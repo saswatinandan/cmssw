@@ -11,10 +11,10 @@ commonEventsDict = {
         'RawPrime': '/eos/cms/tier0/store/data/Run2023F/CommissioningRawPrime/RAW/v1/000/373/710/00000/eda56c1b-3c28-45e0-8b1f-31a39c4daa4d.root',
         'ZeroBias0': '/eos/cms/store/group/phys_heavyions/wangj/RECO2023/PPRefZeroBias0_373710/lumi37-83f48460_recoraw_RAW2DIGI_L1Reco_RECO_inFEVTDEBUGHLT.root'
     },
-    'lumi_40' : {
-        'RawPrime': '/eos/cms/tier0/store/data/Run2023F/CommissioningRawPrime/RAW/v1/000/373/710/00000/808b0f28-da9f-4ed9-8cba-795ff1fabfea.root',
-        'ZeroBias0': '/eos/cms/store/group/phys_heavyions/wangj/RECO2023/PPRefZeroBias0_373710/lumi40-6f63ce0f_recoraw_RAW2DIGI_L1Reco_RECO_inFEVTDEBUGHLT.root'
-    },
+    # 'lumi_40' : {
+    #     'RawPrime': '/eos/cms/tier0/store/data/Run2023F/CommissioningRawPrime/RAW/v1/000/373/710/00000/808b0f28-da9f-4ed9-8cba-795ff1fabfea.root',
+    #     'ZeroBias0': '/eos/cms/store/group/phys_heavyions/wangj/RECO2023/PPRefZeroBias0_373710/lumi40-6f63ce0f_recoraw_RAW2DIGI_L1Reco_RECO_inFEVTDEBUGHLT.root'
+    # },
     'lumi_43' : {
         'RawPrime': '/eos/cms/tier0/store/data/Run2023F/CommissioningRawPrime/RAW/v1/000/373/710/00000/41bf923c-32ad-4c60-b306-3be244dc62ba.root',
         'ZeroBias0': '/eos/cms/store/group/phys_heavyions/wangj/RECO2023/PPRefZeroBias0_373710/lumi43-e311601b_recoraw_RAW2DIGI_L1Reco_RECO_inFEVTDEBUGHLT.root'
