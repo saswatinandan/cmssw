@@ -8,6 +8,7 @@ scram b -j8
 # chmod 755 script/execute
 script/execute
 ```
+> `script/execute` documents the common lumi section files with raw & rawprime datasets. The common lumis and common events are provided in this [google spreadsheet](https://docs.google.com/spreadsheets/d/1z3M-orW7XHjjgSLhbj9HaosmUdPaSw6ozqj9I9xBVDk/edit?usp=sharing)
 
 ### Do cluster matching, plot the cluster distributions
 ```bash
