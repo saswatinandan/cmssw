@@ -1,0 +1,67 @@
+#!/usr/bin/env python
+#
+import os,sys
+
+commonEventsDict = {
+    'lumi_34' : {
+        'RawPrime': '/eos/cms/tier0/store/data/Run2023F/CommissioningRawPrime/RAW/v1/000/373/710/00000/2524299b-1332-4314-b15e-5bf5f6bb1adc.root',
+        'ZeroBias0': '/eos/cms/store/group/phys_heavyions/wangj/RECO2023/PPRefZeroBias0_373710/lumi34-d4d1e95a_recoraw_RAW2DIGI_L1Reco_RECO_inFEVTDEBUGHLT.root'
+    },
+    'lumi_37' : {
+        'RawPrime': '/eos/cms/tier0/store/data/Run2023F/CommissioningRawPrime/RAW/v1/000/373/710/00000/eda56c1b-3c28-45e0-8b1f-31a39c4daa4d.root',
+        'ZeroBias0': '/eos/cms/store/group/phys_heavyions/wangj/RECO2023/PPRefZeroBias0_373710/lumi37-83f48460_recoraw_RAW2DIGI_L1Reco_RECO_inFEVTDEBUGHLT.root'
+    },
+    'lumi_40' : {
+        'RawPrime': '/eos/cms/tier0/store/data/Run2023F/CommissioningRawPrime/RAW/v1/000/373/710/00000/808b0f28-da9f-4ed9-8cba-795ff1fabfea.root',
+        'ZeroBias0': '/eos/cms/store/group/phys_heavyions/wangj/RECO2023/PPRefZeroBias0_373710/lumi40-6f63ce0f_recoraw_RAW2DIGI_L1Reco_RECO_inFEVTDEBUGHLT.root'
+    },
+    'lumi_43' : {
+        'RawPrime': '/eos/cms/tier0/store/data/Run2023F/CommissioningRawPrime/RAW/v1/000/373/710/00000/41bf923c-32ad-4c60-b306-3be244dc62ba.root',
+        'ZeroBias0': '/eos/cms/store/group/phys_heavyions/wangj/RECO2023/PPRefZeroBias0_373710/lumi43-e311601b_recoraw_RAW2DIGI_L1Reco_RECO_inFEVTDEBUGHLT.root'
+    },
+    'lumi_46' : {
+        'RawPrime': '/eos/cms/tier0/store/data/Run2023F/CommissioningRawPrime/RAW/v1/000/373/710/00000/4f8c9a44-1455-4b57-8106-0f2e6f5d2b90.root',
+        'ZeroBias0': '/eos/cms/store/group/phys_heavyions/wangj/RECO2023/PPRefZeroBias0_373710/lumi46-3a19406b_recoraw_RAW2DIGI_L1Reco_RECO_inFEVTDEBUGHLT.root'
+    },
+    'lumi_49' : {
+        'RawPrime': '/eos/cms/tier0/store/data/Run2023F/CommissioningRawPrime/RAW/v1/000/373/710/00000/5fe11fed-bff2-4a10-9967-b5fb71ec0db9.root',
+        'ZeroBias0': '/eos/cms/store/group/phys_heavyions/wangj/RECO2023/PPRefZeroBias0_373710/lumi49-58d8468f_recoraw_RAW2DIGI_L1Reco_RECO_inFEVTDEBUGHLT.root'
+    },
+    # 'lumi_52' : {
+    #     'RawPrime': '/eos/cms/tier0/store/data/Run2023F/CommissioningRawPrime/RAW/v1/000/373/710/00000/a56a4b71-f0ac-4b48-a65f-580a9a994bdc.root',
+    #     'ZeroBias0': '/eos/cms/store/group/phys_heavyions/wangj/RECO2023/PPRefZeroBias0_373710/lumi52-54bcb468_recoraw_RAW2DIGI_L1Reco_RECO_inFEVTDEBUGHLT.root'
+    # },
+    'lumi_55' : {
+        'RawPrime': '/eos/cms/tier0/store/data/Run2023F/CommissioningRawPrime/RAW/v1/000/373/710/00000/b9f4c56d-6f13-4a17-b433-c9098a1dd727.root',
+        'ZeroBias0': '/eos/cms/store/group/phys_heavyions/wangj/RECO2023/PPRefZeroBias0_373710/lumi55-eb27afff_recoraw_RAW2DIGI_L1Reco_RECO_inFEVTDEBUGHLT.root'
+    },
+}
+
+if (not os.path.exists('output/')): os.makedirs('output/')
+if (not os.path.exists('log/')): os.makedirs('log/')
+
+
+for (l, files) in commonEventsDict.items():
+	os.system("cmsRun sep19_2_1_dump_rawprime.py inputFiles={i:s} "
+	          "outputFile=output/{l:s}_sep19_2_1_dump_rawprime.root "
+	          "eventsToProcessTxt=/eos/cms/store/group/phys_heavyions/wangj/RECO2023/PPRefZeroBias0_373710/{l:s}.txt "
+	          "> log/sep19_2_1_dump_rawprime_{l:s}.log 2>&1".format(
+	          	i = files['RawPrime'],
+	          	l = l ) )
+	os.system("cmsRun sep19_2_2_dump_raw.py inputFiles={i:s} "
+	          "outputFile=output/{l:s}_sep19_2_2_dump_raw.root "
+	          "> log/sep19_2_2_dump_raw_{l:s}.log 2>&1".format(
+	          	i = files['ZeroBias0'],
+	          	l = l ) )
+	# os.system("cmsRun sep19_3_1_dump_rawprime.py inputFiles={i:s} "
+	#           "outputFile=output/{l:s}_sep19_3_1_dump_rawprime.root "
+	#           "eventsToProcessTxt=/eos/cms/store/group/phys_heavyions/wangj/RECO2023/PPRefZeroBias0_373710/{l:s}.txt "
+	#           "> log/sep19_3_1_dump_rawprime_{l:s}.log 2>&1".format(
+	#           	i = files['RawPrime'],
+	#           	l = l ) )
+	os.system("cmsRun sep19_3_2_dump_raw.py inputFiles={i:s} "
+	          "outputFile=output/{l:s}_sep19_3_2_dump_raw.root "
+	          "> log/sep19_3_2_dump_raw_{l:s}.log 2>&1".format(
+	          	i = files['ZeroBias0'],
+	          	l = l ) )
+
