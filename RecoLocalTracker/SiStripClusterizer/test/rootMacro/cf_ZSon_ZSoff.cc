@@ -235,6 +235,32 @@ int main(int argc, char const *argv[])
 	offlineClusterTree_2->SetBranchAddress("adc", r_adc_2);
 
 
+
+	TCanvas *canvall = new TCanvas("canvall", "canvall", 600*3, 600*1);
+	gStyle->SetOptTitle(0);
+	gErrorIgnoreLevel = kWarning;
+	canvall->Divide(3,1,0.001,0.001);
+
+	TH1F * h_width_tot_on_all      = new TH1F( "ZS on", 
+	                                    "; width; yield",  
+	                                    50, 0., 50. );
+	TH1F * h_charge_tot_on_all     = new TH1F( "charge_tot_on_all", 
+	                                    "; charge; yield",  
+	                                    100, 0., 700. );
+	TH1F * h_barycenter_tot_on_all = new TH1F( "barycenter_tot_on_all", 
+	                                    "; barycenter; yield",  
+	                                    100, 0., 950. );
+
+	TH1F * h_width_tot_off_all      = new TH1F( "ZS off", 
+	                                    "; width; yield",  
+	                                    50, 0., 50. );
+	TH1F * h_charge_tot_off_all     = new TH1F( "charge_tot_off_all", 
+	                                    "; charge; yield",  
+	                                    100, 0., 700. );
+	TH1F * h_barycenter_tot_off_all = new TH1F( "barycenter_tot_off_all", 
+	                                    "; barycenter; yield",  
+	                                    100, 0., 950. );
+
 	map< int, map< int, map<int, cluster> > > r_dict; 	// event, detId, idx
 	const Int_t r_nEntries = offlineClusterTree->GetEntries();
 	for (int sc_idx = 0; sc_idx < r_nEntries; ++sc_idx)
@@ -245,6 +271,9 @@ int main(int argc, char const *argv[])
 		r_dict[ r_event ][ r_detId ][ sc_idx ] = cluster( sc_idx, r_event, r_run, r_lumi,
 												r_detId, r_firstStrip, r_endStrip, r_barycenter,
 												r_size, r_charge );
+		h_width_tot_on_all->Fill( r_size );
+		h_charge_tot_on_all->Fill( r_charge );
+		h_barycenter_tot_on_all->Fill( r_barycenter );
 	}
 
 	map< int, map< int, map<int, cluster> > > r_dict_2; 	// event, detId, idx
@@ -257,7 +286,57 @@ int main(int argc, char const *argv[])
 		r_dict_2[ r_event_2 ][ r_detId_2 ][ sc_idx ] = cluster( sc_idx, r_event_2, r_run_2, r_lumi_2,
 												r_detId_2, r_firstStrip_2, r_endStrip_2, r_barycenter_2,
 												r_size_2, r_charge_2 );
+
+		h_width_tot_off_all->Fill( r_size_2 );
+		h_charge_tot_off_all->Fill( r_charge_2 );
+		h_barycenter_tot_off_all->Fill( r_barycenter_2 );
 	}
+
+	canvall->cd(1);	
+	canvall->GetPad(1)->SetMargin (0.18, 0.05, 0.15, 0.05);
+	PlotStyle(h_width_tot_off_all); h_width_tot_off_all->SetLineColor(kBlue); 	h_width_tot_off_all->Draw("");
+	PlotStyle(h_width_tot_on_all); h_width_tot_on_all->SetLineWidth(0); h_width_tot_on_all->SetFillColorAlpha(kBlack, 0.7); h_width_tot_on_all->SetLineColorAlpha(kBlack, 0.7);  	h_width_tot_on_all->Draw("same");
+	TLegend* leg0 = canvall->GetPad(1)->BuildLegend(.4, .6, .85, .8);
+	formatLegend(leg0);
+	canvall->cd(2);	
+	canvall->GetPad(2)->SetMargin (0.18, 0.05, 0.15, 0.05);
+	PlotStyle(h_charge_tot_off_all); h_charge_tot_off_all->SetLineColor(kBlue); 	h_charge_tot_off_all->Draw("");
+	PlotStyle(h_charge_tot_on_all); h_charge_tot_on_all->SetLineWidth(0); h_charge_tot_on_all->SetFillColorAlpha(kBlack, 0.7); h_charge_tot_on_all->SetLineColorAlpha(kBlack, 0.7); 	h_charge_tot_on_all->Draw("same");
+	canvall->cd(3);	
+	canvall->GetPad(3)->SetMargin (0.18, 0.05, 0.15, 0.05);
+	PlotStyle(h_barycenter_tot_off_all); h_barycenter_tot_off_all->SetLineColor(kBlue); 	h_barycenter_tot_off_all->Draw("");
+	PlotStyle(h_barycenter_tot_on_all); h_barycenter_tot_on_all->SetLineWidth(0); h_barycenter_tot_on_all->SetFillColorAlpha(kBlack, 0.7); h_barycenter_tot_on_all->SetLineColorAlpha(kBlack, 0.7); 	h_barycenter_tot_on_all->Draw("same");
+	
+	canvall->SaveAs("../img/cf_ZSon_ZSoff_TotalClusters_all.png");
+	system("dropbox_uploader.sh upload ../img/cf_ZSon_ZSoff_TotalClusters_all.png /tmp/");
+
+	delete canvall;
+
+
+	TCanvas *canv0 = new TCanvas("canv0", "canv0", 600*3, 600*1);
+	gStyle->SetOptTitle(0);
+	gErrorIgnoreLevel = kWarning;
+	canv0->Divide(3,1,0.001,0.001);
+
+	TH1F * h_width_tot_on      = new TH1F( "ZS on", 
+	                                    "; width; yield",  
+	                                    50, 0., 50. );
+	TH1F * h_charge_tot_on     = new TH1F( "charge_tot_on", 
+	                                    "; charge; yield",  
+	                                    100, 0., 700. );
+	TH1F * h_barycenter_tot_on = new TH1F( "barycenter_tot_on", 
+	                                    "; barycenter; yield",  
+	                                    100, 0., 950. );
+
+	TH1F * h_width_tot_off      = new TH1F( "ZS off", 
+	                                    "; width; yield",  
+	                                    50, 0., 50. );
+	TH1F * h_charge_tot_off     = new TH1F( "charge_tot_off", 
+	                                    "; charge; yield",  
+	                                    100, 0., 700. );
+	TH1F * h_barycenter_tot_off = new TH1F( "barycenter_tot_off", 
+	                                    "; barycenter; yield",  
+	                                    100, 0., 950. );
 
 
 	for (auto& _scs_perEvt_perDetId: r_dict[chooseEventId]) 
@@ -289,6 +368,10 @@ int main(int argc, char const *argv[])
 
 			first = false;
 
+			h_width_tot_on->Fill( r_size );
+			h_charge_tot_on->Fill( r_charge );
+			h_barycenter_tot_on->Fill( r_barycenter );
+
 			delete h_sc;
 		}
 
@@ -312,6 +395,10 @@ int main(int argc, char const *argv[])
 			h_sc->GetYaxis()->SetRangeUser(0, h_sc->GetMaximum()*3);
 			h_sc->DrawClone("hist same");
 
+			h_width_tot_off->Fill( r_size_2 );
+			h_charge_tot_off->Fill( r_charge_2 );
+			h_barycenter_tot_off->Fill( r_barycenter_2 );
+
 			delete h_sc;
 		}
 
@@ -320,9 +407,9 @@ int main(int argc, char const *argv[])
 		gPad->Modified();
 		gPad->Update();
 
-		canv2->SaveAs(Form("../img/Event%d_DetId%d_clustersShape.pdf",
+		canv2->SaveAs(Form("../img/Event%d_DetId%d_clustersShape.png",
 			chooseEventId, _scs_perEvt_perDetId.first));
-		system(Form("dropbox_uploader.sh upload ../img/Event%d_DetId%d_clustersShape.pdf /tmp/",
+		system(Form("dropbox_uploader.sh upload ../img/Event%d_DetId%d_clustersShape.png /tmp/",
 			chooseEventId, _scs_perEvt_perDetId.first));
 
 	}
@@ -359,6 +446,10 @@ int main(int argc, char const *argv[])
 
 			first = false;
 
+			h_width_tot_off->Fill( r_size_2 );
+			h_charge_tot_off->Fill( r_charge_2 );
+			h_barycenter_tot_off->Fill( r_barycenter_2 );
+
 			delete h_sc;
 		}
 
@@ -367,14 +458,34 @@ int main(int argc, char const *argv[])
 		gPad->Modified();
 		gPad->Update();
 
-		canv2->SaveAs(Form("../img/Event%d_DetId%d_clustersShape.pdf",
+		canv2->SaveAs(Form("../img/Event%d_DetId%d_clustersShape.png",
 			chooseEventId, _scs_perEvt_perDetId.first));
-		system(Form("dropbox_uploader.sh upload ../img/Event%d_DetId%d_clustersShape.pdf /tmp/",
+		system(Form("dropbox_uploader.sh upload ../img/Event%d_DetId%d_clustersShape.png /tmp/",
 			chooseEventId, _scs_perEvt_perDetId.first));
 
 	}
 
 	cout << "------------------------------- Finish scanned ZS off -------------------------------" << endl;
+
+	canv0->cd(1);	
+	canv0->GetPad(1)->SetMargin (0.18, 0.05, 0.15, 0.05);
+	PlotStyle(h_width_tot_off); h_width_tot_off->SetLineColor(kBlue); 	h_width_tot_off->Draw("");
+	PlotStyle(h_width_tot_on); h_width_tot_on->SetLineWidth(0); h_width_tot_on->SetFillColorAlpha(kBlack, 0.7); h_width_tot_on->SetLineColorAlpha(kBlack, 0.7);  	h_width_tot_on->Draw("same");
+	leg0 = canv0->GetPad(1)->BuildLegend(.4, .6, .85, .8);
+	formatLegend(leg0);
+	canv0->cd(2);	
+	canv0->GetPad(2)->SetMargin (0.18, 0.05, 0.15, 0.05);
+	PlotStyle(h_charge_tot_off); h_charge_tot_off->SetLineColor(kBlue); 	h_charge_tot_off->Draw("");
+	PlotStyle(h_charge_tot_on); h_charge_tot_on->SetLineWidth(0); h_charge_tot_on->SetFillColorAlpha(kBlack, 0.7); h_charge_tot_on->SetLineColorAlpha(kBlack, 0.7); 	h_charge_tot_on->Draw("same");
+	canv0->cd(3);	
+	canv0->GetPad(3)->SetMargin (0.18, 0.05, 0.15, 0.05);
+	PlotStyle(h_barycenter_tot_off); h_barycenter_tot_off->SetLineColor(kBlue); 	h_barycenter_tot_off->Draw("");
+	PlotStyle(h_barycenter_tot_on); h_barycenter_tot_on->SetLineWidth(0); h_barycenter_tot_on->SetFillColorAlpha(kBlack, 0.7); h_barycenter_tot_on->SetLineColorAlpha(kBlack, 0.7); 	h_barycenter_tot_on->Draw("same");
+	
+	canv0->SaveAs(Form("../img/cf_ZSon_ZSoff_TotalClusters_Event%d.png", chooseEventId));
+	system(Form("dropbox_uploader.sh upload ../img/cf_ZSon_ZSoff_TotalClusters_Event%d.png /tmp/", chooseEventId));
+
+	delete canv0;
 
 }
 
