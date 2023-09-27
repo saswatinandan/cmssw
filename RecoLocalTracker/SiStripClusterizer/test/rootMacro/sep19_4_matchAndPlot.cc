@@ -160,7 +160,7 @@ struct cluster{
 
 int main(int argc, char const *argv[])
 {
-	string commonLumi(argv[1]);
+	string expTag(argv[1]);
 	bool faster = (argc<=2)? true: atoi(argv[2]);
 
 	/* *******************************
@@ -235,23 +235,23 @@ int main(int argc, char const *argv[])
 	/* *******************************
 	 * 0.2 Loading clusters & dead strips
 	 * *******************************/
-	TFile* f1   		= TFile::Open(("../output/lumi_"+commonLumi+"_sep19_2_1_dump_rawprime.root").c_str(), "read");
+	TFile* f1   		= TFile::Open(("../output/"+expTag+"_sep19_2_1_dump_rawprime.root").c_str(), "read");
 	TDirectoryFile* _1  	= (TDirectoryFile*) f1->Get("sep19_2_1_dump_rawprime");
 	TTree* onlineClusterTree= (TTree*) _1->Get("onlineClusterTree");
 
-	TFile* f2   		= TFile::Open(("../output/lumi_"+commonLumi+"_sep19_2_2_dump_raw.root").c_str(), "read");
+	TFile* f2   		= TFile::Open(("../output/"+expTag+"_sep19_2_2_dump_raw.root").c_str(), "read");
 	TDirectoryFile* _2  	= (TDirectoryFile*) f2->Get("sep19_2_2_dump_raw");
 	TTree* offlineClusterTree= (TTree*) _2->Get("offlineClusterTree");
 
-	// TFile* f3   		= TFile::Open(("../output/lumi_"+commonLumi+"_sep19_3_1_dump_rawprime.root").c_str(), "read");
-	// TDirectoryFile* _3  	= (TDirectoryFile*) f3->Get("sep19_3_dump_deadStrips");
-	// TTree* onlineDeadStripTree= (TTree*) _3->Get("deadStripTree");
+	TFile* f3   		= TFile::Open(("../output/"+expTag+"_sep19_3_1_dump_rawprime.root").c_str(), "read");
+	TDirectoryFile* _3  	= (TDirectoryFile*) f3->Get("sep19_3_dump_deadStrips");
+	TTree* onlineDeadStripTree= (TTree*) _3->Get("deadStripTree");
 
-	TFile* f4   		= TFile::Open(("../output/lumi_"+commonLumi+"_sep19_3_2_dump_raw.root").c_str(), "read");
+	TFile* f4   		= TFile::Open(("../output/"+expTag+"_sep19_3_2_dump_raw.root").c_str(), "read");
 	TDirectoryFile* _4  	= (TDirectoryFile*) f4->Get("sep19_3_dump_deadStrips");
 	TTree* offlineDeadStripTree= (TTree*) _4->Get("deadStripTree");
 
-	const static int nMax = 30000;
+	const static int nMax = 8000000;
 	////// for rawprime
 	unsigned int rp_event;
 	int rp_run;
@@ -282,13 +282,13 @@ int main(int argc, char const *argv[])
 	// uint16_t    rp_ref_channel[nMax];
 	// uint16_t    rp_ref_adc[nMax];
 
-	// // for dead strip
-  	// unsigned int rp_d_event;
-	// int rp_d_run;
-	// int rp_d_lumi;
-	// int    		rp_d_detId;
-	// uint16_t    rp_d_size;
-	// uint16_t    rp_d_channel[800];
+	// for dead strip
+  	unsigned int rp_d_event;
+	int rp_d_run;
+	int rp_d_lumi;
+	int    		rp_d_detId;
+	uint16_t    rp_d_size;
+	uint16_t    rp_d_channel[800];
 
 
 	////// for raw
@@ -344,12 +344,12 @@ int main(int argc, char const *argv[])
 	// onlineClusterTree->SetBranchAddress("ref_channel", rp_ref_channel);
 	// onlineClusterTree->SetBranchAddress("ref_adc", rp_ref_adc);
 
-	// onlineDeadStripTree->SetBranchAddress("event", &rp_d_event);
-	// onlineDeadStripTree->SetBranchAddress("run",   &rp_d_run);
-	// onlineDeadStripTree->SetBranchAddress("lumi",  &rp_d_lumi);
-	// onlineDeadStripTree->SetBranchAddress("detId", &rp_d_detId);
-	// onlineDeadStripTree->SetBranchAddress("size", &rp_d_size);
-	// onlineDeadStripTree->SetBranchAddress("channel", rp_d_channel);
+	onlineDeadStripTree->SetBranchAddress("event", &rp_d_event);
+	onlineDeadStripTree->SetBranchAddress("run",   &rp_d_run);
+	onlineDeadStripTree->SetBranchAddress("lumi",  &rp_d_lumi);
+	onlineDeadStripTree->SetBranchAddress("detId", &rp_d_detId);
+	onlineDeadStripTree->SetBranchAddress("size", &rp_d_size);
+	onlineDeadStripTree->SetBranchAddress("channel", rp_d_channel);
 
 	offlineClusterTree->SetBranchAddress("event", &r_event);
 	offlineClusterTree->SetBranchAddress("run",   &r_run);
@@ -378,7 +378,7 @@ int main(int argc, char const *argv[])
 	map< int, map< int, map<int, cluster> > > r_dict; 	// event, detId, idx
 	map< int, map< int, map<int, cluster> > > rp_dict; 	// event, detId, idx
 	map< int, map< int, map<int, cluster> > > r_d_dict; 	// event, detId, idx
-	// map< int, map< int, map<int, cluster> > > rp_d_dict; 	// event, detId, idx
+	map< int, map< int, map<int, cluster> > > rp_d_dict; 	// event, detId, idx
 	map<int, int> 	matched_sc2ac;
 	vector<cluster>  	unmatched_scs;
 	vector<cluster>  	unmatched_acs;
@@ -454,19 +454,19 @@ int main(int argc, char const *argv[])
 												r_d_size, -1 );
 	}
 
-	// const Int_t rp_d_nEntries = onlineDeadStripTree->GetEntries();
-	// for (int idx = 0; idx < rp_d_nEntries; ++idx)
-	// {
-	// 	if(idx%1000000 == 0) std::cout << "Scanning strip (for online HLT): " << idx << "/" << rp_d_nEntries << std::endl;
-	// 	onlineDeadStripTree->GetEntry(idx);
+	const Int_t rp_d_nEntries = onlineDeadStripTree->GetEntries();
+	for (int idx = 0; idx < rp_d_nEntries; ++idx)
+	{
+		if(idx%1000000 == 0) std::cout << "Scanning strip (for online HLT): " << idx << "/" << rp_d_nEntries << std::endl;
+		onlineDeadStripTree->GetEntry(idx);
 
-	// 	if (r_dict.find(rp_d_event)==r_dict.end()) continue;
+		if (r_dict.find(rp_d_event)==r_dict.end()) continue;
 
-	// 	if (rp_d_size==0) continue;
-	// 	rp_d_dict[ rp_d_event ][ rp_d_detId ][ idx ] = cluster( idx, rp_d_event, rp_d_run, rp_d_lumi,
-	// 											rp_d_detId, -1, -1, -1,
-	// 											rp_d_size, -1 );
-	// }
+		if (rp_d_size==0) continue;
+		rp_d_dict[ rp_d_event ][ rp_d_detId ][ idx ] = cluster( idx, rp_d_event, rp_d_run, rp_d_lumi,
+												rp_d_detId, -1, -1, -1,
+												rp_d_size, -1 );
+	}
 
 	for (auto it = r_dict.cbegin(); it != r_dict.cend() /* not hoisted */; /* no increment */)
 	{
@@ -508,8 +508,8 @@ int main(int argc, char const *argv[])
 	PlotStyle(h_barycenter_tot_ac); h_barycenter_tot_ac->SetLineColor(kBlue); 	h_barycenter_tot_ac->Draw("");
 	PlotStyle(h_barycenter_tot_sc); h_barycenter_tot_sc->SetLineWidth(0); h_barycenter_tot_sc->SetFillColorAlpha(kBlack, 0.7); h_barycenter_tot_sc->SetLineColorAlpha(kBlack, 0.7); 	h_barycenter_tot_sc->Draw("same");
 	
-	canv0->SaveAs(("../img/lumi_"+commonLumi+"_TotalClusters.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/lumi_"+commonLumi+"_TotalClusters.pdf /tmp/").c_str());
+	canv0->SaveAs(("../img/"+expTag+"_TotalClusters.pdf").c_str());
+	system(("dropbox_uploader.sh upload ../img/"+expTag+"_TotalClusters.pdf /tmp/").c_str());
 
 	delete canv0;
 	/*
@@ -641,6 +641,10 @@ int main(int argc, char const *argv[])
 	                                    "; RAW SiStripCluster barycenter; RAW' ApproxCluster barycenter",  
 	                                    100, 0., 950.,
 	                                    100, 0., 950. );
+	TH2F * h_barycenter_vs_charge = new TH2F( "barycenter_vs_charge", 
+	                                    "; #Delta barycenter (RAW'-RAW); #Delta charge (RAW'-RAW)",  
+	                                    100, -2., 2.,
+	                                    100, -700, 300 );
 
 	TH1F * h_width_res      = new TH1F( "width_res", 
 	                                    "; width (RAW'-RAW)/RAW; yield",
@@ -653,7 +657,7 @@ int main(int argc, char const *argv[])
 	                                    50, -2., 2.);
 
 	ofstream matched_sc2ac_txt;
-	matched_sc2ac_txt.open(Form("log/lumi_%s_matched_sc2ac.txt", commonLumi.c_str()));
+	matched_sc2ac_txt.open(Form("log/%s_matched_sc2ac.txt", expTag.c_str()));
 	matched_sc2ac_txt << "event detId sc_idx barycenter width charge firstStrip endStrip ac_idx barycenter width charge firstStrip endStrip\n";
 	for (auto& idx_pair: matched_sc2ac) 
 	{
@@ -665,6 +669,8 @@ int main(int argc, char const *argv[])
 		h_width     ->Fill( r_size, rp_size );
 		h_charge    ->Fill( r_charge, rp_charge );
 		h_barycenter->Fill( r_barycenter, rp_barycenter ); 
+		h_barycenter_vs_charge->Fill( 	rp_barycenter - r_barycenter,
+						rp_charge - r_charge ); 
 
 		h_width_res     ->Fill( ( rp_size - r_size )/((float) r_size) );
 		h_charge_res    ->Fill( ( rp_charge - r_charge )/((float) r_charge) );
@@ -677,10 +683,10 @@ int main(int argc, char const *argv[])
 	matched_sc2ac_txt.close();
 
 
-	TCanvas *canv = new TCanvas("canv", "canv", 600*3, 600*2);
+	TCanvas *canv = new TCanvas("canv", "canv", 600*4, 600*2);
 
 
-	canv->Divide(3,2,0.001,0.001);
+	canv->Divide(4,2,0.001,0.001);
 
 	canv->cd(1); canv->GetPad(1)->SetMargin (0.18, 0.05, 0.15, 0.05);
 	PlotStyle(h_width);  	h_width->Draw("COLZ");
@@ -688,22 +694,24 @@ int main(int argc, char const *argv[])
 	PlotStyle(h_charge);  	h_charge->Draw("COLZ");
 	canv->cd(3); canv->GetPad(3)->SetMargin (0.18, 0.05, 0.15, 0.05);
 	PlotStyle(h_barycenter);  	h_barycenter->Draw("COLZ");
+	canv->cd(4); canv->GetPad(4)->SetMargin (0.18, 0.05, 0.15, 0.05);
+	PlotStyle(h_barycenter_vs_charge);  	h_barycenter_vs_charge->Draw("COLZ");
 	
-	canv->cd(4); canv->GetPad(4)->SetLogy(); canv->GetPad(4)->SetMargin (0.18, 0.05, 0.15, 0.05);
-	PlotStyle(h_width_res);  		h_width_res->Draw("");
 	canv->cd(5); canv->GetPad(5)->SetLogy(); canv->GetPad(5)->SetMargin (0.18, 0.05, 0.15, 0.05);
-	PlotStyle(h_charge_res);  		h_charge_res->Draw("");
+	PlotStyle(h_width_res);  		h_width_res->Draw("");
 	canv->cd(6); canv->GetPad(6)->SetLogy(); canv->GetPad(6)->SetMargin (0.18, 0.05, 0.15, 0.05);
+	PlotStyle(h_charge_res);  		h_charge_res->Draw("");
+	canv->cd(7); canv->GetPad(7)->SetLogy(); canv->GetPad(7)->SetMargin (0.18, 0.05, 0.15, 0.05);
 	PlotStyle(h_barycenter_res);  	h_barycenter_res->Draw("");
 
 
-	canv->SaveAs(("../img/lumi_"+commonLumi+"_MatchedClusters.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/lumi_"+commonLumi+"_MatchedClusters.pdf /tmp/").c_str());
+	canv->SaveAs(("../img/"+expTag+"_MatchedClusters.pdf").c_str());
+	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters.pdf /tmp/").c_str());
 
 	delete canv;
 
 	ofstream unmatched_scs_txt;
-	unmatched_scs_txt.open(Form("log/lumi_%s_unmatched_scs.txt",commonLumi.c_str()));
+	unmatched_scs_txt.open(Form("log/%s_unmatched_scs.txt",expTag.c_str()));
 	unmatched_scs_txt << "event detId sc_idx barycenter width charge firstStrip endStrip\n";
 	for(auto& sc: unmatched_scs)
 	{
@@ -715,7 +723,7 @@ int main(int argc, char const *argv[])
 
 
 	ofstream unmatched_acs_txt;
-	unmatched_acs_txt.open(Form("log/lumi_%s_unmatched_acs.txt",commonLumi.c_str()));
+	unmatched_acs_txt.open(Form("log/%s_unmatched_acs.txt",expTag.c_str()));
 	unmatched_acs_txt << "event detId ac_idx barycenter width charge firstStrip endStrip\n";
 	for(auto& ac: unmatched_acs)
 	{
@@ -741,8 +749,8 @@ int main(int argc, char const *argv[])
 			sc.print();
 			cout << "offline dead strip (sc) " << endl;
 			for (auto& r_ds: r_d_dict[ sc.event ][ sc.detId ]) r_ds.second.print();
-			// cout << "online dead strip (sc) " << endl;
-			// for (auto& rp_ds: rp_d_dict[ sc.event ][ sc.detId ]) rp_ds.second.print();
+			cout << "online dead strip (sc) " << endl;
+			for (auto& rp_ds: rp_d_dict[ sc.event ][ sc.detId ]) rp_ds.second.print();
 			continue;
 		}
 
@@ -871,35 +879,35 @@ int main(int argc, char const *argv[])
 		/* *******************************
 		 * 3.2.3 plot ds of rawprime on the same detId
 		 * *******************************/
-		// map<int, cluster> rp_ds_map = rp_d_dict[sc.event][sc.detId];
-		// // if (!faster) printf("found %ld online (raw') ds in same event and same detId\n", rp_ds_map.size());
+		map<int, cluster> rp_ds_map = rp_d_dict[sc.event][sc.detId];
+		// if (!faster) printf("found %ld online (raw') ds in same event and same detId\n", rp_ds_map.size());
 
-		// if (rp_ds_map.size()==1)
-		// {
-		// 	cluster& rp_ds = rp_ds_map.begin()->second;
-		// 	onlineDeadStripTree->GetEntry(rp_ds.idx);
+		if (rp_ds_map.size()==1)
+		{
+			cluster& rp_ds = rp_ds_map.begin()->second;
+			onlineDeadStripTree->GetEntry(rp_ds.idx);
 
-		// 	TH1F * h_rp_ds = new TH1F(Form("rp_ds_%d_%d", sc.idx, rp_ds.idx), Form("RAW' dead (%d); strip; ADC",rp_ds.idx), 800,0,800 );
-		// 	int rp_d_channel_min = 1000;
-		// 	int rp_d_channel_max = -1;
-		// 	for(uint16_t i=0; i < rp_d_size; ++i) 
-		// 	{
-		// 		h_rp_ds->Fill(rp_d_channel[i], h_sc->GetMaximum());
-		// 		if (rp_d_channel[i] < rp_d_channel_min) rp_d_channel_min = rp_d_channel[i];
-		// 		if (rp_d_channel[i] > rp_d_channel_max) rp_d_channel_max = rp_d_channel[i];
+			TH1F * h_rp_ds = new TH1F(Form("rp_ds_%d_%d", sc.idx, rp_ds.idx), Form("RAW' dead (%d); strip; ADC",rp_ds.idx), 800,0,800 );
+			int rp_d_channel_min = 1000;
+			int rp_d_channel_max = -1;
+			for(uint16_t i=0; i < rp_d_size; ++i) 
+			{
+				h_rp_ds->Fill(rp_d_channel[i], h_sc->GetMaximum());
+				if (rp_d_channel[i] < rp_d_channel_min) rp_d_channel_min = rp_d_channel[i];
+				if (rp_d_channel[i] > rp_d_channel_max) rp_d_channel_max = rp_d_channel[i];
 
-		// 	}
-		// 	h_rp_ds->SetTitle(Form("RAW' dead (%d-%d);",rp_d_channel_min,rp_d_channel_max));
-		// 	// PlotStyle(h_rp_ds);
-		// 	h_rp_ds->SetFillColorAlpha(kMagenta, 0.3);
-		// 	h_rp_ds->SetLineColorAlpha(kMagenta, 0.3);
-		// 	h_rp_ds->DrawClone("hist same");
-		// 	delete h_rp_ds; 
-		// } else if (rp_ds_map.size()==0) {}
-		// else {
-		// 	printf("[Error] Don't expect\n");
-		// 	exit(0);
-		// }
+			}
+			h_rp_ds->SetTitle(Form("RAW' dead (%d-%d);",rp_d_channel_min,rp_d_channel_max));
+			// PlotStyle(h_rp_ds);
+			h_rp_ds->SetFillColorAlpha(kMagenta, 0.3);
+			h_rp_ds->SetLineColorAlpha(kMagenta, 0.3);
+			h_rp_ds->DrawClone("hist same");
+			delete h_rp_ds; 
+		} else if (rp_ds_map.size()==0) {}
+		else {
+			printf("[Error] Don't expect\n");
+			exit(0);
+		}
 
 		TLegend* leg = canv2->BuildLegend(.5, .6, .85, .8);
 		// formatLegend(leg);
@@ -908,8 +916,8 @@ int main(int argc, char const *argv[])
 		delete h_sc;
 
 		
-		canv2->SaveAs(Form("../img/lumi_%s_%sUnmatchedStripClusters_idx%d.pdf",commonLumi.c_str(),prefix.c_str(),sc.idx));
-		if (!faster || prefix=="Warning2_") system(Form("dropbox_uploader.sh upload ../img/lumi_%s_%sUnmatchedStripClusters_idx%d.pdf /tmp/",commonLumi.c_str(),prefix.c_str(),sc.idx));
+		canv2->SaveAs(Form("../img/%s_%sUnmatchedStripClusters_idx%d.pdf",expTag.c_str(),prefix.c_str(),sc.idx));
+		if (!faster || prefix=="Warning2_") system(Form("dropbox_uploader.sh upload ../img/%s_%sUnmatchedStripClusters_idx%d.pdf /tmp/",expTag.c_str(),prefix.c_str(),sc.idx));
 
 		delete canv2;
 		if (!faster || prefix=="Warning2_") printf("===========================================\n");
