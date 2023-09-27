@@ -148,24 +148,61 @@ struct cluster{
 
 };
 
+struct test{
+	int testNumber;
+	string f1name;
+	string f2name;
+
+	string legend1;
+	string legend2;
+
+	string prefix;
+
+	test(): testNumber(0), 
+		   f1name(""), f2name(""),
+		   legend1(""), legend2(""),
+		   prefix("") {};
+
+	test(int in_testNumber ): testNumber(in_testNumber) 
+	{
+		if (in_testNumber==1) 
+		{
+			cout << "bugged HLT" << endl;
+			f1name = "../output/ZSon_sep19_2_2_dump_raw.root";
+			f2name = "../output/ZSoff_sep19_2_2_dump_raw.root";
+			legend1 = "w/ ZS on (ref)";
+			legend2 = "bugged HLT (= ZS off)";
+			prefix = "bugged";
+		}
+		else if (in_testNumber==2) 
+		{
+			cout << "fixed HLT" << endl;
+			f1name = "../output/ZSon_sep19_2_2_dump_raw.root";
+			f2name = "../output/ZSon_fixed_sep19_2_2_dump_raw.root";
+			legend1 = "w/ ZS on (ref)";
+			legend2 = "fixed HLT (= ZS on)";
+			prefix = "fixed";
+		}
+	};
+};
 
 
 int main(int argc, char const *argv[])
 {
 	int chooseEventId = atoi(argv[1]);
+	test thisTest(atoi(argv[2]));
 
-	TFile* f1   		= TFile::Open("../output/ZSon_sep19_2_2_dump_raw.root", "read");
+	TFile* f1   		= TFile::Open(thisTest.f1name.c_str(), "read");
 	TDirectoryFile* _1  	= (TDirectoryFile*) f1->Get("sep19_2_2_dump_raw");
 	TTree* offlineClusterTree= (TTree*) _1->Get("offlineClusterTree");
 
-	TFile* f2   		= TFile::Open("../output/ZSoff_sep19_2_2_dump_raw.root", "read");
+	TFile* f2   		= TFile::Open(thisTest.f2name.c_str(), "read");
 	TDirectoryFile* _2  	= (TDirectoryFile*) f2->Get("sep19_2_2_dump_raw");
 	TTree* offlineClusterTree_2= (TTree*) _2->Get("offlineClusterTree");
 
 	const static int nMax = 300000;
 
 
-	////// for ZS on
 	unsigned int r_event;
 	int r_run;
 	int r_lumi;
@@ -200,7 +237,6 @@ int main(int argc, char const *argv[])
 	offlineClusterTree->SetBranchAddress("adc", r_adc);
 
 
-	////// for ZS off
 	unsigned int r_event_2;
 	int r_run_2;
 	int r_lumi_2;
@@ -241,7 +277,7 @@ int main(int argc, char const *argv[])
 	gErrorIgnoreLevel = kWarning;
 	canvall->Divide(3,1,0.001,0.001);
 
-	TH1F * h_width_tot_on_all      = new TH1F( "ZS on", 
+	TH1F * h_width_tot_on_all      = new TH1F( thisTest.legend1.c_str(), 
 	                                    "; width; yield",  
 	                                    50, 0., 50. );
 	TH1F * h_charge_tot_on_all     = new TH1F( "charge_tot_on_all", 
@@ -251,7 +287,7 @@ int main(int argc, char const *argv[])
 	                                    "; barycenter; yield",  
 	                                    100, 0., 950. );
 
-	TH1F * h_width_tot_off_all      = new TH1F( "ZS off", 
+	TH1F * h_width_tot_off_all      = new TH1F( thisTest.legend2.c_str(), 
 	                                    "; width; yield",  
 	                                    50, 0., 50. );
 	TH1F * h_charge_tot_off_all     = new TH1F( "charge_tot_off_all", 
@@ -265,7 +301,7 @@ int main(int argc, char const *argv[])
 	const Int_t r_nEntries = offlineClusterTree->GetEntries();
 	for (int sc_idx = 0; sc_idx < r_nEntries; ++sc_idx)
 	{
-		if(sc_idx%1000000 == 0) std::cout << "Scanning ZS on clusters: " << sc_idx << "/" << r_nEntries << std::endl;
+		if(sc_idx%1000000 == 0) std::cout << "Scanning file 1 clusters: " << sc_idx << "/" << r_nEntries << std::endl;
 		offlineClusterTree->GetEntry(sc_idx);
 
 		r_dict[ r_event ][ r_detId ][ sc_idx ] = cluster( sc_idx, r_event, r_run, r_lumi,
@@ -280,7 +316,7 @@ int main(int argc, char const *argv[])
 	const Int_t r_nEntries_2 = offlineClusterTree_2->GetEntries();
 	for (int sc_idx = 0; sc_idx < r_nEntries_2; ++sc_idx)
 	{
-		if(sc_idx%1000000 == 0) std::cout << "Scanning ZS off clusters: " << sc_idx << "/" << r_nEntries_2 << std::endl;
+		if(sc_idx%1000000 == 0) std::cout << "Scanning file 2 clusters: " << sc_idx << "/" << r_nEntries_2 << std::endl;
 		offlineClusterTree_2->GetEntry(sc_idx);
 
 		r_dict_2[ r_event_2 ][ r_detId_2 ][ sc_idx ] = cluster( sc_idx, r_event_2, r_run_2, r_lumi_2,
@@ -307,8 +343,10 @@ int main(int argc, char const *argv[])
 	PlotStyle(h_barycenter_tot_off_all); h_barycenter_tot_off_all->SetLineColor(kBlue); 	h_barycenter_tot_off_all->Draw("");
 	PlotStyle(h_barycenter_tot_on_all); h_barycenter_tot_on_all->SetLineWidth(0); h_barycenter_tot_on_all->SetFillColorAlpha(kBlack, 0.7); h_barycenter_tot_on_all->SetLineColorAlpha(kBlack, 0.7); 	h_barycenter_tot_on_all->Draw("same");
 	
-	canvall->SaveAs("../img/cf_ZSon_ZSoff_TotalClusters_all.png");
-	system("dropbox_uploader.sh upload ../img/cf_ZSon_ZSoff_TotalClusters_all.png /tmp/");
+	canvall->SaveAs(Form("../img/%s_cf_ZSon_ZSoff_TotalClusters_all.png", 
+		thisTest.prefix.c_str()));
+	system(Form("dropbox_uploader.sh upload ../img/%s_cf_ZSon_ZSoff_TotalClusters_all.png /tmp/", 
+		thisTest.prefix.c_str()));
 
 	delete canvall;
 
@@ -318,7 +356,7 @@ int main(int argc, char const *argv[])
 	gErrorIgnoreLevel = kWarning;
 	canv0->Divide(3,1,0.001,0.001);
 
-	TH1F * h_width_tot_on      = new TH1F( "ZS on", 
+	TH1F * h_width_tot_on      = new TH1F( thisTest.legend1.c_str(), 
 	                                    "; width; yield",  
 	                                    50, 0., 50. );
 	TH1F * h_charge_tot_on     = new TH1F( "charge_tot_on", 
@@ -328,7 +366,7 @@ int main(int argc, char const *argv[])
 	                                    "; barycenter; yield",  
 	                                    100, 0., 950. );
 
-	TH1F * h_width_tot_off      = new TH1F( "ZS off", 
+	TH1F * h_width_tot_off      = new TH1F( thisTest.legend2.c_str(), 
 	                                    "; width; yield",  
 	                                    50, 0., 50. );
 	TH1F * h_charge_tot_off     = new TH1F( "charge_tot_off", 
@@ -356,7 +394,7 @@ int main(int argc, char const *argv[])
 			// 			r_size, r_charge );
 			sc.print();
 
-			TH1F * h_sc = new TH1F( Form("sc%d", sc.idx), Form("ZS on (%d-%d) rootIdx%d; strip; ADC",sc.firstStrip,sc.endStrip,_sc.first), 800,0,800 );
+			TH1F * h_sc = new TH1F( Form("sc%d", sc.idx), Form("%s (%d-%d); strip; ADC",thisTest.legend1.c_str(), sc.firstStrip,sc.endStrip), 800,0,800 );
 
 			for(uint16_t i=0; i < r_size; ++i) h_sc->Fill(r_channel[i], r_adc[i]);
 			// PlotStyle(h_sc);  	
@@ -385,7 +423,7 @@ int main(int argc, char const *argv[])
 			// 			r_size_2, r_charge_2 );
 			sc.print();
 
-			TH1F * h_sc = new TH1F( Form("sc_2%d", sc.idx), Form("ZS off (%d-%d) rootIdx%d; strip; ADC",sc.firstStrip,sc.endStrip,_sc.first), 800,0,800 );
+			TH1F * h_sc = new TH1F( Form("sc_2%d", sc.idx), Form("%s (%d-%d); strip; ADC",thisTest.legend2.c_str(),sc.firstStrip,sc.endStrip), 800,0,800 );
 
 			for(uint16_t i=0; i < r_size_2; ++i) h_sc->Fill(r_channel_2[i], r_adc_2[i]);
 			// PlotStyle(h_sc);  	
@@ -407,14 +445,14 @@ int main(int argc, char const *argv[])
 		gPad->Modified();
 		gPad->Update();
 
-		canv2->SaveAs(Form("../img/Event%d_DetId%d_clustersShape.png",
-			chooseEventId, _scs_perEvt_perDetId.first));
-		system(Form("dropbox_uploader.sh upload ../img/Event%d_DetId%d_clustersShape.png /tmp/",
-			chooseEventId, _scs_perEvt_perDetId.first));
+		canv2->SaveAs(Form("../img/%s_Event%d_DetId%d_clustersShape.png",
+			thisTest.prefix.c_str(), chooseEventId, _scs_perEvt_perDetId.first));
+		system(Form("dropbox_uploader.sh upload ../img/%s_Event%d_DetId%d_clustersShape.png /tmp/",
+			thisTest.prefix.c_str(), chooseEventId, _scs_perEvt_perDetId.first));
 
 	}
 
-	cout << "------------------------------- Finish scanned ZS on -------------------------------" << endl;
+	cout << "------------------------------- Finish scanned file 1 -------------------------------" << endl;
 
 	for (auto& _scs_perEvt_perDetId: r_dict_2[chooseEventId]) 
 	{
@@ -434,7 +472,7 @@ int main(int argc, char const *argv[])
 			// 			r_size_2, r_charge_2 );
 			sc.print();
 
-			TH1F * h_sc = new TH1F( Form("sc%d", sc.idx), Form("ZS off (%d-%d) rootIdx%d; strip; ADC",sc.firstStrip,sc.endStrip,_sc.first), 800,0,800 );
+			TH1F * h_sc = new TH1F( Form("sc%d", sc.idx), Form("%s (%d-%d); strip; ADC",thisTest.legend2.c_str(),sc.firstStrip,sc.endStrip), 800,0,800 );
 
 			for(uint16_t i=0; i < r_size_2; ++i) h_sc->Fill(r_channel_2[i], r_adc_2[i]);
 			// PlotStyle(h_sc);  	
@@ -458,14 +496,14 @@ int main(int argc, char const *argv[])
 		gPad->Modified();
 		gPad->Update();
 
-		canv2->SaveAs(Form("../img/Event%d_DetId%d_clustersShape.png",
-			chooseEventId, _scs_perEvt_perDetId.first));
-		system(Form("dropbox_uploader.sh upload ../img/Event%d_DetId%d_clustersShape.png /tmp/",
-			chooseEventId, _scs_perEvt_perDetId.first));
+		canv2->SaveAs(Form("../img/%s_Event%d_DetId%d_clustersShape.png",
+			thisTest.prefix.c_str(), chooseEventId, _scs_perEvt_perDetId.first));
+		system(Form("dropbox_uploader.sh upload ../img/%s_Event%d_DetId%d_clustersShape.png /tmp/",
+			thisTest.prefix.c_str(), chooseEventId, _scs_perEvt_perDetId.first));
 
 	}
 
-	cout << "------------------------------- Finish scanned ZS off -------------------------------" << endl;
+	cout << "------------------------------- Finish scanned file 2 -------------------------------" << endl;
 
 	canv0->cd(1);	
 	canv0->GetPad(1)->SetMargin (0.18, 0.05, 0.15, 0.05);
@@ -482,8 +520,10 @@ int main(int argc, char const *argv[])
 	PlotStyle(h_barycenter_tot_off); h_barycenter_tot_off->SetLineColor(kBlue); 	h_barycenter_tot_off->Draw("");
 	PlotStyle(h_barycenter_tot_on); h_barycenter_tot_on->SetLineWidth(0); h_barycenter_tot_on->SetFillColorAlpha(kBlack, 0.7); h_barycenter_tot_on->SetLineColorAlpha(kBlack, 0.7); 	h_barycenter_tot_on->Draw("same");
 	
-	canv0->SaveAs(Form("../img/cf_ZSon_ZSoff_TotalClusters_Event%d.png", chooseEventId));
-	system(Form("dropbox_uploader.sh upload ../img/cf_ZSon_ZSoff_TotalClusters_Event%d.png /tmp/", chooseEventId));
+	canv0->SaveAs(Form("../img/%s_cf_ZSon_ZSoff_TotalClusters_Event%d.png", 
+		thisTest.prefix.c_str(), chooseEventId));
+	system(Form("dropbox_uploader.sh upload ../img/%s_cf_ZSon_ZSoff_TotalClusters_Event%d.png /tmp/", 
+		thisTest.prefix.c_str(), chooseEventId));
 
 	delete canv0;
 
