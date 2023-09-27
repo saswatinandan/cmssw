@@ -22,15 +22,27 @@ options.register ('eventsToProcessTxt',
               VarParsing.multiplicity.singleton,
               VarParsing.varType.string,
               "Events to process text")
+options.register ('n',
+                  -1, # default value
+                  VarParsing.multiplicity.singleton, # singleton or list
+                  VarParsing.varType.int,          # string, int, bool or float
+                  "n")
 options.parseArguments()
 print('inputFiles:\t', options.inputFiles)
 print('eventsToProcessTxt:\t', options.eventsToProcessTxt)
 print('outputFile:\t', options.outputFile)
 
-process.source = cms.Source("PoolSource",
+if options.n != -1:
+    process.maxEvents = cms.untracked.PSet(
+        input = cms.untracked.int32(options.n)
+    )
+
+# process.source = cms.Source("PoolSource",
+process.source = cms.Source(
+    "NewEventStreamFileReader" if ".dat" in options.inputFiles[0] else "PoolSource",
     fileNames = cms.untracked.vstring(['file:'+f for f in options.inputFiles]),
-    secondaryFileNames = cms.untracked.vstring(),
-    eventsToProcess = cms.untracked.VEventRange( list( open(options.eventsToProcessTxt).readlines() ) )
+    # secondaryFileNames = cms.untracked.vstring(),
+    # eventsToProcess = cms.untracked.VEventRange( list( open(options.eventsToProcessTxt).readlines() ) )
 )
 
 process.options = cms.untracked.PSet(

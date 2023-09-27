@@ -16,17 +16,27 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 GT = '132X_dataRun3_Express_v4'
+# GT = '132X_dataRun3_Prompt_v3'
 options = VarParsing ('analysis')
 options.register ('eventsToProcessTxt',
               '',
               VarParsing.multiplicity.singleton,
               VarParsing.varType.string,
               "Events to process text")
+options.register ('n',
+                  -1, # default value
+                  VarParsing.multiplicity.singleton, # singleton or list
+                  VarParsing.varType.int,          # string, int, bool or float
+                  "n")
 options.parseArguments()
 print('inputFiles:\t', options.inputFiles)
-# print('eventsToProcessTxt:\t', options.eventsToProcessTxt)
-print('GT:\t', GT)
+print('eventsToProcessTxt:\t', options.eventsToProcessTxt)
 print('outputFile:\t', options.outputFile)
+
+if options.n != -1:
+    process.maxEvents = cms.untracked.PSet(
+        input = cms.untracked.int32(options.n)
+    )
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(['file:'+f for f in options.inputFiles]),
