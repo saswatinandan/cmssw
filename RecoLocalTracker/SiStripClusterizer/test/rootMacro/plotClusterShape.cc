@@ -229,7 +229,7 @@ int main(int argc, char const *argv[])
 			// 			r_size, r_charge );
 			sc.print();
 
-			TH1F * h_sc = new TH1F( Form("sc%d", sc.idx), Form("RAW (%d-%d) rootIDx%d; strip; ADC",sc.firstStrip,sc.endStrip,_sc.first), 800,0,800 );
+			TH1F * h_sc = new TH1F( Form("sc%d", sc.idx), Form("RAW (%d-%d) rootIdx%d; strip; ADC",sc.firstStrip,sc.endStrip,_sc.first), 800,0,800 );
 
 			for(uint16_t i=0; i < r_size; ++i) h_sc->Fill(r_channel[i], r_adc[i]);
 			// PlotStyle(h_sc);  	
