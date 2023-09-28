@@ -2,6 +2,7 @@
 #
 import os,sys
 
+##### ppref
 commonEventsDict = {
     'lumi_34' : {
         'RawPrime': '/eos/cms/tier0/store/data/Run2023F/CommissioningRawPrime/RAW/v1/000/373/710/00000/2524299b-1332-4314-b15e-5bf5f6bb1adc.root',
@@ -37,31 +38,93 @@ commonEventsDict = {
     },
 }
 
+##### PbPb
+commonEventsDict = {
+    'online_rawprime_ls0051' : {
+        'RawPrime': '/eos/cms/store/t0streamer/Data/HIExpressRawPrime/000/374/288/run374288_ls0051_streamHIExpressRawPrime_StorageManager.dat',
+        'ZeroBias0': '/afs/cern.ch/work/m/mnguyen/public/test/CMSSW_13_2_4/src/aod_RAW2DIGI_L1Reco_RECO.root',
+        # 'ZeroBias0': '../../../HLTrigger/Configuration/test/ls0051_step2_RAW2DIGI_L1Reco_RECO_132X_dataRun3_Express_v4.root'
+    },
+    'test_pbpb_140' : {
+        'RawPrime': '/eos/cms/store/t0streamer/Data/HIExpressRawPrime/000/374/288/run374288_ls0140_streamHIExpressRawPrime_StorageManager.dat',
+        # 'ZeroBias0': '/afs/cern.ch/work/m/mnguyen/public/test/CMSSW_13_2_4/src/aod_RAW2DIGI_L1Reco_RECO.root',
+        'ZeroBias0': '../../../HLTrigger/Configuration/test/ls0140_step2_RAW2DIGI_L1Reco_RECO_132X_dataRun3_Express_v4.root'
+    },
+    'test_pbpb_fevt' : {
+        'RawPrime': '/eos/cms/store/t0streamer/Data/HIExpressRawPrime/000/374/289/run374289_ls0161_streamHIExpressRawPrime_StorageManager.dat',
+        # 'ZeroBias0': '/afs/cern.ch/work/m/mnguyen/public/test/CMSSW_13_2_4/src/aod_RAW2DIGI_L1Reco_RECO.root',
+        'ZeroBias0': '/eos/cms/store/express/HIRun2023A/HIExpressPhysics/FEVT/Express-v1/000/374/289/00000/00e7bcbe-ae61-46ab-baa2-3dd242e57c93.root'
+    },
+    'offline_repacked_rawprime_ls0051' : {
+        'RawPrime': '/afs/cern.ch/work/m/mnguyen/public/test/CMSSW_13_2_4/src/oneEvent/step2_REPACK_wFEDErrors.root',
+        'ZeroBias0': '/afs/cern.ch/work/m/mnguyen/public/test/CMSSW_13_2_4/src/aod_RAW2DIGI_L1Reco_RECO.root',
+    },
+    'ForRawPrime' : {
+        '': '',
+        'ZeroBias0': '/afs/cern.ch/user/c/chenzh/public/forRawPrime/HLT_output_RunOnRawStreamer_ZSon.root', # for rawprime module input
+    },
+    'run374322_ls0025' : {
+        'RawPrime': '/eos/cms/store/t0streamer/Data/HIExpressRawPrime/000/374/322/run374322_ls0025_streamHIExpressRawPrime_StorageManager.dat',
+        'ZeroBias0': '/afs/cern.ch/work/m/mnguyen/public/test/CMSSW_13_2_4/src/run374322/raw_RAW2DIGI_L1Reco_RECO_PAT.root', # for rawprime module input
+    },
+    'test_w_HLTmenu_ZSon_on_VR' : {
+        'RawPrime': '/afs/cern.ch/user/c/chenzh/public/forRawPrime/HITrackerNZS/HLT_output_RunOnRawStreamer_ZSon_TrackerNZS.root',
+        'ZeroBias0': '/afs/cern.ch/work/m/mnguyen/public/test/CMSSW_13_2_4/src/run374322/raw_RAW2DIGI_L1Reco_RECO_PAT.root', # for rawprime module input
+    },
+    'test_w_HLTmenu_ZSon_on_VR' : {
+        'RawPrime': '/afs/cern.ch/user/c/chenzh/public/forRawPrime/HITrackerNZS/HLT_output_RunOnRawStreamer_ZSon_TrackerNZS.root',
+        'ZeroBias0': '/afs/cern.ch/work/m/mnguyen/public/test/CMSSW_13_2_4/src/run374322/raw_RAW2DIGI_L1Reco_RECO_PAT.root', # for rawprime module input
+    },
+    'run374323_ls0258' : {
+        'RawPrime': '/eos/cms/store/t0streamer/Data/HIExpressRawPrime/000/374/323/run374323_ls0258_streamHIExpressRawPrime_StorageManager.dat',
+        'ZeroBias0': '/eos/cms/store/group/phys_heavyions/wangj/RECO2023/aodclus_HIExpress_374323_small/reco_run374323_ls0258_streamHIExpress_StorageManager.root',
+        'Options': 'n=100'
+    },
+    'online_NZS_offline_ZS' : {
+        'RawPrime': '/eos/cms/store/group/phys_heavyions_ops/abaty/RAWPrimeChecks2023/RAW/Run374323_noOnlineZS_withOfflineZS.root',
+        'ZeroBias0': '/eos/cms/store/group/phys_heavyions/wangj/RECO2023/aodclus_HIExpress_374323_small/reco_run374323_ls0258_streamHIExpress_StorageManager.root',
+        'Options': 'n=100'
+    },
+    'fixed_rawprime_run_374345_ls0029' : {
+        'RawPrime': '/eos/cms/store/t0streamer/Data/HIExpressRawPrime/000/374/345/run374345_ls0029_streamHIExpressRawPrime_StorageManager.dat',
+        'ZeroBias0': '/eos/cms/store/group/phys_heavyions_ops/abaty/RAWPrimeChecks2023/RAW_WithHLTFix_v1/raw_RAW2DIGI_L1Reco_RECO_PAT.root',
+        'Options': 'n=100'
+    },
+    #### manually handle this, change the dump branches in (2,2)
+    'RECO_NZS' : {
+        'RawPrime': '/afs/cern.ch/user/c/chenzh/public/forRawPrime/HITrackerNZS/HLT_output_RunOnRawStreamer_ZSoff_TrackerNZS.root',
+        'ZeroBias0': '/eos/cms/store/group/phys_heavyions_ops/abaty/RAWPrimeChecks2023/RAW/run374323_ls0100_streamPhysicsHITrackerNZ_REPACKEDSTREAMER_RAW.root',
+    },
+}
 if (not os.path.exists('output/')): os.makedirs('output/')
 if (not os.path.exists('log/')): os.makedirs('log/')
 
 
 for (l, files) in commonEventsDict.items():
 	os.system("cmsRun sep19_2_1_dump_rawprime.py inputFiles={i:s} "
-	          "outputFile=output/{l:s}_sep19_2_1_dump_rawprime.root "
-	          "eventsToProcessTxt=/eos/cms/store/group/phys_heavyions/wangj/RECO2023/PPRefZeroBias0_373710/{l:s}.txt "
+	          "outputFile=output/{l:s}_sep19_2_1_dump_rawprime.root {o:s} "
+	          # "eventsToProcessTxt=/eos/cms/store/group/phys_heavyions/wangj/RECO2023/PPRefZeroBias0_373710/{l:s}.txt "
 	          "> log/sep19_2_1_dump_rawprime_{l:s}.log 2>&1".format(
 	          	i = files['RawPrime'],
+                o = files['Options'],
 	          	l = l ) )
 	os.system("cmsRun sep19_2_2_dump_raw.py inputFiles={i:s} "
-	          "outputFile=output/{l:s}_sep19_2_2_dump_raw.root "
+	          "outputFile=output/{l:s}_sep19_2_2_dump_raw.root {o:s} "
 	          "> log/sep19_2_2_dump_raw_{l:s}.log 2>&1".format(
 	          	i = files['ZeroBias0'],
+                o = files['Options'],
 	          	l = l ) )
-	# os.system("cmsRun sep19_3_1_dump_rawprime.py inputFiles={i:s} "
-	#           "outputFile=output/{l:s}_sep19_3_1_dump_rawprime.root "
-	#           "eventsToProcessTxt=/eos/cms/store/group/phys_heavyions/wangj/RECO2023/PPRefZeroBias0_373710/{l:s}.txt "
-	#           "> log/sep19_3_1_dump_rawprime_{l:s}.log 2>&1".format(
-	#           	i = files['RawPrime'],
-	#           	l = l ) )
-	os.system("cmsRun sep19_3_2_dump_raw.py inputFiles={i:s} "
+	os.system("cmsRun sep19_3_1_dump_rawprime.py inputFiles={i:s} "
+	          "outputFile=output/{l:s}_sep19_3_1_dump_rawprime.root {o:s} "
+	          # "eventsToProcessTxt=/eos/cms/store/group/phys_heavyions/wangj/RECO2023/PPRefZeroBias0_373710/{l:s}.txt "
+	          "> log/sep19_3_1_dump_rawprime_{l:s}.log 2>&1".format(
+	          	i = files['RawPrime'],
+                o = files['Options'],
+	          	l = l ) )
+	os.system("cmsRun sep19_3_2_dump_raw.py inputFiles={i:s} {o:s} "
 	          "outputFile=output/{l:s}_sep19_3_2_dump_raw.root "
 	          "> log/sep19_3_2_dump_raw_{l:s}.log 2>&1".format(
 	          	i = files['ZeroBias0'],
+                o = files['Options'],
 	          	l = l ) )
 
