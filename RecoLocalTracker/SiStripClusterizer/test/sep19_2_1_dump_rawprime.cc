@@ -82,7 +82,7 @@ private:
   uint16_t    size;
   int         charge;
 
-  const static int nMax = 30000;
+  const static int nMax = 8000000;
   float       hitX[nMax];
   float       hitY[nMax];
   uint16_t    channel[nMax];
