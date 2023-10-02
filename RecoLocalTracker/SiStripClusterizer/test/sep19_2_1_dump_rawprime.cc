@@ -85,6 +85,7 @@ private:
   const static int nMax = 8000000;
   float       hitX[nMax];
   float       hitY[nMax];
+  float       hitZ[nMax];
   uint16_t    channel[nMax];
   uint16_t    adc[nMax];
 
@@ -127,6 +128,7 @@ sep19_2_1_dump_rawprime::sep19_2_1_dump_rawprime(const edm::ParameterSet& conf) 
 
   onlineClusterTree->Branch("x", hitX, "x[size]/F");
   onlineClusterTree->Branch("y", hitY, "y[size]/F");
+  onlineClusterTree->Branch("z", hitZ, "z[size]/F");
   onlineClusterTree->Branch("channel", channel, "channel[size]/s");
   onlineClusterTree->Branch("adc", adc, "adc[size]/s");
 
@@ -187,6 +189,7 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
 
         hitX   [strip - firstStrip] = gp.x();
         hitY   [strip - firstStrip] = gp.y();
+        hitZ   [strip - firstStrip] = gp.z();
         channel[strip - firstStrip] = strip;
         adc    [strip - firstStrip] = convertedCluster[strip - firstStrip];
       }
