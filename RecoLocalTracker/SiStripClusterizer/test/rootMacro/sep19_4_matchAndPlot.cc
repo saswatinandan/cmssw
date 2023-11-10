@@ -44,6 +44,8 @@ void PlotStyle(T* h)
 	h->GetXaxis()->SetTitleFont(defaultFont);
 	h->GetYaxis()->SetLabelFont(defaultFont);
 	h->GetYaxis()->SetTitleFont(defaultFont);
+	h->GetZaxis()->SetLabelFont(defaultFont);
+	h->GetZaxis()->SetTitleFont(defaultFont);
 
 	// gStyle->SetTitleFontSize(16);
 	h->SetTitleOffset  (0);
@@ -63,11 +65,12 @@ void PlotStyle(T* h)
 	h->GetXaxis()->SetLabelSize    (label_size);
 	h->GetXaxis()->SetNdivisions(508);
 
-	h->GetZaxis()->SetTitleOffset  (x_title_offset);
+	h->GetZaxis()->SetTitleOffset  (1.2);
 	h->GetZaxis()->CenterTitle();
 	h->GetZaxis()->SetTitleSize    (x_title_size);
 	h->GetZaxis()->SetLabelOffset  (label_offset);
 	h->GetZaxis()->SetLabelSize    (label_size);
+	h->GetZaxis()->SetNdivisions(508);
 
 	h->SetLineWidth(2);
 	// h->SetMinimum(-0.001);
@@ -92,7 +95,7 @@ struct coordinateModulo{
 	int ring;
 	int nmod;
 	double posx, posy, posz;
-	double length,  width,  thickness, widthAtHalfLength;
+	double length,  size,  thickness, sizeAtHalfLength;
 	int detId;
 	std::string nome; 
 } mod[16588];
@@ -200,8 +203,8 @@ int main(int argc, char const *argv[])
 			*cfile  >> cont >> mod[np].part  >> mod[np].subpart 
 			    >> mod[np].layer  >> mod[np].ring >> mod[np].nmod
 			    >> mod[np].posx >> mod[np].posy >> mod[np].posz
-			    >> mod[np].length >> mod[np].width >> mod[np].thickness
-			    >> mod[np].widthAtHalfLength >> mod[np].detId; 
+			    >> mod[np].length >> mod[np].size >> mod[np].thickness
+			    >> mod[np].sizeAtHalfLength >> mod[np].detId; 
 			getline(*cfile,ciccio);
 			getline(*cfile,mod[np].nome);
 			indice_moduli[mod[np].detId]=np;
@@ -390,8 +393,8 @@ int main(int argc, char const *argv[])
 	gErrorIgnoreLevel = kWarning;
 	canv0->Divide(3,1,0.001,0.001);
 
-	TH1F * h_width_tot_sc      = new TH1F( "RAW", //"(offline) raw cluster", 
-	                                    "; width; yield",  
+	TH1F * h_size_tot_sc      = new TH1F( "RAW", //"(offline) raw cluster", 
+	                                    "; size; yield",  
 	                                    50, 0., 50. );
 	TH1F * h_charge_tot_sc     = new TH1F( "RAW", //"(offline) raw cluster", 
 	                                    "; charge; yield",  
@@ -400,8 +403,8 @@ int main(int argc, char const *argv[])
 	                                    "; barycenter; yield",  
 	                                    100, 0., 950. );
 
-	TH1F * h_width_tot_ac      = new TH1F( "RAW'", //"(online) raw' cluster", 
-	                                    "; width; yield",  
+	TH1F * h_size_tot_ac      = new TH1F( "RAW'", //"(online) raw' cluster", 
+	                                    "; size; yield",  
 	                                    50, 0., 50. );
 	TH1F * h_charge_tot_ac     = new TH1F( "RAW'", //"(online) raw' cluster", 
 	                                    "; charge; yield",  
@@ -436,7 +439,7 @@ int main(int argc, char const *argv[])
 		rp_dict[ rp_event ][ rp_detId ][ ac_idx ] = cluster( ac_idx, rp_event, rp_run, rp_lumi,
 												rp_detId, rp_firstStrip, rp_endStrip, rp_barycenter,
 												rp_size, rp_charge );
-		h_width_tot_ac->Fill( rp_size );
+		h_size_tot_ac->Fill( rp_size );
 		h_charge_tot_ac->Fill( rp_charge );
 		h_barycenter_tot_ac->Fill( rp_barycenter );
 	}
@@ -483,7 +486,7 @@ int main(int argc, char const *argv[])
 				for (auto& _sc: _scs_perEvt_perDetId.second) 
 				{
 					cluster sc(_sc.second);
-					h_width_tot_sc->Fill( sc.size );
+					h_size_tot_sc->Fill( sc.size );
 					h_charge_tot_sc->Fill( sc.charge );
 					h_barycenter_tot_sc->Fill( sc.barycenter);
 				}
@@ -492,12 +495,12 @@ int main(int argc, char const *argv[])
 		}
 	}
 	/* *******************************
-	 * 1.0 Plotting total cluster distributions
+	 * 1.0 Plotting total cluster distributions (matched events)
 	 * *******************************/
 	canv0->cd(1);	
 	canv0->GetPad(1)->SetMargin (0.18, 0.05, 0.15, 0.05);
-	PlotStyle(h_width_tot_ac); h_width_tot_ac->SetLineColor(kBlue); 	h_width_tot_ac->Draw("");
-	PlotStyle(h_width_tot_sc); h_width_tot_sc->SetLineWidth(0); h_width_tot_sc->SetFillColorAlpha(kBlack, 0.5); h_width_tot_sc->SetLineColorAlpha(kBlack, 0.5);  	h_width_tot_sc->Draw("same");
+	PlotStyle(h_size_tot_ac); h_size_tot_ac->SetLineColor(kBlue); 	h_size_tot_ac->Draw("");
+	PlotStyle(h_size_tot_sc); h_size_tot_sc->SetLineWidth(0); h_size_tot_sc->SetFillColorAlpha(kBlack, 0.5); h_size_tot_sc->SetLineColorAlpha(kBlack, 0.5);  	h_size_tot_sc->Draw("same");
 	TLegend* leg0 = canv0->GetPad(1)->BuildLegend(.4, .6, .85, .8);
 	formatLegend(leg0);
 	canv0->cd(2);	
@@ -516,47 +519,47 @@ int main(int argc, char const *argv[])
 
 	TLatex latex;
 
-	TCanvas *canvSingle0 = new TCanvas("canvSingle0", "canvSingle0", 600*1, 600*1);
+	TCanvas *canvSingle0 = new TCanvas("canvSingle0", "canvSingle0", 700, 600);
 	gStyle->SetOptTitle(0);
 	gErrorIgnoreLevel = kWarning;
-	canvSingle0->GetPad(0)->SetMargin (0.18, 0.05, 0.12, 0.07);
+	canvSingle0->GetPad(0)->SetMargin (0.18, 0.20, 0.12, 0.07);
 	
-	h_width_tot_ac->Draw("");
-	h_width_tot_sc->Draw("same");
-	leg0 = canvSingle0->GetPad(0)->BuildLegend(.7, .6, .95, .8);
+	h_size_tot_ac->Draw("");
+	h_size_tot_sc->Draw("same");
+	leg0 = canvSingle0->GetPad(0)->BuildLegend(.62, .6, .87, .8);
 	formatLegend(leg0);
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.DrawLatexNDC(0.51,0.94,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
-	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_width.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_TotalClusters_width.pdf /tmp/").c_str());
+	latex.DrawLatexNDC(0.61,0.94,"(preliminary)");
+	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_size.pdf").c_str());
+	system(("dropbox_uploader.sh upload ../img/"+expTag+"_TotalClusters_size.pdf /tmp/").c_str());
 
 	h_charge_tot_ac->Draw("");
 	h_charge_tot_sc->Draw("same");
-	leg0 = canvSingle0->GetPad(0)->BuildLegend(.7, .6, .95, .8);
+	leg0 = canvSingle0->GetPad(0)->BuildLegend(.62, .6, .87, .8);
 	formatLegend(leg0);
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.DrawLatexNDC(0.51,0.94,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
+	latex.DrawLatexNDC(0.61,0.94,"(preliminary)");
 	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_charge.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_TotalClusters_charge.pdf /tmp/").c_str());
 
 	h_barycenter_tot_ac->Draw("");
 	h_barycenter_tot_sc->Draw("same");
-	leg0 = canvSingle0->GetPad(0)->BuildLegend(.7, .6, .95, .8);
+	leg0 = canvSingle0->GetPad(0)->BuildLegend(.62, .6, .87, .8);
 	formatLegend(leg0);
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.DrawLatexNDC(0.51,0.94,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
+	latex.DrawLatexNDC(0.61,0.94,"(preliminary)");
 	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_barycenter.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_TotalClusters_barycenter.pdf /tmp/").c_str());
 	
@@ -595,7 +598,7 @@ int main(int argc, char const *argv[])
 	*/
 
 	/* *******************************
-	 * 2. matching
+	 * 2. cluster matching
 	 * *******************************/
 	for(auto& _acs_perEvt: rp_dict) 
 	{
@@ -680,8 +683,8 @@ int main(int argc, char const *argv[])
 	/* *******************************
 	 * 3.1 plotting matched cluster pairs
 	 * *******************************/
-	TH2F * h_width      = new TH2F( "width", 
-	                                    "; RAW SiStripCluster width; RAW' ApproxCluster width",  
+	TH2F * h_size      = new TH2F( "size", 
+	                                    "; RAW SiStripCluster size; RAW' ApproxCluster size",  
 	                                    50, 0., 50.,
 	                                    50, 0., 50. );
 	TH2F * h_charge     = new TH2F( "charge", 
@@ -697,19 +700,19 @@ int main(int argc, char const *argv[])
 	                                    100, -2., 2.,
 	                                    100, -700, 300 );
 
-	TH1F * h_width_res      = new TH1F( "width_res", 
-	                                    "; width (RAW'-RAW)/RAW; yield",
-	                                    50, -1., 1.);
+	TH1F * h_size_res      = new TH1F( "size_res", 
+	                                    "; size (RAW'-RAW)/RAW; yield",
+	                                    50, -.1, .1);
 	TH1F * h_charge_res     = new TH1F( "chagre_res", 
 	                                    "; charge (RAW'-RAW)/RAW; yield",
-	                                    50, -1., 1.);
+	                                    50, -.1, .1);
 	TH1F * h_barycenter_res = new TH1F( "barycenter_res", 
 	                                    "; barycenter RAW'-RAW; yield",
-	                                    50, -2., 2.);
+	                                    50, -.1, .1);
 
 	ofstream matched_sc2ac_txt;
 	matched_sc2ac_txt.open(Form("log/%s_matched_sc2ac.txt", expTag.c_str()));
-	matched_sc2ac_txt << "event detId sc_idx barycenter width charge firstStrip endStrip ac_idx barycenter width charge firstStrip endStrip\n";
+	matched_sc2ac_txt << "event detId sc_idx barycenter size charge firstStrip endStrip ac_idx barycenter size charge firstStrip endStrip\n";
 	for (auto& idx_pair: matched_sc2ac) 
 	{
 		// printf("[Debug] approxCluster %p, SiStripCluster %p\n", ac_ptr, sc_ptr);
@@ -717,13 +720,13 @@ int main(int argc, char const *argv[])
 		onlineClusterTree->GetEntry( idx_pair.second);
 
 
-		h_width     ->Fill( r_size, rp_size );
+		h_size     ->Fill( r_size, rp_size );
 		h_charge    ->Fill( r_charge, rp_charge );
 		h_barycenter->Fill( r_barycenter, rp_barycenter ); 
 		h_barycenter_vs_charge->Fill( 	rp_barycenter - r_barycenter,
 						rp_charge - r_charge ); 
 
-		h_width_res     ->Fill( ( rp_size - r_size )/((float) r_size) );
+		h_size_res     ->Fill( ( rp_size - r_size )/((float) r_size) );
 		h_charge_res    ->Fill( ( rp_charge - r_charge )/((float) r_charge) );
 		h_barycenter_res->Fill( rp_barycenter - r_barycenter );
 
@@ -734,25 +737,25 @@ int main(int argc, char const *argv[])
 	matched_sc2ac_txt.close();
 
 
-	TCanvas *canv = new TCanvas("canv", "canv", 600*4, 600*2);
+	TCanvas *canv = new TCanvas("canv", "canv", 700*4, 600*2);
 
 
 	canv->Divide(4,2,0.001,0.001);
 
-	canv->cd(1); canv->GetPad(1)->SetMargin (0.18, 0.05, 0.15, 0.05);
-	PlotStyle(h_width);  	h_width->Draw("COLZ");
-	canv->cd(2); canv->GetPad(2)->SetMargin (0.18, 0.05, 0.15, 0.05);
+	canv->cd(1); canv->GetPad(1)->SetMargin (0.18, 0.20, 0.12, 0.07);
+	PlotStyle(h_size);  	h_size->Draw("COLZ");
+	canv->cd(2); canv->GetPad(2)->SetMargin (0.18, 0.20, 0.12, 0.07);
 	PlotStyle(h_charge);  	h_charge->Draw("COLZ");
-	canv->cd(3); canv->GetPad(3)->SetMargin (0.18, 0.05, 0.15, 0.05);
+	canv->cd(3); canv->GetPad(3)->SetMargin (0.18, 0.20, 0.12, 0.07);
 	PlotStyle(h_barycenter);  	h_barycenter->Draw("COLZ");
-	canv->cd(4); canv->GetPad(4)->SetMargin (0.18, 0.05, 0.15, 0.05);
+	canv->cd(4); canv->GetPad(4)->SetMargin (0.18, 0.20, 0.12, 0.07);
 	PlotStyle(h_barycenter_vs_charge);  	h_barycenter_vs_charge->Draw("COLZ");
 	
-	canv->cd(5); canv->GetPad(5)->SetLogy(); canv->GetPad(5)->SetMargin (0.18, 0.05, 0.15, 0.05);
-	PlotStyle(h_width_res);  		h_width_res->Draw("");
-	canv->cd(6); canv->GetPad(6)->SetLogy(); canv->GetPad(6)->SetMargin (0.18, 0.05, 0.15, 0.05);
+	canv->cd(5); canv->GetPad(5)->SetLogy(); canv->GetPad(5)->SetMargin (0.18, 0.20, 0.12, 0.07);
+	PlotStyle(h_size_res);  		h_size_res->Draw("");
+	canv->cd(6); canv->GetPad(6)->SetLogy(); canv->GetPad(6)->SetMargin (0.18, 0.20, 0.12, 0.07);
 	PlotStyle(h_charge_res);  		h_charge_res->Draw("");
-	canv->cd(7); canv->GetPad(7)->SetLogy(); canv->GetPad(7)->SetMargin (0.18, 0.05, 0.15, 0.05);
+	canv->cd(7); canv->GetPad(7)->SetLogy(); canv->GetPad(7)->SetMargin (0.18, 0.20, 0.12, 0.07);
 	PlotStyle(h_barycenter_res);  	h_barycenter_res->Draw("");
 
 
@@ -762,83 +765,94 @@ int main(int argc, char const *argv[])
 	delete canv;
 
 
-	TCanvas *canvSingle = new TCanvas("canvSingle", "canvSingle", 600*1, 600*1);
+	TCanvas *canvSingle = new TCanvas("canvSingle", "canvSingle", 700, 600);
 	gStyle->SetOptTitle(0);
 	gErrorIgnoreLevel = kWarning;
-	canvSingle->GetPad(0)->SetMargin (0.18, 0.05, 0.12, 0.07);
-	h_width->Draw("COLZ");
+	canvSingle->GetPad(0)->SetMargin (0.18, 0.20, 0.12, 0.07);
+	canvSingle->cd();
+	h_size->Draw("COLZ");
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.DrawLatexNDC(0.51,0.94,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
-	canv->SaveAs(("../img/"+expTag+"_MatchedClusters_width_scat.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_width_scat.pdf /tmp/").c_str());
+	latex.DrawLatexNDC(0.61,0.94,"(preliminary)");
+	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_size_scat.pdf").c_str());
+	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_size_scat.pdf /tmp/").c_str());
 
 	h_charge->Draw("COLZ");
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.DrawLatexNDC(0.51,0.94,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
-	canv->SaveAs(("../img/"+expTag+"_MatchedClusters_charge_scat.pdf").c_str());
+	latex.DrawLatexNDC(0.61,0.94,"(preliminary)");
+	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_charge_scat.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_charge_scat.pdf /tmp/").c_str());
 
 	h_barycenter->Draw("COLZ");
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.DrawLatexNDC(0.51,0.94,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
-	canv->SaveAs(("../img/"+expTag+"_MatchedClusters_barycenter_scat.pdf").c_str());
+	latex.DrawLatexNDC(0.61,0.94,"(preliminary)");
+	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_barycenter_scat.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_barycenter_scat.pdf /tmp/").c_str());
 
 	h_barycenter_vs_charge->Draw("COLZ");
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.DrawLatexNDC(0.51,0.94,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
-	canv->SaveAs(("../img/"+expTag+"_MatchedClusters_del_barycenter_del_charge_scat.pdf").c_str());
+	latex.DrawLatexNDC(0.61,0.94,"(preliminary)");
+	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_del_barycenter_del_charge_scat.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_del_barycenter_del_charge_scat.pdf /tmp/").c_str());
 
-	h_width_res->Draw("");
+	h_size_res->Draw("");
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.DrawLatexNDC(0.51,0.94,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
-	canv->SaveAs(("../img/"+expTag+"_MatchedClusters_width_res.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_width_res.pdf /tmp/").c_str());
+	latex.DrawLatexNDC(0.61,0.94,"(preliminary)");
+	
+	latex.SetTextFont(43);
+	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_size_res->GetMean()));
+	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_size_res->GetStdDev()));
+	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_size_res.pdf").c_str());
+	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_size_res.pdf /tmp/").c_str());
 
 	h_charge_res->Draw("");
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.DrawLatexNDC(0.51,0.94,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
-	canv->SaveAs(("../img/"+expTag+"_MatchedClusters_charge_res.pdf").c_str());
+	latex.DrawLatexNDC(0.61,0.94,"(preliminary)");
+	latex.SetTextFont(43);
+	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_charge_res->GetMean()));
+	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_charge_res->GetStdDev()));
+	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_charge_res.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_charge_res.pdf /tmp/").c_str());
 
 	h_barycenter_res->Draw("");
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.DrawLatexNDC(0.51,0.94,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
-	canv->SaveAs(("../img/"+expTag+"_MatchedClusters_barycenter_res.pdf").c_str());
+	latex.DrawLatexNDC(0.61,0.94,"(preliminary)");
+	latex.SetTextFont(43);
+	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_barycenter_res->GetMean()));
+	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_barycenter_res->GetStdDev()));
+	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_barycenter_res.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_barycenter_res.pdf /tmp/").c_str());
 
 	ofstream unmatched_scs_txt;
 	unmatched_scs_txt.open(Form("log/%s_unmatched_scs.txt",expTag.c_str()));
-	unmatched_scs_txt << "event detId sc_idx barycenter width charge firstStrip endStrip\n";
+	unmatched_scs_txt << "event detId sc_idx barycenter size charge firstStrip endStrip\n";
 	for(auto& sc: unmatched_scs)
 	{
 		unmatched_scs_txt << sc.event << " " << sc.detId << " " 
@@ -850,7 +864,7 @@ int main(int argc, char const *argv[])
 
 	ofstream unmatched_acs_txt;
 	unmatched_acs_txt.open(Form("log/%s_unmatched_acs.txt",expTag.c_str()));
-	unmatched_acs_txt << "event detId ac_idx barycenter width charge firstStrip endStrip\n";
+	unmatched_acs_txt << "event detId ac_idx barycenter size charge firstStrip endStrip\n";
 	for(auto& ac: unmatched_acs)
 	{
 		unmatched_acs_txt << ac.event << " " << ac.detId << " " 
