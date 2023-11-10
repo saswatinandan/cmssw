@@ -20,6 +20,7 @@
 #include "TCanvas.h"
 #include "TStyle.h"
 #include "TLegend.h"
+#include "TLatex.h"
 #include "TLine.h"
 #include "TError.h"
 
@@ -30,13 +31,13 @@ void PlotStyle(T* h)
 {
 	//fonts
     int defaultFont       = 43;
-    float x_title_size    = 20;
-    float y_title_size    = 20;
+    float x_title_size    = 28;
+    float y_title_size    = 28;
 
     float x_title_offset  = 1.5;
     float y_title_offset  = 2.1;
 
-    float label_size      = 20;
+    float label_size      = 28;
     float label_offset    = 0.013;
 
 	h->GetXaxis()->SetLabelFont(defaultFont);
@@ -55,7 +56,7 @@ void PlotStyle(T* h)
 	h->GetYaxis()->SetLabelSize    (label_size);
 	h->GetYaxis()->SetNdivisions(508);
 
-	h->GetXaxis()->SetTitleOffset  (x_title_offset);
+	h->GetXaxis()->SetTitleOffset  (1.2);
 	h->GetXaxis()->CenterTitle();
 	h->GetXaxis()->SetTitleSize    (x_title_size);
 	h->GetXaxis()->SetLabelOffset  (label_offset);
@@ -74,7 +75,7 @@ void PlotStyle(T* h)
 }
 
 
-void formatLegend(TLegend* leg, double textsize=17)
+void formatLegend(TLegend* leg, double textsize=27)
 {
         leg->SetBorderSize(0);
         leg->SetTextFont(43);
@@ -383,29 +384,29 @@ int main(int argc, char const *argv[])
 	vector<cluster>  	unmatched_scs;
 	vector<cluster>  	unmatched_acs;
 
-
 	TCanvas *canv0 = new TCanvas("canv0", "canv0", 600*3, 600*1);
 	gStyle->SetOptTitle(0);
+	gStyle->SetOptStat(0);
 	gErrorIgnoreLevel = kWarning;
 	canv0->Divide(3,1,0.001,0.001);
 
-	TH1F * h_width_tot_sc      = new TH1F( "(offline) raw cluster", 
+	TH1F * h_width_tot_sc      = new TH1F( "RAW", //"(offline) raw cluster", 
 	                                    "; width; yield",  
 	                                    50, 0., 50. );
-	TH1F * h_charge_tot_sc     = new TH1F( "charge_tot_sc", 
+	TH1F * h_charge_tot_sc     = new TH1F( "RAW", //"(offline) raw cluster", 
 	                                    "; charge; yield",  
 	                                    100, 0., 700. );
-	TH1F * h_barycenter_tot_sc = new TH1F( "barycenter_tot_sc", 
+	TH1F * h_barycenter_tot_sc = new TH1F( "RAW", //"(offline) raw cluster", 
 	                                    "; barycenter; yield",  
 	                                    100, 0., 950. );
 
-	TH1F * h_width_tot_ac      = new TH1F( "(online) raw' cluster", 
+	TH1F * h_width_tot_ac      = new TH1F( "RAW'", //"(online) raw' cluster", 
 	                                    "; width; yield",  
 	                                    50, 0., 50. );
-	TH1F * h_charge_tot_ac     = new TH1F( "charge_tot_ac", 
+	TH1F * h_charge_tot_ac     = new TH1F( "RAW'", //"(online) raw' cluster", 
 	                                    "; charge; yield",  
 	                                    100, 0., 700. );
-	TH1F * h_barycenter_tot_ac = new TH1F( "barycenter_tot_ac", 
+	TH1F * h_barycenter_tot_ac = new TH1F( "RAW'", //"(online) raw' cluster", 
 	                                    "; barycenter; yield",  
 	                                    100, 0., 950. );
 
@@ -496,22 +497,72 @@ int main(int argc, char const *argv[])
 	canv0->cd(1);	
 	canv0->GetPad(1)->SetMargin (0.18, 0.05, 0.15, 0.05);
 	PlotStyle(h_width_tot_ac); h_width_tot_ac->SetLineColor(kBlue); 	h_width_tot_ac->Draw("");
-	PlotStyle(h_width_tot_sc); h_width_tot_sc->SetLineWidth(0); h_width_tot_sc->SetFillColorAlpha(kBlack, 0.7); h_width_tot_sc->SetLineColorAlpha(kBlack, 0.7);  	h_width_tot_sc->Draw("same");
+	PlotStyle(h_width_tot_sc); h_width_tot_sc->SetLineWidth(0); h_width_tot_sc->SetFillColorAlpha(kBlack, 0.5); h_width_tot_sc->SetLineColorAlpha(kBlack, 0.5);  	h_width_tot_sc->Draw("same");
 	TLegend* leg0 = canv0->GetPad(1)->BuildLegend(.4, .6, .85, .8);
 	formatLegend(leg0);
 	canv0->cd(2);	
 	canv0->GetPad(2)->SetMargin (0.18, 0.05, 0.15, 0.05);
 	PlotStyle(h_charge_tot_ac); h_charge_tot_ac->SetLineColor(kBlue); 	h_charge_tot_ac->Draw("");
-	PlotStyle(h_charge_tot_sc); h_charge_tot_sc->SetLineWidth(0); h_charge_tot_sc->SetFillColorAlpha(kBlack, 0.7); h_charge_tot_sc->SetLineColorAlpha(kBlack, 0.7); 	h_charge_tot_sc->Draw("same");
+	PlotStyle(h_charge_tot_sc); h_charge_tot_sc->SetLineWidth(0); h_charge_tot_sc->SetFillColorAlpha(kBlack, 0.5); h_charge_tot_sc->SetLineColorAlpha(kBlack, 0.5); 	h_charge_tot_sc->Draw("same");
 	canv0->cd(3);	
 	canv0->GetPad(3)->SetMargin (0.18, 0.05, 0.15, 0.05);
 	PlotStyle(h_barycenter_tot_ac); h_barycenter_tot_ac->SetLineColor(kBlue); 	h_barycenter_tot_ac->Draw("");
-	PlotStyle(h_barycenter_tot_sc); h_barycenter_tot_sc->SetLineWidth(0); h_barycenter_tot_sc->SetFillColorAlpha(kBlack, 0.7); h_barycenter_tot_sc->SetLineColorAlpha(kBlack, 0.7); 	h_barycenter_tot_sc->Draw("same");
+	PlotStyle(h_barycenter_tot_sc); h_barycenter_tot_sc->SetLineWidth(0); h_barycenter_tot_sc->SetFillColorAlpha(kBlack, 0.5); h_barycenter_tot_sc->SetLineColorAlpha(kBlack, 0.5); 	h_barycenter_tot_sc->Draw("same");
 	
 	canv0->SaveAs(("../img/"+expTag+"_TotalClusters.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_TotalClusters.pdf /tmp/").c_str());
 
 	delete canv0;
+
+	TLatex latex;
+
+	TCanvas *canvSingle0 = new TCanvas("canvSingle0", "canvSingle0", 600*1, 600*1);
+	gStyle->SetOptTitle(0);
+	gErrorIgnoreLevel = kWarning;
+	canvSingle0->GetPad(0)->SetMargin (0.18, 0.05, 0.12, 0.07);
+	
+	h_width_tot_ac->Draw("");
+	h_width_tot_sc->Draw("same");
+	leg0 = canvSingle0->GetPad(0)->BuildLegend(.7, .6, .95, .8);
+	formatLegend(leg0);
+	latex.SetTextFont(63);
+	latex.SetTextSize(31);
+	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.SetTextFont(53);
+	latex.SetTextSize(22);
+	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
+	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_width.pdf").c_str());
+	system(("dropbox_uploader.sh upload ../img/"+expTag+"_TotalClusters_width.pdf /tmp/").c_str());
+
+	h_charge_tot_ac->Draw("");
+	h_charge_tot_sc->Draw("same");
+	leg0 = canvSingle0->GetPad(0)->BuildLegend(.7, .6, .95, .8);
+	formatLegend(leg0);
+	latex.SetTextFont(63);
+	latex.SetTextSize(31);
+	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.SetTextFont(53);
+	latex.SetTextSize(22);
+	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
+	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_charge.pdf").c_str());
+	system(("dropbox_uploader.sh upload ../img/"+expTag+"_TotalClusters_charge.pdf /tmp/").c_str());
+
+	h_barycenter_tot_ac->Draw("");
+	h_barycenter_tot_sc->Draw("same");
+	leg0 = canvSingle0->GetPad(0)->BuildLegend(.7, .6, .95, .8);
+	formatLegend(leg0);
+	latex.SetTextFont(63);
+	latex.SetTextSize(31);
+	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.SetTextFont(53);
+	latex.SetTextSize(22);
+	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
+	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_barycenter.pdf").c_str());
+	system(("dropbox_uploader.sh upload ../img/"+expTag+"_TotalClusters_barycenter.pdf /tmp/").c_str());
+	
+	delete canvSingle0;
+
+
 	/*
 	cout << "map of raw clusters: " << endl;
 	for(auto& _cs_perEvt: r_dict) 
@@ -709,6 +760,81 @@ int main(int argc, char const *argv[])
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters.pdf /tmp/").c_str());
 
 	delete canv;
+
+
+	TCanvas *canvSingle = new TCanvas("canvSingle", "canvSingle", 600*1, 600*1);
+	gStyle->SetOptTitle(0);
+	gErrorIgnoreLevel = kWarning;
+	canvSingle->GetPad(0)->SetMargin (0.18, 0.05, 0.12, 0.07);
+	h_width->Draw("COLZ");
+	latex.SetTextFont(63);
+	latex.SetTextSize(31);
+	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.SetTextFont(53);
+	latex.SetTextSize(22);
+	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
+	canv->SaveAs(("../img/"+expTag+"_MatchedClusters_width_scat.pdf").c_str());
+	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_width_scat.pdf /tmp/").c_str());
+
+	h_charge->Draw("COLZ");
+	latex.SetTextFont(63);
+	latex.SetTextSize(31);
+	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.SetTextFont(53);
+	latex.SetTextSize(22);
+	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
+	canv->SaveAs(("../img/"+expTag+"_MatchedClusters_charge_scat.pdf").c_str());
+	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_charge_scat.pdf /tmp/").c_str());
+
+	h_barycenter->Draw("COLZ");
+	latex.SetTextFont(63);
+	latex.SetTextSize(31);
+	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.SetTextFont(53);
+	latex.SetTextSize(22);
+	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
+	canv->SaveAs(("../img/"+expTag+"_MatchedClusters_barycenter_scat.pdf").c_str());
+	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_barycenter_scat.pdf /tmp/").c_str());
+
+	h_barycenter_vs_charge->Draw("COLZ");
+	latex.SetTextFont(63);
+	latex.SetTextSize(31);
+	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.SetTextFont(53);
+	latex.SetTextSize(22);
+	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
+	canv->SaveAs(("../img/"+expTag+"_MatchedClusters_del_barycenter_del_charge_scat.pdf").c_str());
+	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_del_barycenter_del_charge_scat.pdf /tmp/").c_str());
+
+	h_width_res->Draw("");
+	latex.SetTextFont(63);
+	latex.SetTextSize(31);
+	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.SetTextFont(53);
+	latex.SetTextSize(22);
+	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
+	canv->SaveAs(("../img/"+expTag+"_MatchedClusters_width_res.pdf").c_str());
+	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_width_res.pdf /tmp/").c_str());
+
+	h_charge_res->Draw("");
+	latex.SetTextFont(63);
+	latex.SetTextSize(31);
+	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.SetTextFont(53);
+	latex.SetTextSize(22);
+	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
+	canv->SaveAs(("../img/"+expTag+"_MatchedClusters_charge_res.pdf").c_str());
+	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_charge_res.pdf /tmp/").c_str());
+
+	h_barycenter_res->Draw("");
+	latex.SetTextFont(63);
+	latex.SetTextSize(31);
+	latex.DrawLatexNDC(0.61,0.94,"CMS");
+	latex.SetTextFont(53);
+	latex.SetTextSize(22);
+	latex.DrawLatexNDC(0.73,0.94,"(preliminary)");
+	canv->SaveAs(("../img/"+expTag+"_MatchedClusters_barycenter_res.pdf").c_str());
+	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_barycenter_res.pdf /tmp/").c_str());
 
 	ofstream unmatched_scs_txt;
 	unmatched_scs_txt.open(Form("log/%s_unmatched_scs.txt",expTag.c_str()));
