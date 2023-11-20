@@ -282,7 +282,7 @@ int main(int argc, char const *argv[])
 	TDirectoryFile* _4  	= (TDirectoryFile*) f4->Get("sep19_3_dump_deadStrips");
 	TTree* offlineDeadStripTree= (TTree*) _4->Get("deadStripTree");
 
-	const static int nMax = 6000000;
+	const static int nMax = 5000;
 	////// for rawprime
 	unsigned int rp_event;
 	int rp_run;
