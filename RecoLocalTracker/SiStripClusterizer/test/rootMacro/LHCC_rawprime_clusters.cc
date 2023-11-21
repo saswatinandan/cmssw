@@ -425,20 +425,20 @@ int main(int argc, char const *argv[])
 	                                    50, 0., 50. );
 	TH1F * h_charge_tot_sc     = new TH1F( "RAW", //"(offline) raw cluster", 
 	                                    "; charge; yield",  
-	                                    100, 0., 700. );
+	                                    88, 0., 704. );
 	TH1F * h_barycenter_tot_sc = new TH1F( "RAW", //"(offline) raw cluster", 
 	                                    "; barycenter; yield",  
-	                                    100, 0., 950. );
+	                                    950, 0., 950. );
 
 	TH1F * h_size_tot_ac      = new TH1F( "RAW'", //"(online) raw' cluster", 
 	                                    "; size; yield",  
 	                                    50, 0., 50. );
 	TH1F * h_charge_tot_ac     = new TH1F( "RAW'", //"(online) raw' cluster", 
 	                                    "; charge; yield",  
-	                                    100, 0., 700. );
+	                                    88, 0., 704. );
 	TH1F * h_barycenter_tot_ac = new TH1F( "RAW'", //"(online) raw' cluster", 
 	                                    "; barycenter; yield",  
-	                                    100, 0., 950. );
+	                                    950, 0., 950. );
 
 
 
@@ -568,7 +568,7 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.63,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.48,0.945,"PbPb #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_size.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_TotalClusters_size.pdf /tmp/").c_str());
 
@@ -586,7 +586,7 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.63,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.48,0.945,"PbPb #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_charge.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_TotalClusters_charge.pdf /tmp/").c_str());
 
@@ -604,7 +604,7 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.63,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.48,0.945,"PbPb #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_barycenter.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_TotalClusters_barycenter.pdf /tmp/").c_str());
 	
@@ -734,12 +734,12 @@ int main(int argc, char const *argv[])
 	                                    50, 0., 50. );
 	TH2F * h_charge     = new TH2F( "charge", 
 	                                    "; RAW SiStripCluster charge; RAW' ApproxCluster charge",  
-	                                    100, 0., 700.,
-	                                    100, 0., 700. );
+	                                    88, 0., 704.,
+	                                    88, 0., 704. );
 	TH2F * h_barycenter = new TH2F( "barycenter", 
 	                                    "; RAW SiStripCluster barycenter; RAW' ApproxCluster barycenter",  
-	                                    100, 0., 950.,
-	                                    100, 0., 950. );
+	                                    192, 0., 768.,
+	                                    192, 0., 768. );
 	TH2F * h_barycenter_vs_charge = new TH2F( "barycenter_vs_charge", 
 	                                    "; #Delta barycenter (RAW'-RAW); #Delta charge (RAW'-RAW)",  
 	                                    100, -2., 2.,
@@ -824,7 +824,7 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.48,0.945,"PbPb #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_size_scat.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_size_scat.pdf /tmp/").c_str());
 
@@ -837,7 +837,7 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.48,0.945,"PbPb #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_charge_scat.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_charge_scat.pdf /tmp/").c_str());
 
@@ -850,7 +850,7 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.48,0.945,"PbPb #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_barycenter_scat.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_barycenter_scat.pdf /tmp/").c_str());
 
@@ -863,7 +863,7 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.48,0.945,"PbPb #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_del_barycenter_del_charge_scat.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_del_barycenter_del_charge_scat.pdf /tmp/").c_str());
 
@@ -876,7 +876,7 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.48,0.945,"PbPb #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	
 	latex.SetTextFont(43);
 	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_size_res->GetMean()));
@@ -893,7 +893,7 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.48,0.945,"PbPb #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	latex.SetTextFont(43);
 	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_charge_res->GetMean()));
 	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_charge_res->GetStdDev()));
@@ -909,7 +909,7 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.48,0.945,"PbPb #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	latex.SetTextFont(43);
 	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_barycenter_res->GetMean()));
 	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_barycenter_res->GetStdDev()));
