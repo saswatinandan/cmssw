@@ -179,6 +179,25 @@ struct test{
 			f1name = "/eos/cms/store/group/phys_heavyions/yuchenc/TrackingEffTables2022PbPbRun/run375790_HIPhysicsRawPrime0.txt";
 			f2name = "/afs/cern.ch/user/y/yuchenc/tracking/CMSSW_13_2_5_patch1/src/HITrackingStudies/HITrackingStudies/test/tracking_ntuple/LHCC_run375790_HIMinimumBias0.root";
 			matchtxt = "lumi_run_event_txt/matching_rows_check_run375790.txt";
+		} else if (in_expTag=="LHCC_run375820_selected") 
+		{
+			cout << "run375820 (selected)" << endl;
+			f1name = "/eos/cms/store/group/phys_heavyions/yuchenc/TrackingEffTables2022PbPbRun/run375820_HIPhysicsRawPrime0_selected.txt";
+			f2name = "/afs/cern.ch/user/y/yuchenc/tracking/CMSSW_13_2_5_patch1/src/HITrackingStudies/HITrackingStudies/test/tracking_ntuple/LHCC_run375820_HIMinimumBias0_selected.root";
+			matchtxt = "lumi_run_event_txt/matching_rows_check_run375820.txt";
+		} else if (in_expTag=="LHCC_run375790_selected") 
+		{
+			cout << "run375790 (selected)" << endl;
+			f1name = "/eos/cms/store/group/phys_heavyions/yuchenc/TrackingEffTables2022PbPbRun/run375790_HIPhysicsRawPrime0_selected.txt";
+			f2name = "/afs/cern.ch/user/y/yuchenc/tracking/CMSSW_13_2_5_patch1/src/HITrackingStudies/HITrackingStudies/test/tracking_ntuple/LHCC_run375790_HIMinimumBias0_selected.root";
+			matchtxt = "lumi_run_event_txt/matching_rows_check_run375790.txt";
+		} else if (in_expTag=="LHCC_run375790_run375820_run375823_selected") 
+		{
+			cout << "run375790, run375820, run375823 (selected)" << endl;
+			f1name = "/eos/cms/store/group/phys_heavyions/yuchenc/TrackingEffTables2022PbPbRun/run375790_run375820_run375823_HIPhysicsRawPrime0_selected.txt";
+			f2name = "/afs/cern.ch/user/y/yuchenc/tracking/CMSSW_13_2_5_patch1/src/HITrackingStudies/HITrackingStudies/test/tracking_ntuple/LHCC_run375790_run375820_run375823_HIMinimumBias0_selected.root";
+			// hadd /afs/cern.ch/user/y/yuchenc/tracking/CMSSW_13_2_5_patch1/src/HITrackingStudies/HITrackingStudies/test/tracking_ntuple/LHCC_run375790_run375820_run375823_HIMinimumBias0_selected.root /afs/cern.ch/user/y/yuchenc/tracking/CMSSW_13_2_5_patch1/src/HITrackingStudies/HITrackingStudies/test/tracking_ntuple/LHCC_run375790_HIMinimumBias0_selected.root /afs/cern.ch/user/y/yuchenc/tracking/CMSSW_13_2_5_patch1/src/HITrackingStudies/HITrackingStudies/test/tracking_ntuple/LHCC_run375820_HIMinimumBias0_selected.root /afs/cern.ch/user/y/yuchenc/tracking/CMSSW_13_2_5_patch1/src/HITrackingStudies/HITrackingStudies/test/tracking_ntuple/LHCC_run375823_HIMinimumBias0_selected.root
+			matchtxt = "lumi_run_event_txt/matching_rows_check_run375790_run375820_run375823.txt";
 		}
 	}
 };
@@ -190,6 +209,20 @@ float cut_dxySig = 3.0;
 float cut_ptRes = 0.10;
 float cut_chi2 = 0.18;
 float cut_nhits = 11;
+
+
+void Divide_w_sameDsets(TH1F* num, TH1F* denom, TH1F* ratio)
+{
+	for (int _x = 1; _x < num->GetNbinsX()+1; ++_x)
+	{
+		float _r 	= num->GetBinContent(_x)/denom->GetBinContent(_x);
+		float _n_relErr = TMath::Abs(   num->GetBinError(_x)/  num->GetBinContent(_x) );
+		float _d_relErr = TMath::Abs( denom->GetBinError(_x)/denom->GetBinContent(_x) );
+		float _r_err 	= TMath::Abs(_r) * ( (_n_relErr > _d_relErr) ? _n_relErr : _d_relErr  );
+		ratio->SetBinContent(_x, _r);
+		ratio->SetBinError(_x, _r_err);
+	}
+}
 
 int main(int argc, char const *argv[])
 {
@@ -342,7 +375,7 @@ int main(int argc, char const *argv[])
 
 	// Define custom bin edges
 	const int numBins = 7;
-	Double_t customBins[numBins + 1] = {0.1, 0.5, 1.0, 3.0, 7.0, 10.0, 50.0, 100.0};
+	Double_t customBins[numBins + 1] = {0.1, 0.5, 1.0, 2.0, 6.0, 9.0, 30.0, 100.0};
 
 	TH1F * h_pt_tot_r      = new TH1F( "RAW",
 	                                    "; track p_{T} [GeV/#it{c}]; normalized distributions",  
@@ -352,7 +385,7 @@ int main(int argc, char const *argv[])
 	                                    30, -5., 5. );
 	TH1F * h_dcazres_tot_r = new TH1F( "RAW",
 	                                    "; track DCA z/#sigma; normalized distributions", // (0.5 < p_{T} < 0.9 [GeV/#it{c}]); normalized distributions",  
-	                                    30, -5., 5. );
+	                                    30, -3., 3. );
 	TH2F * h_etaphi_r = new TH2F( "h_etaphi_r", 
 	                                    "RAW\'/RAW; track #eta; track #phi",  
 	                                    16, -2.4, 2.4,
@@ -408,9 +441,9 @@ int main(int argc, char const *argv[])
 	                                    30, -5., 5. );
 	TH1F * h_dcazres_tot_rp = new TH1F( "RAW'",
 	                                    "; track DCA z/#sigma; normalized distributions", // (0.5 < p_{T} < 0.9 [GeV/#it{c}]); normalized distributions",  
-	                                    30, -5., 5. );
-	TH2F * h_etaphi_rp = new TH2F( "h_etaphi_rp", 
-	                                    "RAW\'/RAW; track #eta; track #phi",  
+	                                    30, -3., 3. );
+	TH2F * h_etaphi_rp = new TH2F( "h_etaphi_rp",
+					    "RAW\'/RAW; track #eta; track #phi",
 	                                    16, -2.4, 2.4,
 	                                    30, -TMath::Pi(), TMath::Pi() );
 	TH1F * h_eta_rp = new TH1F( "h_eta_rp", 
@@ -637,15 +670,18 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.63,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.48,0.945,"PbPb #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_pt.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_pt.pdf /tmp/").c_str());
 
+	canvSingle0->GetPad(0)->SetMargin (0.18, 0.20, 0.14, 0.07);
 	TH1F* h_pt_tot_ratio = (TH1F*) h_pt_tot_rp->Clone("h_pt_tot_rp");
+	h_pt_tot_ratio->GetXaxis()->SetTitleOffset(1.4);
 	h_pt_tot_rp->SetMarkerColor(46);
 	h_pt_tot_ratio->GetYaxis()->SetTitle("RAW\'/RAW");
 	h_pt_tot_ratio->GetYaxis()->SetRangeUser(0.90,1.10);
-	h_pt_tot_ratio->Divide(h_pt_tot_r);
+	Divide_w_sameDsets(h_pt_tot_rp, h_pt_tot_r, h_pt_tot_ratio);
+	// h_pt_tot_ratio->Divide(h_pt_tot_r);
 	h_pt_tot_ratio->Draw("e");
 	h_pt_tot_ratio->Print("all");
 	gStyle->SetGridStyle(3);  // Dashed grid lines
@@ -653,16 +689,17 @@ int main(int argc, char const *argv[])
 	gPad->SetGridy();
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.53,0.84,"CMS");
+	latex.DrawLatexNDC(0.43,0.84,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.63,0.84,"Preliminary");
+	latex.DrawLatexNDC(0.53,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.48,0.945,"PbPb #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_ptRatio.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_ptRatio.pdf /tmp/").c_str());
 
+	canvSingle0->GetPad(0)->SetMargin (0.18, 0.20, 0.12, 0.07);
 	gPad->SetLogx(0);
 	h_dcaxyres_tot_rp->Draw("hist");
 	h_dcaxyres_tot_r->Draw("hist same");
@@ -677,7 +714,7 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.63,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.48,0.945,"PbPb #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_dcaxyres.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_dcaxyres.pdf /tmp/").c_str());
 
@@ -685,7 +722,8 @@ int main(int argc, char const *argv[])
 	h_dcaxyres_tot_rp->SetMarkerColor(46);
 	h_dcaxyres_tot_ratio->GetYaxis()->SetTitle("RAW\'/RAW");
 	h_dcaxyres_tot_ratio->GetYaxis()->SetRangeUser(0.95,1.05);
-	h_dcaxyres_tot_ratio->Divide(h_dcaxyres_tot_r);
+	Divide_w_sameDsets(h_dcaxyres_tot_rp, h_dcaxyres_tot_r, h_dcaxyres_tot_ratio);
+	// h_dcaxyres_tot_ratio->Divide(h_dcaxyres_tot_r);
 	h_dcaxyres_tot_ratio->Draw("e");
 	gPad->SetGridy();
 	latex.SetTextFont(63);
@@ -696,7 +734,7 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.63,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.48,0.945,"PbPb #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_dcaxyresRatio.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_dcaxyresRatio.pdf /tmp/").c_str());
 
@@ -713,7 +751,7 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.63,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.48,0.945,"PbPb #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_dcazres.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_dcazres.pdf /tmp/").c_str());
 	
@@ -721,7 +759,8 @@ int main(int argc, char const *argv[])
 	h_dcazres_tot_rp->SetMarkerColor(46);
 	h_dcazres_tot_ratio->GetYaxis()->SetTitle("RAW\'/RAW");
 	h_dcazres_tot_ratio->GetYaxis()->SetRangeUser(0.95,1.05);
-	h_dcazres_tot_ratio->Divide(h_dcazres_tot_r);
+	Divide_w_sameDsets(h_dcazres_tot_rp, h_dcazres_tot_r, h_dcazres_tot_ratio);
+	// h_dcazres_tot_ratio->Divide(h_dcazres_tot_r);
 	h_dcazres_tot_ratio->Draw("e");
 	gPad->SetGridy();
 	latex.SetTextFont(63);
@@ -732,7 +771,7 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.63,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.48,0.945,"PbPb #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_dcazresRatio.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_dcazresRatio.pdf /tmp/").c_str());
 
@@ -757,7 +796,7 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.48,0.945,"PbPb #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle->SaveAs(("../img/"+expTag+"_etaphi.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_etaphi.pdf /tmp/").c_str());
 
