@@ -12,6 +12,9 @@ LHCC_rawprime_tracks.o: LHCC_rawprime_tracks.cc
 filterMatchedEvents.o: filterMatchedEvents.cc
 	g++ `root-config --cflags --glibs` -O3 filterMatchedEvents.cc -o filterMatchedEvents.o
 
+filterMatchedEvents_singleFile.o: filterMatchedEvents_singleFile.cc
+	g++ `root-config --cflags --glibs` -O3 filterMatchedEvents_singleFile.cc -o filterMatchedEvents_singleFile.o
+
 plotClusterShape.o: plotClusterShape.cc
 	g++ `root-config --cflags --glibs` -O3 plotClusterShape.cc -o plotClusterShape.o
 
