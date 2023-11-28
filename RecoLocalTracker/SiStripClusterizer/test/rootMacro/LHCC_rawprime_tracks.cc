@@ -69,7 +69,7 @@ void PlotStyle(T* h)
     float y_title_size    = 28;
 
     float x_title_offset  = 1.5;
-    float y_title_offset  = 2.1;
+    float y_title_offset  = 2.2;
 
     float label_size      = 28;
     float label_offset    = 0.013;
@@ -99,7 +99,7 @@ void PlotStyle(T* h)
 	h->GetXaxis()->SetLabelSize    (label_size);
 	h->GetXaxis()->SetNdivisions(508);
 
-	h->GetZaxis()->SetTitleOffset  (1.2);
+	h->GetZaxis()->SetTitleOffset  (1.8);
 	h->GetZaxis()->CenterTitle();
 	h->GetZaxis()->SetTitleSize    (x_title_size);
 	h->GetZaxis()->SetLabelOffset  (label_offset);
@@ -674,11 +674,11 @@ int main(int argc, char const *argv[])
 	canvSingle0->SaveAs(("../img/"+expTag+"_pt.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_pt.pdf /tmp/").c_str());
 
-	canvSingle0->GetPad(0)->SetMargin (0.18, 0.20, 0.14, 0.07);
+	canvSingle0->GetPad(0)->SetMargin (0.22, 0.16, 0.14, 0.07);
 	TH1F* h_pt_tot_ratio = (TH1F*) h_pt_tot_rp->Clone("h_pt_tot_rp");
 	h_pt_tot_ratio->GetXaxis()->SetTitleOffset(1.4);
 	h_pt_tot_rp->SetMarkerColor(46);
-	h_pt_tot_ratio->GetYaxis()->SetTitle("RAW\'/RAW");
+	h_pt_tot_ratio->GetYaxis()->SetTitle("#frac{(N_{track})_{RAW\'}}{(N_{track})_{RAW}}");
 	h_pt_tot_ratio->GetYaxis()->SetRangeUser(0.90,1.10);
 	Divide_w_sameDsets(h_pt_tot_rp, h_pt_tot_r, h_pt_tot_ratio);
 	// h_pt_tot_ratio->Divide(h_pt_tot_r);
@@ -689,13 +689,13 @@ int main(int argc, char const *argv[])
 	gPad->SetGridy();
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.43,0.84,"CMS");
+	latex.DrawLatexNDC(0.26,0.84,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.53,0.84,"Preliminary");
+	latex.DrawLatexNDC(0.36,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.37,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_ptRatio.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_ptRatio.pdf /tmp/").c_str());
 
@@ -718,9 +718,10 @@ int main(int argc, char const *argv[])
 	canvSingle0->SaveAs(("../img/"+expTag+"_dcaxyres.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_dcaxyres.pdf /tmp/").c_str());
 
+	canvSingle0->GetPad(0)->SetMargin (0.22, 0.16, 0.14, 0.07);
 	TH1F* h_dcaxyres_tot_ratio = (TH1F*) h_dcaxyres_tot_rp->Clone("h_dcaxyres_tot_rp");
 	h_dcaxyres_tot_rp->SetMarkerColor(46);
-	h_dcaxyres_tot_ratio->GetYaxis()->SetTitle("RAW\'/RAW");
+	h_dcaxyres_tot_ratio->GetYaxis()->SetTitle("#frac{(N_{track})_{RAW\'}}{(N_{track})_{RAW}}");
 	h_dcaxyres_tot_ratio->GetYaxis()->SetRangeUser(0.95,1.05);
 	Divide_w_sameDsets(h_dcaxyres_tot_rp, h_dcaxyres_tot_r, h_dcaxyres_tot_ratio);
 	// h_dcaxyres_tot_ratio->Divide(h_dcaxyres_tot_r);
@@ -728,16 +729,17 @@ int main(int argc, char const *argv[])
 	gPad->SetGridy();
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.53,0.84,"CMS");
+	latex.DrawLatexNDC(0.26,0.84,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.63,0.84,"Preliminary");
+	latex.DrawLatexNDC(0.36,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.37,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_dcaxyresRatio.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_dcaxyresRatio.pdf /tmp/").c_str());
 
+	canvSingle0->GetPad(0)->SetMargin (0.18, 0.20, 0.12, 0.07);
 	h_dcazres_tot_rp->Draw("hist");
 	h_dcazres_tot_r->Draw("hist same");
 	h_dcazres_tot_rp->Draw("hist same");
@@ -755,9 +757,10 @@ int main(int argc, char const *argv[])
 	canvSingle0->SaveAs(("../img/"+expTag+"_dcazres.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_dcazres.pdf /tmp/").c_str());
 	
+	canvSingle0->GetPad(0)->SetMargin (0.22, 0.16, 0.14, 0.07);
 	TH1F* h_dcazres_tot_ratio = (TH1F*) h_dcazres_tot_rp->Clone("h_dcazres_tot_rp");
 	h_dcazres_tot_rp->SetMarkerColor(46);
-	h_dcazres_tot_ratio->GetYaxis()->SetTitle("RAW\'/RAW");
+	h_dcazres_tot_ratio->GetYaxis()->SetTitle("#frac{(N_{track})_{RAW\'}}{(N_{track})_{RAW}}");
 	h_dcazres_tot_ratio->GetYaxis()->SetRangeUser(0.95,1.05);
 	Divide_w_sameDsets(h_dcazres_tot_rp, h_dcazres_tot_r, h_dcazres_tot_ratio);
 	// h_dcazres_tot_ratio->Divide(h_dcazres_tot_r);
@@ -765,13 +768,13 @@ int main(int argc, char const *argv[])
 	gPad->SetGridy();
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.53,0.84,"CMS");
+	latex.DrawLatexNDC(0.26,0.84,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.63,0.84,"Preliminary");
+	latex.DrawLatexNDC(0.36,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
-	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.37,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_dcazresRatio.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_dcazresRatio.pdf /tmp/").c_str());
 
@@ -779,21 +782,24 @@ int main(int argc, char const *argv[])
 
 	TCanvas *canvSingle = new TCanvas("canvSingle", "canvSingle", 700, 600);
 	gErrorIgnoreLevel = kWarning;
-	canvSingle->GetPad(0)->SetMargin (0.18, 0.20, 0.12, 0.07);
+	canvSingle->GetPad(0)->SetMargin (0.15, 0.23, 0.12, 0.07);
 	canvSingle->cd();
 	h_etaphi_rp->Divide(h_etaphi_r);
+	h_etaphi_rp->GetYaxis()->SetTitleOffset(1.6);
+	h_etaphi_rp->GetZaxis()->SetTitleOffset(1.8);
+	h_etaphi_rp->GetZaxis()->SetTitle("#frac{(N_{track})_{RAW\'}}{(N_{track})_{RAW}}");
 	h_etaphi_rp->Draw("COLZ");
-	leg0 = new TLegend(.15, .7, .4, .8);
-	leg0->AddEntry((TObject*) 0, "RAW\'/RAW", "");
 	h_etaphi_rp->GetZaxis()->SetRangeUser(0.95,1.05);
-	formatLegend(leg0);
-	leg0->Draw();
+	// leg0 = new TLegend(.15, .7, .4, .8);
+	// leg0->AddEntry((TObject*) 0, "#frac{(N_{track})_{RAW\'}}{(N_{track})_{RAW}}", "");
+	// formatLegend(leg0);
+	// leg0->Draw();
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.21,0.84,"CMS");
+	latex.DrawLatexNDC(0.19,0.84,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
+	latex.DrawLatexNDC(0.29,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
