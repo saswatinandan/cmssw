@@ -551,6 +551,9 @@ int main(int argc, char const *argv[])
 	gErrorIgnoreLevel = kWarning;
 	canvSingle0->GetPad(0)->SetMargin (0.18, 0.20, 0.12, 0.07);
 	
+	h_size_tot_ac->GetYaxis()->SetRangeUser(
+		h_size_tot_ac->GetYaxis()->GetXmin(),
+		h_size_tot_ac->GetMaximum()*1.2 );
 	h_size_tot_ac->Draw("");
 	h_size_tot_sc->Draw("same");
 	h_size_tot_ac->Draw("same");
@@ -562,16 +565,19 @@ int main(int argc, char const *argv[])
 	leg0->Draw();
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.53,0.84,"CMS");
+	latex.DrawLatexNDC(0.22,0.84,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.63,0.84,"Preliminary");
+	latex.DrawLatexNDC(0.32,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_size.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_TotalClusters_size.pdf /tmp/").c_str());
 
+	h_charge_tot_ac->GetYaxis()->SetRangeUser(
+		h_charge_tot_ac->GetYaxis()->GetXmin(),
+		h_charge_tot_ac->GetMaximum()*1.2 );
 	h_charge_tot_ac->Draw("");
 	h_charge_tot_sc->Draw("same");
 	h_charge_tot_ac->Draw("same");
@@ -580,10 +586,10 @@ int main(int argc, char const *argv[])
 	leg0->Draw();
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.53,0.84,"CMS");
+	latex.DrawLatexNDC(0.22,0.84,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.63,0.84,"Preliminary");
+	latex.DrawLatexNDC(0.32,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
@@ -598,10 +604,10 @@ int main(int argc, char const *argv[])
 	leg0->Draw();
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.53,0.84,"CMS");
+	latex.DrawLatexNDC(0.22,0.84,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.63,0.84,"Preliminary");
+	latex.DrawLatexNDC(0.32,0.84,"Preliminary");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
@@ -815,6 +821,8 @@ int main(int argc, char const *argv[])
 	gErrorIgnoreLevel = kWarning;
 	canvSingle->GetPad(0)->SetMargin (0.18, 0.20, 0.12, 0.07);
 	canvSingle->cd();
+	h_size->GetZaxis()->SetTitleOffset(1.8);
+	h_size->GetZaxis()->SetTitle("number of clusters");
 	h_size->Draw("COLZ");
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
@@ -828,6 +836,8 @@ int main(int argc, char const *argv[])
 	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_size_scat.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_size_scat.pdf /tmp/").c_str());
 
+	h_charge->GetZaxis()->SetTitleOffset(1.8);
+	h_charge->GetZaxis()->SetTitle("number of clusters");
 	h_charge->Draw("COLZ");
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
@@ -841,6 +851,8 @@ int main(int argc, char const *argv[])
 	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_charge_scat.pdf").c_str());
 	system(("dropbox_uploader.sh upload ../img/"+expTag+"_MatchedClusters_charge_scat.pdf /tmp/").c_str());
 
+	h_barycenter->GetZaxis()->SetTitleOffset(1.8);
+	h_barycenter->GetZaxis()->SetTitle("number of clusters");
 	h_barycenter->Draw("COLZ");
 	latex.SetTextFont(63);
 	latex.SetTextSize(31);
