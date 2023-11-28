@@ -172,6 +172,12 @@ struct test{
 			f1name = "/eos/cms/store/group/phys_heavyions/yuchenc/TrackingEffTables2022PbPbRun/run375790_HIPhysicsRawPrime0.txt";
 			f2name = "/afs/cern.ch/user/y/yuchenc/tracking/CMSSW_13_2_5_patch1/src/HITrackingStudies/HITrackingStudies/test/tracking_ntuple/LHCC_run375790_HIMinimumBias0.root";
 			matchtxt = "lumi_run_event_txt/matching_rows_check_run375790.txt";
+		} else if (in_expTag=="LHCC_run375790_run375820_run375823") 
+		{
+			cout << "run375790, run375820, run375823" << endl;
+			f1name = "/eos/cms/store/group/phys_heavyions/yuchenc/TrackingEffTables2022PbPbRun/run375790_run375820_run375823_HIPhysicsRawPrime0.txt";
+			f2name = "/afs/cern.ch/user/y/yuchenc/tracking/CMSSW_13_2_5_patch1/src/HITrackingStudies/HITrackingStudies/test/tracking_ntuple/LHCC_run375790_run375820_run375823_HIMinimumBias0.root";
+			matchtxt = "lumi_run_event_txt/matching_rows_check_run375790_run375820_run375823.txt";
 		}
 	}
 };
@@ -281,6 +287,7 @@ int main(int argc, char const *argv[])
 	for (Long64_t entry = 0; entry < trackTree_rp->GetEntries(); ++entry) 
 	{
 		trackTree_rp->GetEntry(entry);
+		if (rp_nTrk==0) continue;
 		if (!evtMatchedMap[rp_run][rp_lumi][rp_event]) continue;
 		selectedTree_rp->Fill();
 	}
@@ -301,6 +308,7 @@ int main(int argc, char const *argv[])
 	for (Long64_t entry = 0; entry < trackTree_r->GetEntries(); ++entry) 
 	{
 		trackTree_r->GetEntry(entry);
+		if (r_nTrk==0) continue;
 		if (!evtMatchedMap[r_run][r_lumi][r_event]) continue;
 		selectedTree_r->Fill();
 	}
