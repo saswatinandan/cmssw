@@ -789,7 +789,16 @@ int LHCC_rawprime_clusters()
 	matched_sc2ac_txt.open(Form("log/%s_matched_sc2ac.txt", expTag.c_str()));
 	matched_sc2ac_overflow_txt.open(Form("log/%s_matched_sc2ac_overflow.txt", expTag.c_str()));
 	matched_sc2ac_txt << "event detId sc_idx barycenter size charge firstStrip endStrip ac_idx barycenter size charge firstStrip endStrip\n";
-	matched_sc2ac_overflow_txt << "charge_withovrflow event detId sc_idx firstStrip endStrip ac_idx firstStrip endStrip\n";
+	
+	TH1F * h_dfirstStrip = new TH1F("dfirstStrip", "delta_firstStrip; delta_firstStrip; yield", 10, -0.5, 9.5);
+        TH1F * h_dendStrip = new TH1F("dendStrip", "delta_endStrip; delta_endStrip; yield", 10, -0.5, 9.5);
+       
+	TH1F * h_size_res_overflow      = new TH1F( "size_res_overflow",
+                                            "for matched cluster with overflowbin; size (RAW'-RAW)/RAW; yield",
+                                            50, -.1, .1);
+        TH1F * h_barycenter_res_overflow = new TH1F( "barycenter_res_overflow",
+                                            "for matched cluster with overflowbin; barycenter RAW'-RAW; yield",
+                                            50, -.1, .1);
 	for (auto& idx_pair: matched_sc2ac) 
 	{
 		// printf("[Debug] approxCluster %p, SiStripCluster %p\n", ac_ptr, sc_ptr);
@@ -811,102 +820,53 @@ int LHCC_rawprime_clusters()
 						  << idx_pair.first << " " << r_barycenter << " " << r_size << " " << r_charge << " " << r_firstStrip << " " << r_endStrip << " "
 						  << idx_pair.second << " " << rp_barycenter << " " << rp_size << " " << rp_charge << " " << rp_firstStrip << " " << rp_endStrip << "\n";
 		if (charge_withovrflow) {
-			matched_sc2ac_overflow_txt << idx_pair.first << " " << r_firstStrip << " " << r_endStrip << " " << idx_pair.second << " " << rp_firstStrip << " " << rp_endStrip << "\n";
+			h_dfirstStrip->Fill(abs(r_firstStrip-rp_firstStrip));
+                        h_dendStrip->Fill(abs(r_endStrip-rp_endStrip));
 
+			h_size_res_overflow    ->Fill( (rp_size - rp_size)/((float) r_size)  );
+                        h_barycenter_res_overflow->Fill( r_barycenter - rp_barycenter );
 		}
 	}
 	matched_sc2ac_txt.close();
-	matched_sc2ac_overflow_txt.close();
-
         
-	 TH1F * h_r_firstStrip = new TH1F("r_firstStrip", "r_firstStrip; firstStrip; yield", 800, 0, 800);
-         TH1F * h_rp_firstStrip = new TH1F("rp_firstStrip", "rp_firstStrip; firstStrip; yield", 800, 0, 800);
-	 TH1F * h_r_endStrip = new TH1F("r_endStrip", "r_endStrip; lastStrip; yield", 800, 0, 800);
-         TH1F * h_rp_endStrip = new TH1F("rp_endStrip", "rp_endStrip; lastStrip; yield", 800, 0, 800);
+        TCanvas *canvSingle = new TCanvas("canvSingle", "canvSingle", 700, 600);
+        gStyle->SetOptTitle(0);
+        gErrorIgnoreLevel = kWarning;
+        canvSingle->GetPad(0)->SetMargin (0.18, 0.20, 0.12, 0.07);
+        canvSingle->cd();
 
-	  printf("Reading: %s", Form("log/%s_matched_sc2ac_overflow.txt", expTag.c_str()));
-		std::ifstream inputFile(Form("log/%s_matched_sc2ac_overflow.txt", expTag.c_str()));
+	PlotStyle(h_dfirstStrip); h_dfirstStrip->SetLineColor(46);
+        h_dfirstStrip->Draw("");
+        latex.SetTextFont(63);
+        latex.SetTextSize(31);
+        latex.DrawLatexNDC(0.22,0.84,"CMS");
+        latex.SetTextFont(53);
+        latex.SetTextSize(22);
+        latex.DrawLatexNDC(0.32,0.84,"Preliminary");
+        latex.SetTextFont(43);
+	canvSingle0->SaveAs(("../img/"+expTag+"_overflowfirstStrip.pdf").c_str());
 
-		// Check if the file is successfully opened
-		if (!inputFile.is_open()) {
-			std::cerr << "Error opening the file." << std::endl;
-			return 1; // Exit with an error code
-		}
+	PlotStyle(h_dendStrip); h_dendStrip->SetLineColor(46);
+        h_dendStrip->Draw("");
+        latex.SetTextFont(63);
+        latex.SetTextSize(31);
+        latex.DrawLatexNDC(0.22,0.84,"CMS");
+        latex.SetTextFont(53);
+        latex.SetTextSize(22);
+        latex.DrawLatexNDC(0.32,0.84,"Preliminary");
+        latex.SetTextFont(43);
+        canvSingle0->SaveAs(("../img/"+expTag+"_overflowlastStrip.pdf").c_str());
+       
+        PlotStyle(h_size_res_overflow);      h_size_res_overflow->Draw("COLZ");
+        canvSingle0->SaveAs(("../img/"+expTag+"_overflowsize.pdf").c_str());
 
-		// Read the file line by line
-		std::string line;
-		while (std::getline(inputFile, line)) {
-			// Create a string stream from the line
-			std::istringstream iss(line);
+        PlotStyle(h_barycenter_res_overflow);      h_barycenter_res_overflow->Draw("COLZ");
+        canvSingle0->SaveAs(("../img/"+expTag+"_overflowbarycenter.pdf").c_str());
 
-			// Variables to store data
-			int _r_idx;
-			int _r_firstStrip;
-			int _r_endStrip;
-			int _rp_idx;
-                        int _rp_firstStrip;
-                        int _rp_endStrip;
-
-			// Read data from the stringstream
-			if (iss >> _r_idx >> _r_firstStrip >> _r_endStrip >> _rp_idx >> _rp_firstStrip >> _rp_endStrip) {
-                             h_r_firstStrip->Fill(_r_firstStrip);
-			     h_rp_firstStrip->Fill(_rp_firstStrip);
-			     h_r_endStrip->Fill(_r_endStrip);
-                             h_rp_endStrip->Fill(_rp_endStrip);
-			}
-	        }
-
-		PlotStyle(h_rp_firstStrip); h_rp_firstStrip->SetLineColor(46);
-		PlotStyle(h_r_firstStrip); h_r_firstStrip->SetLineWidth(0); h_r_firstStrip->SetFillColorAlpha(31, 0.6); h_r_firstStrip->SetLineColorAlpha(31, 0.6);
-
-                h_r_firstStrip->GetYaxis()->SetRangeUser(
-                h_r_firstStrip->GetYaxis()->GetXmin(),
-                h_r_firstStrip->GetMaximum()*1.2 );
-                h_r_firstStrip->Draw("");
-                h_rp_firstStrip->Draw("same");
-                leg0 = new TLegend(.62, .6, .87, .8);
-                leg0->AddEntry(h_r_firstStrip, "RAW", "f");
-                leg0->AddEntry(h_rp_firstStrip, "RAW\'", "l");
-                // leg0 = canvSingle0->GetPad(0)->BuildLegend(.62, .6, .87, .8);
-                formatLegend(leg0);
-                leg0->Draw();
-                latex.SetTextFont(63);
-                latex.SetTextSize(31);
-                latex.DrawLatexNDC(0.22,0.84,"CMS");
-                latex.SetTextFont(53);
-                latex.SetTextSize(22);
-                latex.DrawLatexNDC(0.32,0.84,"Preliminary");
-                latex.SetTextFont(43);
-		canvSingle0->SaveAs(("../img/"+expTag+"_overflowfirstStrip.pdf").c_str());
-
-		PlotStyle(h_rp_endStrip); h_rp_endStrip->SetLineColor(46);
-                PlotStyle(h_r_endStrip); h_r_endStrip->SetLineWidth(0); h_r_endStrip->SetFillColorAlpha(31, 0.6); h_r_endStrip->SetLineColorAlpha(31, 0.6);
-
-                h_r_endStrip->GetYaxis()->SetRangeUser(
-                h_r_endStrip->GetYaxis()->GetXmin(),
-                h_r_endStrip->GetMaximum()*1.2 );
-                h_r_endStrip->Draw("");
-                h_rp_endStrip->Draw("same");
-                leg0 = new TLegend(.62, .6, .87, .8);
-                leg0->AddEntry(h_r_endStrip, "RAW", "f");
-                leg0->AddEntry(h_rp_endStrip, "RAW\'", "l");
-                // leg0 = canvSingle0->GetPad(0)->BuildLegend(.62, .6, .87, .8);
-                formatLegend(leg0);
-                leg0->Draw();
-                latex.SetTextFont(63);
-                latex.SetTextSize(31);
-                latex.DrawLatexNDC(0.22,0.84,"CMS");
-                latex.SetTextFont(53);
-                latex.SetTextSize(22);
-                latex.DrawLatexNDC(0.32,0.84,"Preliminary");
-                latex.SetTextFont(43);
-                canvSingle0->SaveAs(("../img/"+expTag+"_overflowlastStrip.pdf").c_str());
-        
-	delete h_r_firstStrip;
-        delete h_rp_firstStrip;
-        delete h_r_endStrip;
-        delete h_rp_endStrip;
-
+	delete h_dfirstStrip;
+        delete h_dendStrip;
+	delete h_size_res_overflow;
+	delete h_barycenter_res_overflow;
 
         
 	TCanvas *canv = new TCanvas("canv", "canv", 700*4, 600*2);
@@ -936,11 +896,11 @@ int LHCC_rawprime_clusters()
 	delete canv;
 
 
-	TCanvas *canvSingle = new TCanvas("canvSingle", "canvSingle", 700, 600);
+	/*TCanvas *canvSingle = new TCanvas("canvSingle", "canvSingle", 700, 600);
 	gStyle->SetOptTitle(0);
 	gErrorIgnoreLevel = kWarning;
 	canvSingle->GetPad(0)->SetMargin (0.18, 0.20, 0.12, 0.07);
-	canvSingle->cd();
+	canvSingle->cd();*/
 	h_size->GetZaxis()->SetTitleOffset(1.8);
 	h_size->GetZaxis()->SetTitle("number of clusters");
 	h_size->Draw("COLZ");
