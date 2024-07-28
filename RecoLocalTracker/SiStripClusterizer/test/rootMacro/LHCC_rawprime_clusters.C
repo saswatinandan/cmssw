@@ -806,6 +806,12 @@ int LHCC_rawprime_clusters()
         TH2F * h_hitx = new TH2F("hitx", ";Raw hitX; Raw' hit_X", 400, -100., 100, 100, -100., 100.);
         TH2F * h_hity = new TH2F("hity", ";Raw hitY; Raw' hit_Y", 400, -100., 100, 100, -100., 100.);
 
+	TCanvas *canvSingle = new TCanvas("canvSingle", "canvSingle", 700, 600);
+        gStyle->SetOptTitle(0);
+        gErrorIgnoreLevel = kWarning;
+        canvSingle->GetPad(0)->SetMargin (0.18, 0.20, 0.12, 0.07);
+        canvSingle->cd();
+
 	for (auto& idx_pair: matched_sc2ac) 
 	{
 		// printf("[Debug] approxCluster %p, SiStripCluster %p\n", ac_ptr, sc_ptr);
@@ -836,6 +842,74 @@ int LHCC_rawprime_clusters()
 				h_hitx_overflow->Fill(r_hitX[i], rp_hitX[i]);
 				h_hity_overflow->Fill(r_hitY[i], rp_hitY[i]);
 			}
+		        map<int, cluster> r_map = r_dict[r_event][r_detId];
+			map<int, cluster> rp_map = rp_dict[rp_event][rp_detId];
+			assert((r_event == rp_event) && (r_detId == rp_detId));
+
+			for (auto& sc: r_map) {
+                           offlineClusterTree->GetEntry(sc.first);
+			   bool matched = false;
+			   TH1F * h_adc_matched(NULL); 
+			   TH1F * h_adc_unmatched(NULL);
+                           if (sc.first == idx_pair.first) {
+				   matched = true;
+				   h_adc_matched = new TH1F(Form("adc_matched_%d", idx_pair.first), Form("RAW_matched (%d-%d)",r_firstStrip, r_endStrip), 800,0.,800);
+			   }
+			   else {
+				  h_adc_unmatched = new TH1F(Form("adc_unmatched_%d-%d", idx_pair.first, sc.first), Form("RAW_matched (%d-%d)",r_firstStrip, r_endStrip), 800,0.,800);
+                           }
+			   for (uint16_t i=0; i < r_size; ++i) {
+                                if (matched) h_adc_matched->Fill(r_channel[i], r_adc[i]);
+				else h_adc_unmatched->Fill(r_channel[i], r_adc[i]);
+                           }
+			   if  (matched) {
+			     h_adc_matched->SetLineWidth(0);
+                             h_adc_matched->SetFillColorAlpha(31, 0.4);
+                             h_adc_matched->SetLineColorAlpha(31, 0.4);
+                             h_adc_matched->GetYaxis()->SetRangeUser(0, h_adc_matched->GetMaximum()*3);
+                             h_adc_matched->DrawClone("hist");
+			     delete h_adc_matched;
+			   }
+                           else {
+			     h_adc_unmatched->SetLineColor(46);
+			     h_adc_unmatched->DrawClone("hist same");
+			     delete h_adc_unmatched;
+			   }
+			}
+			canvSingle->SaveAs(Form("../img/%sRaw_overflow_matched_vs_unmatched_idx_%d.png",expTag.c_str(), idx_pair.first));
+			std::cout << "saving " << std::endl;
+
+			for (auto& c: rp_map) {
+                           onlineClusterTree->GetEntry(c.first);
+                           bool matched = false;
+                           TH1F * h_adc_matched(NULL);
+                           TH1F * h_adc_unmatched(NULL);
+                           if (c.first == idx_pair.second) {
+                                   matched = true;
+                                   h_adc_matched = new TH1F(Form("Raw'_adc_matched_%d", idx_pair.first), Form("RAW'_matched (%d-%d)",rp_firstStrip, rp_endStrip), 800,0.,800);
+                           }
+                           else {
+                                  h_adc_unmatched = new TH1F(Form("Raw'_adc_unmatched_%d-%d", idx_pair.second, c.first), Form("RAW_matched (%d-%d)",rp_firstStrip, rp_endStrip), 800,0.,800);
+                           }
+                           for (uint16_t i=0; i < rp_size; ++i) {
+                                if (matched) h_adc_matched->Fill(rp_channel[i], rp_adc[i]);
+                                else h_adc_unmatched->Fill(rp_channel[i], rp_adc[i]);
+                           }
+                           if  (matched) {
+                             h_adc_matched->SetLineWidth(0);
+                             h_adc_matched->SetFillColorAlpha(31, 0.4);
+                             h_adc_matched->SetLineColorAlpha(31, 0.4);
+                             h_adc_matched->GetYaxis()->SetRangeUser(0, h_adc_matched->GetMaximum()*3);
+                             h_adc_matched->DrawClone("hist");
+                             delete h_adc_matched;
+                           }
+                           else {
+                             h_adc_unmatched->SetLineColor(46);
+                             h_adc_unmatched->DrawClone("hist same");
+                             delete h_adc_unmatched;
+                           }
+                        }
+                        canvSingle->SaveAs(Form("../img/%sRawp_overflow_matched_vs_unmatched_idx_%d.png",expTag.c_str(), idx_pair.first));
 		}
 	      else {
                  h_dfirstStrip->Fill(abs(r_firstStrip-rp_firstStrip));
@@ -846,16 +920,9 @@ int LHCC_rawprime_clusters()
                                 h_hitx->Fill(r_hitX[i], rp_hitX[i]);
                                 h_hity->Fill(r_hitY[i], rp_hitY[i]);
                         }
-	      }
 	}
 	matched_sc2ac_txt.close();
         
-        TCanvas *canvSingle = new TCanvas("canvSingle", "canvSingle", 700, 600);
-        gStyle->SetOptTitle(0);
-        gErrorIgnoreLevel = kWarning;
-        canvSingle->GetPad(0)->SetMargin (0.18, 0.20, 0.12, 0.07);
-        canvSingle->cd();
-
 	PlotStyle(h_dfirstStrip); h_dfirstStrip->SetLineColor(46);
         h_dfirstStrip->Draw("");
         latex.SetTextFont(63);
