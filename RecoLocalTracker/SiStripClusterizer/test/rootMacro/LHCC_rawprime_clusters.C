@@ -219,7 +219,7 @@ int fillWithOverFlow(TH1 * histogram,
 int LHCC_rawprime_clusters()
 {
 	bool faster = 1;
-	std::string expTag = "test";
+	std::string expTag = "clusterStudy";
 	/*string expTag(argv[1]);
 	test thisTest(expTag);
 	bool faster = (argc<=2)? true: atoi(argv[2]);
@@ -567,7 +567,7 @@ int LHCC_rawprime_clusters()
 	PlotStyle(h_barycenter_tot_ac); h_barycenter_tot_ac->SetLineColor(46); 	h_barycenter_tot_ac->Draw("");
 	PlotStyle(h_barycenter_tot_sc); h_barycenter_tot_sc->SetLineWidth(0); h_barycenter_tot_sc->SetFillColorAlpha(31, 0.4); h_barycenter_tot_sc->SetLineColorAlpha(31, 0.4); 	h_barycenter_tot_sc->Draw("same");
 	
-	canv0->SaveAs(("../img/"+expTag+"_TotalClusters.pdf").c_str());
+	canv0->SaveAs(("../img/"+expTag+"_TotalClusters.png").c_str());
 
 	delete canv0;
 
@@ -599,7 +599,7 @@ int LHCC_rawprime_clusters()
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
-	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_size.pdf").c_str());
+	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_size.png").c_str());
 
 	h_charge_tot_ac->GetYaxis()->SetRangeUser(
 		h_charge_tot_ac->GetYaxis()->GetXmin(),
@@ -619,7 +619,7 @@ int LHCC_rawprime_clusters()
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
-	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_charge.pdf").c_str());
+	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_charge.png").c_str());
 
 	h_barycenter_tot_ac->Draw("");
 	h_barycenter_tot_sc->Draw("same");
@@ -636,7 +636,7 @@ int LHCC_rawprime_clusters()
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
-	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_barycenter.pdf").c_str());
+	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_barycenter.png").c_str());
 	
 	delete canvSingle0;
 
@@ -865,7 +865,7 @@ int LHCC_rawprime_clusters()
         latex.SetTextSize(22);
         latex.DrawLatexNDC(0.32,0.84,"Preliminary");
         latex.SetTextFont(43);
-	canvSingle0->SaveAs(("../img/"+expTag+"_wo_overflowfirstStrip.pdf").c_str());
+	canvSingle0->SaveAs(("../img/"+expTag+"_wo_overflowfirstStrip.png").c_str());
 
 	PlotStyle(h_dendStrip); h_dendStrip->SetLineColor(46);
         h_dendStrip->Draw("");
@@ -876,7 +876,7 @@ int LHCC_rawprime_clusters()
         latex.SetTextSize(22);
         latex.DrawLatexNDC(0.32,0.84,"Preliminary");
         latex.SetTextFont(43);
-        canvSingle0->SaveAs(("../img/"+expTag+"_wo_overflowlastStrip.pdf").c_str());
+        canvSingle0->SaveAs(("../img/"+expTag+"_wo_overflowlastStrip.png").c_str());
 
 	PlotStyle(h_dfirstStrip_overflow); h_dfirstStrip_overflow->SetLineColor(46);
         h_dfirstStrip_overflow->Draw("");
@@ -887,7 +887,7 @@ int LHCC_rawprime_clusters()
         latex.SetTextSize(22);
         latex.DrawLatexNDC(0.32,0.84,"Preliminary");
         latex.SetTextFont(43);
-        canvSingle0->SaveAs(("../img/"+expTag+"_overflowfirstStrip.pdf").c_str());
+        canvSingle0->SaveAs(("../img/"+expTag+"_overflowfirstStrip.png").c_str());
 
         PlotStyle(h_dendStrip_overflow); h_dendStrip_overflow->SetLineColor(46);
         h_dendStrip_overflow->Draw("");
@@ -898,35 +898,35 @@ int LHCC_rawprime_clusters()
         latex.SetTextSize(22);
         latex.DrawLatexNDC(0.32,0.84,"Preliminary");
         latex.SetTextFont(43);
-        canvSingle0->SaveAs(("../img/"+expTag+"_overflowlastStrip.pdf").c_str());
+        canvSingle0->SaveAs(("../img/"+expTag+"_overflowlastStrip.png").c_str());
       
         PlotStyle(h_barycenter_res_overflow); h_barycenter_res_overflow->SetLineColor(46);
         h_barycenter_res_overflow->Draw("");	
-        canvSingle0->SaveAs(("../img/"+expTag+"_overflowbarycenter.pdf").c_str());
+        canvSingle0->SaveAs(("../img/"+expTag+"_overflowbarycenter.png").c_str());
 
 	PlotStyle(h_adc_overflow); h_adc_overflow->SetLineColor(46);
         h_adc_overflow->Draw("colz");
-        canvSingle0->SaveAs(("../img/"+expTag+"_overflow_adc.pdf").c_str());
+        canvSingle0->SaveAs(("../img/"+expTag+"_overflow_adc.png").c_str());
 
 	PlotStyle(h_hitx_overflow); h_hitx_overflow->SetLineColor(46);
         h_hitx_overflow->Draw("colz");
-        canvSingle0->SaveAs(("../img/"+expTag+"_overflow_hitx.pdf").c_str());
+        canvSingle0->SaveAs(("../img/"+expTag+"_overflow_hitx.png").c_str());
 
 	PlotStyle(h_hity_overflow); h_hity_overflow->SetLineColor(46);
         h_hity_overflow->Draw("colz");
-        canvSingle0->SaveAs(("../img/"+expTag+"_overflow_hity.pdf").c_str());
+        canvSingle0->SaveAs(("../img/"+expTag+"_overflow_hity.png").c_str());
 
 	PlotStyle(h_adc); h_adc->SetLineColor(46);
         h_adc->Draw("colz");
-        canvSingle0->SaveAs(("../img/"+expTag+"_adc.pdf").c_str());
+        canvSingle0->SaveAs(("../img/"+expTag+"_adc.png").c_str());
 
         PlotStyle(h_hitx); h_hitx->SetLineColor(46);
         h_hitx->Draw("colz");
-        canvSingle0->SaveAs(("../img/"+expTag+"_hitx.pdf").c_str());
+        canvSingle0->SaveAs(("../img/"+expTag+"_hitx.png").c_str());
 
         PlotStyle(h_hity); h_hity->SetLineColor(46);
         h_hity->Draw("colz");
-        canvSingle0->SaveAs(("../img/"+expTag+"_hity.pdf").c_str());
+        canvSingle0->SaveAs(("../img/"+expTag+"_hity.png").c_str());
 
 	delete h_dfirstStrip_overflow;
         delete h_dendStrip_overflow;
@@ -962,7 +962,7 @@ int LHCC_rawprime_clusters()
 	PlotStyle(h_barycenter_res);  	h_barycenter_res->Draw("");
 
 
-	canv->SaveAs(("../img/"+expTag+"_MatchedClusters.pdf").c_str());
+	canv->SaveAs(("../img/"+expTag+"_MatchedClusters.png").c_str());
 
 	delete canv;
 
@@ -984,7 +984,7 @@ int LHCC_rawprime_clusters()
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
-	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_size_scat.pdf").c_str());
+	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_size_scat.png").c_str());
 
 	h_charge->GetZaxis()->SetTitleOffset(1.8);
 	h_charge->GetZaxis()->SetTitle("number of clusters");
@@ -998,7 +998,7 @@ int LHCC_rawprime_clusters()
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
-	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_charge_scat.pdf").c_str());
+	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_charge_scat.png").c_str());
 
 	h_barycenter->GetZaxis()->SetTitleOffset(1.8);
 	h_barycenter->GetZaxis()->SetTitle("number of clusters");
@@ -1012,7 +1012,7 @@ int LHCC_rawprime_clusters()
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
-	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_barycenter_scat.pdf").c_str());
+	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_barycenter_scat.png").c_str());
 
 	h_barycenter_vs_charge->Draw("COLZ");
 	latex.SetTextFont(63);
@@ -1024,7 +1024,7 @@ int LHCC_rawprime_clusters()
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
-	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_del_barycenter_del_charge_scat.pdf").c_str());
+	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_del_barycenter_del_charge_scat.png").c_str());
 
 	h_size_res->Draw("");
 	latex.SetTextFont(63);
@@ -1040,7 +1040,7 @@ int LHCC_rawprime_clusters()
 	latex.SetTextFont(43);
 	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_size_res->GetMean()));
 	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_size_res->GetStdDev()));
-	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_size_res.pdf").c_str());
+	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_size_res.png").c_str());
 
 	h_charge_res->Draw("");
 	latex.SetTextFont(63);
@@ -1056,7 +1056,7 @@ int LHCC_rawprime_clusters()
 	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_charge_res->GetMean()));
 	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_charge_res->GetStdDev()));
 	canvSingle->SetLogy(true);
-	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_charge_res.pdf").c_str());
+	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_charge_res.png").c_str());
 
 	h_barycenter_res->Draw("");
 	latex.SetTextFont(63);
@@ -1071,7 +1071,7 @@ int LHCC_rawprime_clusters()
 	latex.SetTextFont(43);
 	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_barycenter_res->GetMean()));
 	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_barycenter_res->GetStdDev()));
-	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_barycenter_res.pdf").c_str());
+	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_barycenter_res.png").c_str());
 
 	ofstream unmatched_scs_txt;
 	unmatched_scs_txt.open(Form("log/%s_unmatched_scs.txt",expTag.c_str()));
@@ -1279,7 +1279,7 @@ int LHCC_rawprime_clusters()
 		delete h_sc;
 
 		
-		canv2->SaveAs(Form("../img/%s_%sUnmatchedStripClusters_idx%d.pdf",expTag.c_str(),prefix.c_str(),sc.idx));
+		canv2->SaveAs(Form("../img/%s_%sUnmatchedStripClusters_idx%d.png",expTag.c_str(),prefix.c_str(),sc.idx));
 
 		delete canv2;
 		if (!faster || prefix=="Warning2_") printf("===========================================\n");
