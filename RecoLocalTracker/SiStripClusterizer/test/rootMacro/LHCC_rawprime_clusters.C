@@ -785,20 +785,27 @@ int LHCC_rawprime_clusters()
 	                                    "; barycenter RAW'-RAW; yield",
 	                                    50, -.1, .1);
 
-	ofstream matched_sc2ac_txt, matched_sc2ac_overflow_txt;
+	ofstream matched_sc2ac_txt;
 	matched_sc2ac_txt.open(Form("log/%s_matched_sc2ac.txt", expTag.c_str()));
-	matched_sc2ac_overflow_txt.open(Form("log/%s_matched_sc2ac_overflow.txt", expTag.c_str()));
 	matched_sc2ac_txt << "event detId sc_idx barycenter size charge firstStrip endStrip ac_idx barycenter size charge firstStrip endStrip\n";
 	
+	TH1F * h_dfirstStrip_overflow = new TH1F("dfirstStrip_overflow", "delta_firstStrip; delta_firstStrip; yield", 10, -0.5, 9.5);
+        TH1F * h_dendStrip_overflow = new TH1F("dendStrip_overflow", "delta_endStrip; delta_endStrip; yield", 10, -0.5, 9.5);
+
 	TH1F * h_dfirstStrip = new TH1F("dfirstStrip", "delta_firstStrip; delta_firstStrip; yield", 10, -0.5, 9.5);
         TH1F * h_dendStrip = new TH1F("dendStrip", "delta_endStrip; delta_endStrip; yield", 10, -0.5, 9.5);
        
-	TH1F * h_size_res_overflow      = new TH1F( "size_res_overflow",
-                                            "for matched cluster with overflowbin; size (RAW'-RAW)/RAW; yield",
-                                            50, -.1, .1);
         TH1F * h_barycenter_res_overflow = new TH1F( "barycenter_res_overflow",
                                             "for matched cluster with overflowbin; barycenter RAW'-RAW; yield",
                                             50, -.1, .1);
+	TH2F * h_adc_overflow = new TH2F("adc_overflow", ";Raw adc; Raw' adc", 256, 0., 256, 256, 0., 256.);
+	TH2F * h_hitx_overflow = new TH2F("hitx_overflow", ";Raw hitX; Raw' hit_X", 400, -100., 100, 100, -100., 100.);
+	TH2F * h_hity_overflow = new TH2F("hity_overflow", ";Raw hitY; Raw' hit_Y", 400, -100., 100, 100, -100., 100.);
+
+	TH2F * h_adc = new TH2F("adc", ";Raw adc; Raw' adc", 256, 0., 256, 256, 0., 256.);
+        TH2F * h_hitx = new TH2F("hitx", ";Raw hitX; Raw' hit_X", 400, -100., 100, 100, -100., 100.);
+        TH2F * h_hity = new TH2F("hity", ";Raw hitY; Raw' hit_Y", 400, -100., 100, 100, -100., 100.);
+
 	for (auto& idx_pair: matched_sc2ac) 
 	{
 		// printf("[Debug] approxCluster %p, SiStripCluster %p\n", ac_ptr, sc_ptr);
@@ -820,12 +827,26 @@ int LHCC_rawprime_clusters()
 						  << idx_pair.first << " " << r_barycenter << " " << r_size << " " << r_charge << " " << r_firstStrip << " " << r_endStrip << " "
 						  << idx_pair.second << " " << rp_barycenter << " " << rp_size << " " << rp_charge << " " << rp_firstStrip << " " << rp_endStrip << "\n";
 		if (charge_withovrflow) {
-			h_dfirstStrip->Fill(abs(r_firstStrip-rp_firstStrip));
-                        h_dendStrip->Fill(abs(r_endStrip-rp_endStrip));
+			h_dfirstStrip_overflow->Fill(abs(r_firstStrip-rp_firstStrip));
+                        h_dendStrip_overflow->Fill(abs(r_endStrip-rp_endStrip));
 
-			h_size_res_overflow    ->Fill( (rp_size - rp_size)/((float) r_size)  );
                         h_barycenter_res_overflow->Fill( r_barycenter - rp_barycenter );
+			for(uint16_t i=0; i < r_size; ++i) {
+				h_adc_overflow->Fill(r_adc[i], rp_adc[i]);
+				h_hitx_overflow->Fill(r_hitX[i], rp_hitX[i]);
+				h_hity_overflow->Fill(r_hitY[i], rp_hitY[i]);
+			}
 		}
+	      else {
+                 h_dfirstStrip->Fill(abs(r_firstStrip-rp_firstStrip));
+                 h_dendStrip->Fill(abs(r_endStrip-rp_endStrip));
+                        //h_barycenter_res_overflow->Fill( r_barycenter - rp_barycenter );
+                        for(uint16_t i=0; i < r_size; ++i) {
+                                h_adc->Fill(r_adc[i], rp_adc[i]);
+                                h_hitx->Fill(r_hitX[i], rp_hitX[i]);
+                                h_hity->Fill(r_hitY[i], rp_hitY[i]);
+                        }
+	      }
 	}
 	matched_sc2ac_txt.close();
         
@@ -844,7 +865,7 @@ int LHCC_rawprime_clusters()
         latex.SetTextSize(22);
         latex.DrawLatexNDC(0.32,0.84,"Preliminary");
         latex.SetTextFont(43);
-	canvSingle0->SaveAs(("../img/"+expTag+"_overflowfirstStrip.pdf").c_str());
+	canvSingle0->SaveAs(("../img/"+expTag+"_wo_overflowfirstStrip.pdf").c_str());
 
 	PlotStyle(h_dendStrip); h_dendStrip->SetLineColor(46);
         h_dendStrip->Draw("");
@@ -855,18 +876,68 @@ int LHCC_rawprime_clusters()
         latex.SetTextSize(22);
         latex.DrawLatexNDC(0.32,0.84,"Preliminary");
         latex.SetTextFont(43);
-        canvSingle0->SaveAs(("../img/"+expTag+"_overflowlastStrip.pdf").c_str());
-       
-        PlotStyle(h_size_res_overflow);      h_size_res_overflow->Draw("COLZ");
-        canvSingle0->SaveAs(("../img/"+expTag+"_overflowsize.pdf").c_str());
+        canvSingle0->SaveAs(("../img/"+expTag+"_wo_overflowlastStrip.pdf").c_str());
 
-        PlotStyle(h_barycenter_res_overflow);      h_barycenter_res_overflow->Draw("COLZ");
+	PlotStyle(h_dfirstStrip_overflow); h_dfirstStrip_overflow->SetLineColor(46);
+        h_dfirstStrip_overflow->Draw("");
+        latex.SetTextFont(63);
+        latex.SetTextSize(31);
+        latex.DrawLatexNDC(0.22,0.84,"CMS");
+        latex.SetTextFont(53);
+        latex.SetTextSize(22);
+        latex.DrawLatexNDC(0.32,0.84,"Preliminary");
+        latex.SetTextFont(43);
+        canvSingle0->SaveAs(("../img/"+expTag+"_overflowfirstStrip.pdf").c_str());
+
+        PlotStyle(h_dendStrip_overflow); h_dendStrip_overflow->SetLineColor(46);
+        h_dendStrip_overflow->Draw("");
+        latex.SetTextFont(63);
+        latex.SetTextSize(31);
+        latex.DrawLatexNDC(0.22,0.84,"CMS");
+        latex.SetTextFont(53);
+        latex.SetTextSize(22);
+        latex.DrawLatexNDC(0.32,0.84,"Preliminary");
+        latex.SetTextFont(43);
+        canvSingle0->SaveAs(("../img/"+expTag+"_overflowlastStrip.pdf").c_str());
+      
+        PlotStyle(h_barycenter_res_overflow); h_barycenter_res_overflow->SetLineColor(46);
+        h_barycenter_res_overflow->Draw("");	
         canvSingle0->SaveAs(("../img/"+expTag+"_overflowbarycenter.pdf").c_str());
+
+	PlotStyle(h_adc_overflow); h_adc_overflow->SetLineColor(46);
+        h_adc_overflow->Draw("colz");
+        canvSingle0->SaveAs(("../img/"+expTag+"_overflow_adc.pdf").c_str());
+
+	PlotStyle(h_hitx_overflow); h_hitx_overflow->SetLineColor(46);
+        h_hitx_overflow->Draw("colz");
+        canvSingle0->SaveAs(("../img/"+expTag+"_overflow_hitx.pdf").c_str());
+
+	PlotStyle(h_hity_overflow); h_hity_overflow->SetLineColor(46);
+        h_hity_overflow->Draw("colz");
+        canvSingle0->SaveAs(("../img/"+expTag+"_overflow_hity.pdf").c_str());
+
+	PlotStyle(h_adc); h_adc->SetLineColor(46);
+        h_adc->Draw("colz");
+        canvSingle0->SaveAs(("../img/"+expTag+"_adc.pdf").c_str());
+
+        PlotStyle(h_hitx); h_hitx->SetLineColor(46);
+        h_hitx->Draw("colz");
+        canvSingle0->SaveAs(("../img/"+expTag+"_hitx.pdf").c_str());
+
+        PlotStyle(h_hity); h_hity->SetLineColor(46);
+        h_hity->Draw("colz");
+        canvSingle0->SaveAs(("../img/"+expTag+"_hity.pdf").c_str());
+
+	delete h_dfirstStrip_overflow;
+        delete h_dendStrip_overflow;
+	delete h_barycenter_res_overflow;
+	delete h_adc_overflow;
+	delete h_hitx_overflow; delete h_hity_overflow;
 
 	delete h_dfirstStrip;
         delete h_dendStrip;
-	delete h_size_res_overflow;
-	delete h_barycenter_res_overflow;
+        delete h_adc;
+        delete h_hitx; delete h_hity;
 
         
 	TCanvas *canv = new TCanvas("canv", "canv", 700*4, 600*2);
