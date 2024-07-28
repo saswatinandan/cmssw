@@ -224,76 +224,23 @@ void Divide_w_sameDsets(TH1F* num, TH1F* denom, TH1F* ratio)
 	}
 }
 
-int main(int argc, char const *argv[])
-{
-	string expTag(argv[1]);
-	test thisTest(expTag);
-	bool faster = (argc<=2)? true: atoi(argv[2]);
+int LHCC_rawprime_tracks() {
 
-	/* *******************************
-	 * 0. Loading matched events info & track trees
-	 * *******************************/
-	// Reading matched events
+	std::string expTag = "test";
 	map< int, map< int, map<int, bool> > > evtMatchedMap;
+	map< int, map< int, map<int, bool> > > evtMap;
 	
-	if (thisTest.matchtxt!="all")
-	{
-		printf("Reading: %s\n", thisTest.matchtxt.c_str());
-		std::ifstream inputFile(thisTest.matchtxt.c_str());
-
-		// Check if the file is successfully opened
-		if (!inputFile.is_open()) {
-			std::cerr << "Error opening the file." << std::endl;
-			return 1; // Exit with an error code
-		}
-
-		// Read the file line by line
-		std::string line;
-		int countMatchedEvts = 0;
-		while (std::getline(inputFile, line)) {
-			// Create a string stream from the line
-			std::istringstream iss(line);
-
-			// Variables to store data
-			int _run;
-			int _event;
-			int _lumi;
-
-			// Read data from the stringstream
-			if (iss >> _run >> _event >> _lumi) {
-				// Print the read data
-				evtMatchedMap[_run][_lumi][_event] = true;
-				// std::cout << "Run: " << _run << ", Event: " << _event << ", Lumi: " << _lumi << std::endl;
-				countMatchedEvts ++;
-			} else {
-				std::cerr << "Error reading data from line: " << line << std::endl;
-			}
-		}
-
-		printf("Finished reading: %d matched events\n", countMatchedEvts);
-		
-		// Close the file
-		inputFile.close();
-	}
-
-
-	TChain* trackTree_rp 	= new TChain("anaTrack/trackTree");
-	std::vector<std::string> fileList1 = getFileList(thisTest.f1name.c_str());
-	int fileListLen = (5000<fileList1.size())? 5000: fileList1.size();
-	for (unsigned int fI=0; fI<fileListLen; fI++) {
-		trackTree_rp->Add(fileList1.at(fI).c_str());
-	}
-
-	TChain* trackTree_r 	= new TChain("anaTrack/trackTree");
-	std::vector<std::string> fileList2 = getFileList(thisTest.f2name.c_str());
-	fileListLen = (5000<fileList2.size())? 5000: fileList2.size();
-	for (unsigned int fI=0; fI<fileListLen; fI++) {
-		trackTree_r->Add(fileList2.at(fI).c_str());
-	}
+        TFile* f1               = TFile::Open("/eos/home-v/vmuralee/PREanalysis/outputFiles/flatTrackRawprime.root", "read");
+        TDirectoryFile* _1      = (TDirectoryFile*) f1->Get("trackAnalyzer");
+        TTree* trackTree_rp     = (TTree*) _1->Get("trackTree");
+        
+        TFile* f2               = TFile::Open("/eos/home-s/snandan/PREanalysis/outputFiles/flatTrackRaw.root", "read");                
+        TDirectoryFile* _2      = (TDirectoryFile*) f2->Get("trackAnalyzer");
+        TTree* trackTree_r      = (TTree*) _2->Get("trackTree");
 
 	const static int nMax = 40000;
 	////// for rawprime
-	int rp_event;
+	UInt_t rp_event;
 	int rp_run;
 	int rp_lumi;
 	int rp_nTrk;
@@ -306,16 +253,16 @@ int main(int argc, char const *argv[])
 	float       rp_trkDz1[nMax];
 	float       rp_trkDzError1[nMax];
 	
-	unsigned char rp_trkAlgo[nMax];
-	unsigned char rp_trkNHit[nMax];
-	unsigned char rp_trkNdof[nMax];
-	unsigned char rp_trkNlayer[nMax];
+	UShort_t rp_trkAlgo[nMax];
+	Int_t rp_trkNHit[nMax];
+	Int_t rp_trkNdof[nMax];
+	Int_t rp_trkNlayer[nMax];
 	float       rp_trkChi2[nMax];
 	float       rp_trkPtError[nMax];
 
 
 	////// for raw
-	int r_event;
+	UInt_t r_event;
 	int r_run;
 	int r_lumi;
 	int r_nTrk;
@@ -328,17 +275,17 @@ int main(int argc, char const *argv[])
 	float       r_trkDz1[nMax];
 	float       r_trkDzError1[nMax];
 	
-	unsigned char r_trkAlgo[nMax];
-	unsigned char r_trkNHit[nMax];
-	unsigned char r_trkNdof[nMax];
-	unsigned char r_trkNlayer[nMax];
+	UShort_t r_trkAlgo[nMax];
+	Int_t r_trkNHit[nMax];
+	Int_t r_trkNdof[nMax];
+	Int_t r_trkNlayer[nMax];
 	float       r_trkChi2[nMax];
 	float       r_trkPtError[nMax];
 
-	trackTree_rp->SetBranchAddress("nEv", 	&rp_event);
-	trackTree_rp->SetBranchAddress("nRun",  &rp_run);
-	trackTree_rp->SetBranchAddress("nLumi", &rp_lumi);
-	trackTree_rp->SetBranchAddress("nTrk",  &rp_nTrk);
+	trackTree_rp->SetBranchAddress("event", 	&rp_event);
+	trackTree_rp->SetBranchAddress("run",  &rp_run);
+	trackTree_rp->SetBranchAddress("lumi", &rp_lumi);
+	trackTree_rp->SetBranchAddress("nTracks",  &rp_nTrk);
 
 	trackTree_rp->SetBranchAddress("trkPt", 	rp_trkPt);
 	trackTree_rp->SetBranchAddress("trkEta", 	rp_trkEta);
@@ -354,10 +301,10 @@ int main(int argc, char const *argv[])
 	trackTree_rp->SetBranchAddress("trkChi2", 	rp_trkChi2);
 	trackTree_rp->SetBranchAddress("trkPtError", 	rp_trkPtError);
 
-	trackTree_r->SetBranchAddress("nEv", 	&r_event);
-	trackTree_r->SetBranchAddress("nRun",   &r_run);
-	trackTree_r->SetBranchAddress("nLumi",  &r_lumi);
-	trackTree_r->SetBranchAddress("nTrk",  	&r_nTrk);
+	trackTree_r->SetBranchAddress("event", 	&r_event);
+	trackTree_r->SetBranchAddress("run",   &r_run);
+	trackTree_r->SetBranchAddress("lumi",  &r_lumi);
+	trackTree_r->SetBranchAddress("nTracks",  	&r_nTrk);
 
 	trackTree_r->SetBranchAddress("trkPt", 		r_trkPt);
 	trackTree_r->SetBranchAddress("trkEta", 	r_trkEta);
@@ -377,13 +324,13 @@ int main(int argc, char const *argv[])
 	const int numBins = 7;
 	Double_t customBins[numBins + 1] = {0.1, 0.5, 1.0, 2.0, 6.0, 9.0, 30.0, 100.0};
 
-	TH1F * h_pt_tot_r      = new TH1F( "RAW",
+	TH1F * h_pt_tot_r      = new TH1F( "RAW_pt_tot",
 	                                    "; track p_{T} [GeV/#it{c}]; normalized distributions",  
 	                                    numBins, customBins);
-	TH1F * h_dcaxyres_tot_r     = new TH1F( "RAW",
+	TH1F * h_dcaxyres_tot_r     = new TH1F( "RAW_decayxyres",
 	                                    "; track DCA xy/#sigma; normalized distributions", //  (0.5 < p_{T} < 0.9 [GeV/#it{c}]); normalized distributions",  
 	                                    30, -5., 5. );
-	TH1F * h_dcazres_tot_r = new TH1F( "RAW",
+	TH1F * h_dcazres_tot_r = new TH1F( "RAW_dcazres",
 	                                    "; track DCA z/#sigma; normalized distributions", // (0.5 < p_{T} < 0.9 [GeV/#it{c}]); normalized distributions",  
 	                                    30, -3., 3. );
 	TH2F * h_etaphi_r = new TH2F( "h_etaphi_r", 
@@ -433,13 +380,13 @@ int main(int argc, char const *argv[])
 	                                    "trkAlgo==24; track #eta; normalized distributions",  
 	                                    16, -2.4, 2.4 );
 
-	TH1F * h_pt_tot_rp      = new TH1F( "RAW'",
+	TH1F * h_pt_tot_rp      = new TH1F( "RAW'_pt_tot",
 	                                    "; track p_{T} [GeV/#it{c}]; normalized distributions",  
 	                                    numBins, customBins);
-	TH1F * h_dcaxyres_tot_rp     = new TH1F( "RAW'",
+	TH1F * h_dcaxyres_tot_rp     = new TH1F( "RAW'_dcaxyres",
 	                                    "; track DCA xy/#sigma; normalized distributions", //  (0.5 < p_{T} < 0.9 [GeV/#it{c}]); normalized distributions",  
 	                                    30, -5., 5. );
-	TH1F * h_dcazres_tot_rp = new TH1F( "RAW'",
+	TH1F * h_dcazres_tot_rp = new TH1F( "RAW'_dcazres_tot",
 	                                    "; track DCA z/#sigma; normalized distributions", // (0.5 < p_{T} < 0.9 [GeV/#it{c}]); normalized distributions",  
 	                                    30, -3., 3. );
 	TH2F * h_etaphi_rp = new TH2F( "h_etaphi_rp",
@@ -490,24 +437,46 @@ int main(int argc, char const *argv[])
 	                                    16, -2.4, 2.4 );
 
 
-	float pt_avg_r = 0;
 	const Int_t r_nEntries = trackTree_r->GetEntries();
-	for (int r_idx = 0; r_idx < r_nEntries; ++r_idx)
-	{
+	for (int r_idx = 0; r_idx < r_nEntries; ++r_idx) {
+                trackTree_r->GetEntry(r_idx);
+		evtMatchedMap[r_run][r_lumi][r_event] = 0;
+	}
+       
+	const Int_t rp_nEntries = trackTree_rp->GetEntries();
+        for (int rp_idx = 0; rp_idx < rp_nEntries; ++rp_idx) {
+
+		trackTree_rp->GetEntry(rp_idx);
+		
+		if (  evtMatchedMap.find(rp_run) == evtMatchedMap.end() ) continue;
+                if (  evtMatchedMap[rp_run].find(rp_lumi) == evtMatchedMap[rp_run].end() ) continue;
+		if (  evtMatchedMap[rp_run][rp_lumi].find(rp_event) == evtMatchedMap[rp_run][rp_lumi].end() ) continue;
+
+		evtMatchedMap[rp_run][rp_lumi][rp_event] = 1;
+
+	}
+
+
+        float pt_avg_r = 0;
+	for (int r_idx = 0; r_idx < r_nEntries; ++r_idx) {
 		if(r_idx%1000 == 0) std::cout << "Scanning raw tracks: " << r_idx << "/" << r_nEntries << std::endl;
 		trackTree_r->GetEntry(r_idx);
 
-		if (thisTest.matchtxt!="all" && !evtMatchedMap[r_run][r_lumi][r_event]) continue;
-
+		if ( !evtMatchedMap[r_run][r_lumi][r_event]) {
+			assert(0);
+			continue;
+		}
 		// trackTree_r->Show(r_idx);
 
 		for (int r_trkIdx = 0; r_trkIdx < r_nTrk; ++r_trkIdx)
 		{
+			if ( (std::abs(r_trkDz1[r_trkIdx]/r_trkDzError1[r_trkIdx]) < cut_dzSig) &&
+		             (     std::abs(r_trkPtError[r_trkIdx]/r_trkPt[r_trkIdx])     < cut_ptRes) && 
+			     ((int) r_trkNHit[r_trkIdx]                                  >=cut_nhits)) std::cout << "*****" << r_trkChi2[r_trkIdx] << "\t" << (int) r_trkNdof[r_trkIdx] << "\t" << (int) r_trkNlayer[r_trkIdx] << "\t" << std::endl; 
 			// if (r_trkAlgo[r_trkIdx]!=0) continue;
 			// cout << r_trkPt[r_trkIdx] << ", " << r_trkEta[r_trkIdx] << ", " << r_trkPhi[r_trkIdx] << ", " << r_trkDxy1[r_trkIdx] << ", " << r_trkDxyError1[r_trkIdx] << ", " << r_trkDz1[r_trkIdx] << ", " << r_trkDzError1[r_trkIdx] << ", " << (int) r_trkNHit[r_trkIdx] << ", " << r_trkChi2[r_trkIdx] << ", " << r_trkPtError[r_trkIdx] << endl;
 
 			if ( std::abs(r_trkDz1[r_trkIdx]/r_trkDzError1[r_trkIdx]) 	< cut_dzSig && 
-			     // std::abs(r_trkDxy1[r_trkIdx]/r_trkDxyError1[r_trkIdx]) 	< cut_dxySig && 
 			     r_trkChi2[r_trkIdx]/((int) r_trkNdof[r_trkIdx])
 			     			/((int) r_trkNlayer[r_trkIdx]) 		< cut_chi2 && 
 			     (int) r_trkNHit[r_trkIdx] 					>=cut_nhits && 
@@ -517,6 +486,7 @@ int main(int argc, char const *argv[])
 			     // r_trkAlgo[r_trkIdx]!=22
 			     // ) 
 			{
+				std::cout << "found track " << std::endl;
 				pt_avg_r += r_trkPt[r_trkIdx];
 				h_pt_tot_r->Fill( r_trkPt[r_trkIdx] );
 				h_dcaxyres_tot_r->Fill( r_trkDxy1[r_trkIdx]/r_trkDxyError1[r_trkIdx] );
@@ -542,16 +512,19 @@ int main(int argc, char const *argv[])
 	// h_pt_tot_r->Print();
 
 	float pt_avg_rp = 0;
-	const Int_t rp_nEntries = trackTree_rp->GetEntries();
 	for (int rp_idx = 0; rp_idx < rp_nEntries; ++rp_idx)
 	{
 		if(rp_idx%1000 == 0) std::cout << "Scanning rawprime tracks: " << rp_idx << "/" << rp_nEntries << std::endl;
 		trackTree_rp->GetEntry(rp_idx);
 
-		if (thisTest.matchtxt!="all" && !evtMatchedMap[rp_run][rp_lumi][rp_event]) continue;
+		if ( !evtMatchedMap[rp_run][rp_lumi][rp_event]) continue;
 
 		for (int rp_trkIdx = 0; rp_trkIdx < rp_nTrk; ++rp_trkIdx)
 		{
+			if ((std::abs(rp_trkDz1[rp_trkIdx]/rp_trkDzError1[rp_trkIdx])   < cut_dzSig) &&
+				((int) rp_trkNHit[rp_trkIdx] >=cut_nhits ) &&
+			  std::abs(rp_trkPtError[rp_trkIdx]/rp_trkPt[rp_trkIdx]) < cut_ptRes &&
+			  (rp_trkChi2[rp_trkIdx]/((int) rp_trkNdof[rp_trkIdx]) < cut_chi2)) std::cout << "found 11 " << std::endl;
 			// if (rp_trkAlgo[rp_trkIdx]!=0) continue;
 			if ( std::abs(rp_trkDz1[rp_trkIdx]/rp_trkDzError1[rp_trkIdx]) 	< cut_dzSig && 
 			     // std::abs(rp_trkDxy1[rp_trkIdx]/rp_trkDxyError1[rp_trkIdx]) < cut_dxySig && 
@@ -564,6 +537,7 @@ int main(int argc, char const *argv[])
 			     // rp_trkAlgo[rp_trkIdx]!=22
 			     // )
 			{
+				std::cout << "found track " << std::endl;
 				pt_avg_rp += rp_trkPt[rp_trkIdx];
 				h_pt_tot_rp->Fill( rp_trkPt[rp_trkIdx] );
 				h_dcaxyres_tot_rp->Fill( rp_trkDxy1[rp_trkIdx]/rp_trkDxyError1[rp_trkIdx] );
@@ -672,7 +646,6 @@ int main(int argc, char const *argv[])
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_pt.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_pt.pdf /tmp/").c_str());
 
 	canvSingle0->GetPad(0)->SetMargin (0.22, 0.16, 0.14, 0.07);
 	TH1F* h_pt_tot_ratio = (TH1F*) h_pt_tot_rp->Clone("h_pt_tot_rp");
@@ -697,7 +670,6 @@ int main(int argc, char const *argv[])
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.37,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_ptRatio.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_ptRatio.pdf /tmp/").c_str());
 
 	canvSingle0->GetPad(0)->SetMargin (0.18, 0.20, 0.12, 0.07);
 	gPad->SetLogx(0);
@@ -716,7 +688,6 @@ int main(int argc, char const *argv[])
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_dcaxyres.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_dcaxyres.pdf /tmp/").c_str());
 
 	canvSingle0->GetPad(0)->SetMargin (0.22, 0.16, 0.14, 0.07);
 	TH1F* h_dcaxyres_tot_ratio = (TH1F*) h_dcaxyres_tot_rp->Clone("h_dcaxyres_tot_rp");
@@ -737,7 +708,6 @@ int main(int argc, char const *argv[])
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.37,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_dcaxyresRatio.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_dcaxyresRatio.pdf /tmp/").c_str());
 
 	canvSingle0->GetPad(0)->SetMargin (0.18, 0.20, 0.12, 0.07);
 	h_dcazres_tot_rp->Draw("hist");
@@ -755,7 +725,6 @@ int main(int argc, char const *argv[])
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_dcazres.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_dcazres.pdf /tmp/").c_str());
 	
 	canvSingle0->GetPad(0)->SetMargin (0.22, 0.16, 0.14, 0.07);
 	TH1F* h_dcazres_tot_ratio = (TH1F*) h_dcazres_tot_rp->Clone("h_dcazres_tot_rp");
@@ -776,7 +745,6 @@ int main(int argc, char const *argv[])
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.37,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_dcazresRatio.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_dcazresRatio.pdf /tmp/").c_str());
 
 	delete canvSingle0;
 
@@ -804,92 +772,77 @@ int main(int argc, char const *argv[])
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle->SaveAs(("../img/"+expTag+"_etaphi.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_etaphi.pdf /tmp/").c_str());
 
 	h_eta_rp->Divide(h_eta_r);
 	h_eta_rp->Draw("e");
 	gPad->SetGridy();
 	canvSingle0->SaveAs(("../img/"+expTag+"_etaRatio.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_etaRatio.pdf /tmp/").c_str());
 
 	gStyle->SetOptTitle(1);
 	h_eta_rp_trkAlgo0->Divide(h_eta_r_trkAlgo0);
 	h_eta_rp_trkAlgo0->Draw("e");
 	gPad->SetGridy();
 	canvSingle0->SaveAs(("../img/"+expTag+"_etaRatio_trkAlgo0.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_etaRatio_trkAlgo0.pdf /tmp/").c_str());
 
 	h_eta_rp_trkAlgo2->Divide(h_eta_r_trkAlgo2);
 	h_eta_rp_trkAlgo2->Draw("e");
 	gPad->SetGridy();
 	canvSingle0->SaveAs(("../img/"+expTag+"_etaRatio_trkAlgo2.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_etaRatio_trkAlgo2.pdf /tmp/").c_str());
 
 	h_eta_rp_trkAlgo4->Divide(h_eta_r_trkAlgo4);
 	h_eta_rp_trkAlgo4->Draw("e");
 	gPad->SetGridy();
 	canvSingle0->SaveAs(("../img/"+expTag+"_etaRatio_trkAlgo4.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_etaRatio_trkAlgo4.pdf /tmp/").c_str());
 
 	h_eta_rp_trkAlgo5->Divide(h_eta_r_trkAlgo5);
 	h_eta_rp_trkAlgo5->Draw("e");
 	gPad->SetGridy();
 	canvSingle0->SaveAs(("../img/"+expTag+"_etaRatio_trkAlgo5.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_etaRatio_trkAlgo5.pdf /tmp/").c_str());
 
 	h_eta_rp_trkAlgo6->Divide(h_eta_r_trkAlgo6);
 	h_eta_rp_trkAlgo6->Draw("e");
 	gPad->SetGridy();
 	canvSingle0->SaveAs(("../img/"+expTag+"_etaRatio_trkAlgo6.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_etaRatio_trkAlgo6.pdf /tmp/").c_str());
 
 	h_eta_rp_trkAlgo7->Divide(h_eta_r_trkAlgo7);
 	h_eta_rp_trkAlgo7->Draw("e");
 	gPad->SetGridy();
 	canvSingle0->SaveAs(("../img/"+expTag+"_etaRatio_trkAlgo7.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_etaRatio_trkAlgo7.pdf /tmp/").c_str());
 
 	h_eta_rp_trkAlgo8->Divide(h_eta_r_trkAlgo8);
 	h_eta_rp_trkAlgo8->Draw("e");
 	gPad->SetGridy();
 	canvSingle0->SaveAs(("../img/"+expTag+"_etaRatio_trkAlgo8.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_etaRatio_trkAlgo8.pdf /tmp/").c_str());
 
 	h_eta_rp_trkAlgo9->Divide(h_eta_r_trkAlgo9);
 	h_eta_rp_trkAlgo9->Draw("e");
 	gPad->SetGridy();
 	canvSingle0->SaveAs(("../img/"+expTag+"_etaRatio_trkAlgo9.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_etaRatio_trkAlgo9.pdf /tmp/").c_str());
 
 	h_eta_rp_trkAlgo10->Divide(h_eta_r_trkAlgo10);
 	h_eta_rp_trkAlgo10->Draw("e");
 	gPad->SetGridy();
 	canvSingle0->SaveAs(("../img/"+expTag+"_etaRatio_trkAlgo10.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_etaRatio_trkAlgo10.pdf /tmp/").c_str());
 
 	h_eta_rp_trkAlgo13->Divide(h_eta_r_trkAlgo13);
 	h_eta_rp_trkAlgo13->Draw("e");
 	gPad->SetGridy();
 	canvSingle0->SaveAs(("../img/"+expTag+"_etaRatio_trkAlgo13.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_etaRatio_trkAlgo13.pdf /tmp/").c_str());
 
 	h_eta_rp_trkAlgo22->Divide(h_eta_r_trkAlgo22);
 	h_eta_rp_trkAlgo22->Draw("e");
 	gPad->SetGridy();
 	canvSingle0->SaveAs(("../img/"+expTag+"_etaRatio_trkAlgo22.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_etaRatio_trkAlgo22.pdf /tmp/").c_str());
 
 	h_eta_rp_trkAlgo23->Divide(h_eta_r_trkAlgo23);
 	h_eta_rp_trkAlgo23->Draw("e");
 	gPad->SetGridy();
 	canvSingle0->SaveAs(("../img/"+expTag+"_etaRatio_trkAlgo23.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_etaRatio_trkAlgo23.pdf /tmp/").c_str());
 
 	h_eta_rp_trkAlgo24->Divide(h_eta_r_trkAlgo24);
 	h_eta_rp_trkAlgo24->Draw("e");
 	gPad->SetGridy();
 	canvSingle0->SaveAs(("../img/"+expTag+"_etaRatio_trkAlgo24.pdf").c_str());
-	system(("dropbox_uploader.sh upload ../img/"+expTag+"_etaRatio_trkAlgo24.pdf /tmp/").c_str());
 
 	delete canvSingle;
 
