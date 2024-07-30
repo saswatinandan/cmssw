@@ -811,7 +811,9 @@ int LHCC_rawprime_clusters()
         gErrorIgnoreLevel = kWarning;
         canvSingle->GetPad(0)->SetMargin (0.18, 0.20, 0.12, 0.07);
         canvSingle->cd();
-
+        
+	TFile * f = new TFile("cluster_study.root", "recreate");
+	f->cd();
 	for (auto& idx_pair: matched_sc2ac) 
 	{
 		// printf("[Debug] approxCluster %p, SiStripCluster %p\n", ac_ptr, sc_ptr);
@@ -853,10 +855,10 @@ int LHCC_rawprime_clusters()
 			   TH1F * h_adc_unmatched(NULL);
                            if (sc.first == idx_pair.first) {
 				   matched = true;
-				   h_adc_matched = new TH1F(Form("adc_matched_%d", idx_pair.first), Form("RAW_matched (%d-%d); strip; ADC", r_firstStrip, r_endStrip), 800,0.,800);
+				   h_adc_matched = new TH1F(Form("Raw_matched_cluster_%d-%d", idx_pair.first, idx_pair.second), Form("RAW_matched_cluster (%d-%d); strip; ADC", r_firstStrip, r_endStrip), 800,0.,800);
 			   }
 			   else {
-				  h_adc_unmatched = new TH1F(Form("adc_unmatched_%d-%d", idx_pair.first, sc.first), Form("RAW_unmatched (%d-%d); strip; ADC", r_firstStrip, r_endStrip), 800,0.,800);
+				  h_adc_unmatched = new TH1F(Form("Raw_other_cluster_%d-%d", idx_pair.first, sc.first), Form("RAW_other_cluster (%d-%d); strip; ADC", r_firstStrip, r_endStrip), 800,0.,800);
                            }
 			   for (uint16_t i=0; i < r_size; ++i) {
                                 if (matched) h_adc_matched->Fill(r_channel[i], r_adc[i]);
@@ -868,11 +870,13 @@ int LHCC_rawprime_clusters()
                              h_adc_matched->SetLineColorAlpha(31, 0.4);
                              h_adc_matched->GetYaxis()->SetRangeUser(0, h_adc_matched->GetMaximum()*4);
                              h_adc_matched->DrawClone("hist");
+			     h_adc_matched->Write();
 			     delete h_adc_matched;
 			   }
                            else {
 			     h_adc_unmatched->SetLineColor(46);
 			     h_adc_unmatched->DrawClone("hist same");
+			     h_adc_unmatched->Write();
 			     delete h_adc_unmatched;
 			   }
 			}
@@ -883,10 +887,10 @@ int LHCC_rawprime_clusters()
                            TH1F * h_adc_unmatched(NULL);
                            if (c.first == idx_pair.second) {
                                    matched = true;
-                                   h_adc_matched = new TH1F(Form("Raw'_adc_matched_%d", idx_pair.first), Form("RAW'_matched (%d-%d); strip; ADC", rp_firstStrip, rp_endStrip), 800,0.,800);
+                                   h_adc_matched = new TH1F(Form("Raw'_matched_cluster_%d-%d", idx_pair.first, idx_pair.second), Form("RAW'_matched_cluster (%d-%d); strip; ADC", rp_firstStrip, rp_endStrip), 800,0.,800);
                            }
                            else {
-                                  h_adc_unmatched = new TH1F(Form("Raw'_adc_unmatched_%d-%d", idx_pair.second, c.first), Form("RAW'_unmatched (%d-%d); strip; ADC", rp_firstStrip, rp_endStrip), 800,0.,800);
+                                  h_adc_unmatched = new TH1F(Form("Raw'_other_cluster_%d-%d", idx_pair.second, c.first), Form("RAW'_other_cluster (%d-%d); strip; ADC", rp_firstStrip, rp_endStrip), 800,0.,800);
                            }
                            for (uint16_t i=0; i < rp_size; ++i) {
                                 if (matched) h_adc_matched->Fill(rp_channel[i], rp_adc[i]);
@@ -898,11 +902,13 @@ int LHCC_rawprime_clusters()
                              h_adc_matched->SetLineColorAlpha(8, 0.4);
                              h_adc_matched->GetYaxis()->SetRangeUser(0, h_adc_matched->GetMaximum()*3);
                              h_adc_matched->DrawClone("same hist");
+			     h_adc_matched->Write();
                              delete h_adc_matched;
                            }
                            else {
                              h_adc_unmatched->SetLineColor(9);
                              h_adc_unmatched->DrawClone("hist same");
+			     h_adc_unmatched->Write();
                              delete h_adc_unmatched;
                            }
                         }
@@ -923,6 +929,7 @@ int LHCC_rawprime_clusters()
                         }
 	      }
 	}
+	f->Close();
 	matched_sc2ac_txt.close();
         
 	PlotStyle(h_dfirstStrip); h_dfirstStrip->SetLineColor(46);
