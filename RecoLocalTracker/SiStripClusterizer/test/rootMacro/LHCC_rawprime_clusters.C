@@ -301,19 +301,19 @@ int LHCC_rawprime_clusters()
         TDirectoryFile* _1      = (TDirectoryFile*) f1->Get("sep19_2_1_dump_rawprime");
         TTree* onlineClusterTree= (TTree*) _1->Get("onlineClusterTree");
 
-        TFile* f2               = TFile::Open("/eos/home-v/vmuralee/PREanalysis/outputFiles/test/step2_dump_Raw.root", "read");
+        TFile* f2               = TFile::Open("/eos/home-s/snandan/Muon_sep19_2_2_dump_raw.root", "read");
 			// /eos/home-v/vmuralee/PREanalysis/outputFiles/test/step2_dump_Raw.root);
         TDirectoryFile* _2      = (TDirectoryFile*) f2->Get("sep19_2_2_dump_raw");
         TTree* offlineClusterTree= (TTree*) _2->Get("offlineClusterTree");
 
-        TFile* f3               = TFile::Open("/eos/home-s/snandan/Muon_sep19_3_1_dump_rawprime.root", "read");
+        TFile* f3               = TFile::Open("/eos/home-s/snandan/Muon_sep19_2_1_deadStrip_rawprime.root", "read");
 			// /eos/home-v/vmuralee/PREanalysis/outputFiles/test/step2_dump_Rawprime_check.root);
         TDirectoryFile* _3      = (TDirectoryFile*) f3->Get("sep19_3_dump_deadStrips");
         TTree* onlineDeadStripTree= (TTree*) _3->Get("deadStripTree");
 
-        TFile* f4               = TFile::Open("/eos/home-v/vmuralee/PREanalysis/outputFiles/test/step3_dump_Raw.root", "read");
+        TFile* f4               = TFile::Open("/eos/home-s/snandan/Muon_sep19_2_2_deadStrip_raw.root", "read");
 	// /eos/home-v/vmuralee/PREanalysis/outputFiles/test/step2_dump_Raw_check.root);
-        TDirectoryFile* _4      = (TDirectoryFile*) f4->Get("sep19_3_2_dump_raw");
+        TDirectoryFile* _4      = (TDirectoryFile*) f4->Get("sep19_3_dump_deadStrips");
         TTree* offlineDeadStripTree= (TTree*) _4->Get("deadStripTree");
 	
 	const static int nMax = 5000;
@@ -847,6 +847,13 @@ int LHCC_rawprime_clusters()
 		        map<int, cluster> r_map = r_dict[r_event][r_detId];
 			map<int, cluster> rp_map = rp_dict[rp_event][rp_detId];
 			if ((r_event != rp_event) | (r_detId != rp_detId)) return 0;
+			TCanvas *canvSingle = new TCanvas("canv", "canvSingle", 700, 600);
+			canvSingle->cd();
+                        gStyle->SetOptTitle(0);
+			//if (idx_pair.first != 97471) continue;
+                        //if (idx_pair.first != 3654862) continue;
+			//if ( std::abs( (int)r_map.size() - (int)rp_map.size()) >=1) std::cout << r_run << "\t" << r_lumi << "\t" << r_event << "\t" << r_map.size() << "\t" << rp_map.size() << "\t" << r_detId << "\t" << rp_detId << std::endl;
+			//return 0;
 
 			for (auto& sc: r_map) {
                            offlineClusterTree->GetEntry(sc.first);
@@ -869,7 +876,7 @@ int LHCC_rawprime_clusters()
                              h_adc_matched->SetFillColorAlpha(31, 0.4);
                              h_adc_matched->SetLineColorAlpha(31, 0.4);
                              h_adc_matched->GetYaxis()->SetRangeUser(0, h_adc_matched->GetMaximum()*4);
-                             h_adc_matched->DrawClone("hist");
+                             h_adc_matched->DrawClone("hist same");
 			     h_adc_matched->Write();
 			     delete h_adc_matched;
 			   }
@@ -913,10 +920,10 @@ int LHCC_rawprime_clusters()
                            }
                         }
 			TLegend* leg = canvSingle->BuildLegend(.5, .6, .85, .9);
-                        // formatLegend(leg);
                         gPad->Modified();
                         gPad->Update();
                         canvSingle->SaveAs(Form("../img/%sRawp_overflow_matched_vs_unmatched_idx_%d.png",expTag.c_str(), idx_pair.first));
+			delete canvSingle;
 		}
 	      else {
                  h_dfirstStrip->Fill(abs(r_firstStrip-rp_firstStrip));
