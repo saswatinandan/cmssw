@@ -135,8 +135,8 @@ constrainValue(T value,
     return value;
 }
 
-enum cuts {dzSig=1, chi2, ptRes, nhits};
-std::map<int, std::string> cutToname = { {cuts::dzSig, "dzSig"}, {cuts::ptRes, "ptRes"},{cuts::chi2, "chi2"},{cuts::nhits, "nhits"}};
+enum cuts {nocut=1, dzSig, chi2, ptRes, nhits};
+std::map<int, std::string> cutToname = { {cuts::nocut, "nocut"}, {cuts::dzSig, "dzSig"}, {cuts::ptRes, "ptRes"},{cuts::chi2, "chi2"},{cuts::nhits, "nhits"}};
 
 
 int fillWithOverFlow(TH1 * histogram,
@@ -264,6 +264,20 @@ auto deltaR(float& e1, float& e2, float& p1, float& p2) {
 	return TMath::Sqrt(pow((e1 - e2), 2) + pow(dp, 2));
 }
 
+auto createhist(std::string name, std::string title, int nbins, Double_t array[8], float xlow=9999, float xhigh=0){
+
+	if(xlow==9999) {
+	 TH1F* h = new TH1F(name.c_str(), title.c_str(), nbins, array);
+	 h->Sumw2();
+	 return h;
+	}
+	else {
+         TH1F* h = new TH1F(name.c_str(), title.c_str(), nbins, xlow, xhigh);
+         h->Sumw2();
+         return h;
+	}
+}
+
 int LHCC_rawprime_tracks() {
 
 	std::string expTag = "test";
@@ -274,7 +288,7 @@ int LHCC_rawprime_tracks() {
         TDirectoryFile* _1      = (TDirectoryFile*) f1->Get("trackAnalyzer");
         TTree* trackTree_rp     = (TTree*) _1->Get("trackTree");
         
-        TFile* f2               = TFile::Open("/eos/home-s/snandan/flatTrackRaw.root", "read");
+        TFile* f2               = TFile::Open("/eos/home-s/snandan/flatTrackRawrereco.root", "read");
         TDirectoryFile* _2      = (TDirectoryFile*) f2->Get("trackAnalyzer");
         TTree* trackTree_r      = (TTree*) _2->Get("trackTree");
 
@@ -481,17 +495,17 @@ int LHCC_rawprime_tracks() {
 	TH1F * h_trk_chi2 = new TH1F("trk_chi2", "Raw;trk_chi2;yield;", 400, 0,100);
 	TH1F * h_trk_nhits = new TH1F("trk_nhits", "Raw;trk_nhits;yield;", 100, -0.5,100);
 	TH1F * h_trk_pterrDpt = new TH1F("trk_pterrDpt", "Raw;trk_pterrDpt;yield;", 50, 0,1);
-	TH1F * h_cutflow = new TH1F("cutflow", "cutflow", cuts::nhits, cuts::dzSig, cuts::nhits+1);
+	TH1F * h_cutflow = new TH1F("cutflow", "cutflow", cuts::nhits, cuts::nocut, cuts::nhits+1);
 
 	TH1F * h_trk_p_dzDdzerr = new TH1F("trk_p_dzDdzerr", "Raw';trk_p_dzDdzerr;yield;", 50, 0,10);
         TH1F * h_trk_p_chi2 = new TH1F("trk_p_chi2", "Raw';trk_p_chi2;yield;", 400, 0,100);
         TH1F * h_trk_p_nhits = new TH1F("trk_p_nhits", "Raw';trk_p_nhits;yield;", 100, -0.5,100);
         TH1F * h_trk_p_pterrDpt = new TH1F("trk_p_pterrDpt", "Raw';trk_p_pterrDpt;yield;", 50, 0,1);
-	TH1F * h_cutflow_p = new TH1F("cutflow_p", "cutflow'", cuts::nhits, cuts::dzSig, cuts::nhits+1);
+	TH1F * h_cutflow_p = new TH1F("cutflow_p", "cutflow'", cuts::nhits, cuts::nocut, cuts::nhits+1);
 
-	TH1F * h_matchtrack_pt_ratio = new TH1F("ratio", "ratio_Raw_vs_Raw'", 50, 0,2);
+	TH1F * h_matchtrack_pt_ratio = new TH1F("ratio", "ratio_Raw_vs_Raw'", 50, 0.5,1.5);
 
-	for(int ibin=cuts::dzSig; ibin<=cuts::nhits; ibin++) {
+	for(int ibin=cuts::nocut; ibin<=cuts::nhits; ibin++) {
 		h_cutflow->GetXaxis()->SetBinLabel(ibin, cutToname[ibin].c_str());
 		h_cutflow_p->GetXaxis()->SetBinLabel(ibin, cutToname[ibin].c_str());
 	}
@@ -532,8 +546,7 @@ int LHCC_rawprime_tracks() {
 		for (int r_trkIdx = 0; r_trkIdx < r_nTrk; ++r_trkIdx)
 		{
 			fillWithOverFlow(h_trk_dzDdzerr, std::abs(r_trkDz1[r_trkIdx]/r_trkDzError1[r_trkIdx]));
-			fillWithOverFlow(h_trk_chi2, r_trkChi2[r_trkIdx]/((int) r_trkNdof[r_trkIdx])
-                                                /((int) r_trkNlayer[r_trkIdx]));
+			fillWithOverFlow(h_trk_chi2, r_trkChi2[r_trkIdx]/((int) r_trkNdof[r_trkIdx]));
 			fillWithOverFlow(h_trk_nhits, r_trkNHit[r_trkIdx]);
                         fillWithOverFlow(h_trk_pterrDpt, std::abs(r_trkPtError[r_trkIdx]/r_trkPt[r_trkIdx]));
                         fillWithOverFlow(h_trk_dzDdzerr, r_trkDz1[r_trkIdx]/r_trkDzError1[r_trkIdx]);
@@ -541,7 +554,8 @@ int LHCC_rawprime_tracks() {
                                                 /((int) r_trkNlayer[r_trkIdx]));
                         fillWithOverFlow(h_trk_nhits, r_trkNHit[r_trkIdx]);
                         fillWithOverFlow(h_trk_pterrDpt, std::abs(r_trkPtError[r_trkIdx]/r_trkPt[r_trkIdx]));
-                        if(std::abs(r_trkDz1[r_trkIdx]/r_trkDzError1[r_trkIdx]) >= cut_dzSig) continue;
+			h_cutflow->Fill(cuts::nocut);
+                        //if(std::abs(r_trkDz1[r_trkIdx]/r_trkDzError1[r_trkIdx]) >= cut_dzSig) continue;
                         h_cutflow->Fill(cuts::dzSig);
                         if(r_trkChi2[r_trkIdx]/((int) r_trkNdof[r_trkIdx])
                                                 /((int) r_trkNlayer[r_trkIdx]) >= cut_chi2) continue;
@@ -553,39 +567,26 @@ int LHCC_rawprime_tracks() {
 
 			// if (r_trkAlgo[r_trkIdx]!=0) continue;
 			// cout << r_trkPt[r_trkIdx] << ", " << r_trkEta[r_trkIdx] << ", " << r_trkPhi[r_trkIdx] << ", " << r_trkDxy1[r_trkIdx] << ", " << r_trkDxyError1[r_trkIdx] << ", " << r_trkDz1[r_trkIdx] << ", " << r_trkDzError1[r_trkIdx] << ", " << (int) r_trkNHit[r_trkIdx] << ", " << r_trkChi2[r_trkIdx] << ", " << r_trkPtError[r_trkIdx] << endl;
-
-			if ( std::abs(r_trkDz1[r_trkIdx]/r_trkDzError1[r_trkIdx]) 	< cut_dzSig && 
-			     r_trkChi2[r_trkIdx]/((int) r_trkNdof[r_trkIdx])
-			     			/((int) r_trkNlayer[r_trkIdx]) 		< cut_chi2 && 
-			     (int) r_trkNHit[r_trkIdx] 					>=cut_nhits && 
-			     std::abs(r_trkPtError[r_trkIdx]/r_trkPt[r_trkIdx]) 	< cut_ptRes ) // &&
-			     // r_trkAlgo[r_trkIdx]!=0 &&
-			     // r_trkAlgo[r_trkIdx]!=4 &&
-			     // r_trkAlgo[r_trkIdx]!=22
-			     // ) 
-			{
-				
-				r_goodtrack[r_idx].push_back(r_trkIdx);
-				pt_avg_r += r_trkPt[r_trkIdx];
-				h_pt_tot_r->Fill( r_trkPt[r_trkIdx] );
-				h_dcaxyres_tot_r->Fill( r_trkDxy1[r_trkIdx]/r_trkDxyError1[r_trkIdx] );
-				h_dcazres_tot_r->Fill( r_trkDz1[r_trkIdx]/r_trkDzError1[r_trkIdx]);
-				h_etaphi_r->Fill( r_trkEta[r_trkIdx], r_trkPhi[r_trkIdx]);
-				h_eta_r->Fill( r_trkEta[r_trkIdx]);
-				if(r_trkAlgo[r_trkIdx]==0) h_eta_r_trkAlgo0->Fill( r_trkEta[r_trkIdx]);
-				if(r_trkAlgo[r_trkIdx]==2) h_eta_r_trkAlgo2->Fill( r_trkEta[r_trkIdx]);
-				if(r_trkAlgo[r_trkIdx]==4) h_eta_r_trkAlgo4->Fill( r_trkEta[r_trkIdx]);
-				if(r_trkAlgo[r_trkIdx]==5) h_eta_r_trkAlgo5->Fill( r_trkEta[r_trkIdx]);
-				if(r_trkAlgo[r_trkIdx]==6) h_eta_r_trkAlgo6->Fill( r_trkEta[r_trkIdx]);
-				if(r_trkAlgo[r_trkIdx]==7) h_eta_r_trkAlgo7->Fill( r_trkEta[r_trkIdx]);
-				if(r_trkAlgo[r_trkIdx]==8) h_eta_r_trkAlgo8->Fill( r_trkEta[r_trkIdx]);
-				if(r_trkAlgo[r_trkIdx]==9) h_eta_r_trkAlgo9->Fill( r_trkEta[r_trkIdx]);
-				if(r_trkAlgo[r_trkIdx]==10) h_eta_r_trkAlgo10->Fill( r_trkEta[r_trkIdx]);
-				if(r_trkAlgo[r_trkIdx]==13) h_eta_r_trkAlgo13->Fill( r_trkEta[r_trkIdx]);
-				if(r_trkAlgo[r_trkIdx]==22) h_eta_r_trkAlgo22->Fill( r_trkEta[r_trkIdx]);
-				if(r_trkAlgo[r_trkIdx]==23) h_eta_r_trkAlgo23->Fill( r_trkEta[r_trkIdx]);
-				if(r_trkAlgo[r_trkIdx]==24) h_eta_r_trkAlgo24->Fill( r_trkEta[r_trkIdx]);
-			}
+			r_goodtrack[r_idx].push_back(r_trkIdx);
+			pt_avg_r += r_trkPt[r_trkIdx];
+			h_pt_tot_r->Fill( r_trkPt[r_trkIdx] );
+			h_dcaxyres_tot_r->Fill( r_trkDxy1[r_trkIdx]/r_trkDxyError1[r_trkIdx] );
+			h_dcazres_tot_r->Fill( r_trkDz1[r_trkIdx]/r_trkDzError1[r_trkIdx]);
+			h_etaphi_r->Fill( r_trkEta[r_trkIdx], r_trkPhi[r_trkIdx]);
+			h_eta_r->Fill( r_trkEta[r_trkIdx]);
+			if(r_trkAlgo[r_trkIdx]==0) h_eta_r_trkAlgo0->Fill( r_trkEta[r_trkIdx]);
+			if(r_trkAlgo[r_trkIdx]==2) h_eta_r_trkAlgo2->Fill( r_trkEta[r_trkIdx]);
+			if(r_trkAlgo[r_trkIdx]==4) h_eta_r_trkAlgo4->Fill( r_trkEta[r_trkIdx]);
+			if(r_trkAlgo[r_trkIdx]==5) h_eta_r_trkAlgo5->Fill( r_trkEta[r_trkIdx]);
+			if(r_trkAlgo[r_trkIdx]==6) h_eta_r_trkAlgo6->Fill( r_trkEta[r_trkIdx]);
+			if(r_trkAlgo[r_trkIdx]==7) h_eta_r_trkAlgo7->Fill( r_trkEta[r_trkIdx]);
+			if(r_trkAlgo[r_trkIdx]==8) h_eta_r_trkAlgo8->Fill( r_trkEta[r_trkIdx]);
+			if(r_trkAlgo[r_trkIdx]==9) h_eta_r_trkAlgo9->Fill( r_trkEta[r_trkIdx]);
+			if(r_trkAlgo[r_trkIdx]==10) h_eta_r_trkAlgo10->Fill( r_trkEta[r_trkIdx]);
+			if(r_trkAlgo[r_trkIdx]==13) h_eta_r_trkAlgo13->Fill( r_trkEta[r_trkIdx]);
+			if(r_trkAlgo[r_trkIdx]==22) h_eta_r_trkAlgo22->Fill( r_trkEta[r_trkIdx]);
+			if(r_trkAlgo[r_trkIdx]==23) h_eta_r_trkAlgo23->Fill( r_trkEta[r_trkIdx]);
+			if(r_trkAlgo[r_trkIdx]==24) h_eta_r_trkAlgo24->Fill( r_trkEta[r_trkIdx]);
 		}
 	}
 	// h_pt_tot_r->Print();
@@ -600,12 +601,12 @@ int LHCC_rawprime_tracks() {
 
 		for (int rp_trkIdx = 0; rp_trkIdx < rp_nTrk; ++rp_trkIdx)
 		{
-			fillWithOverFlow(h_trk_p_dzDdzerr, std::abs(rp_trkDz1[rp_trkIdx]/rp_trkDzError1[rp_trkIdx]));
-                        fillWithOverFlow(h_trk_p_chi2, rp_trkChi2[rp_trkIdx]/((int) rp_trkNdof[rp_trkIdx])
-                                                /((int) rp_trkNlayer[rp_trkIdx]));
+			h_cutflow_p->Fill(cuts::nocut);
+			//fillWithOverFlow(h_trk_p_dzDdzerr, std::abs(rp_trkDz1[rp_trkIdx]/rp_trkDzError1[rp_trkIdx]));
+                        fillWithOverFlow(h_trk_p_chi2, rp_trkChi2[rp_trkIdx]/((int) rp_trkNdof[rp_trkIdx]));
                         fillWithOverFlow(h_trk_p_nhits, rp_trkNHit[rp_trkIdx]);
                         fillWithOverFlow(h_trk_p_pterrDpt, std::abs(rp_trkPtError[rp_trkIdx]/rp_trkPt[rp_trkIdx]));
-			if(std::abs(rp_trkDz1[rp_trkIdx]/rp_trkDzError1[rp_trkIdx]) >= cut_dzSig) continue;
+			//if(std::abs(rp_trkDz1[rp_trkIdx]/rp_trkDzError1[rp_trkIdx]) >= cut_dzSig) continue;
 		        h_cutflow_p->Fill(cuts::dzSig);
 			if(rp_trkChi2[rp_trkIdx]/((int) rp_trkNdof[rp_trkIdx])
                                                 /((int) rp_trkNlayer[rp_trkIdx]) >= cut_chi2) continue;
@@ -615,38 +616,26 @@ int LHCC_rawprime_tracks() {
                         if((int) rp_trkNHit[rp_trkIdx] < cut_nhits) continue;
 			h_cutflow_p->Fill(cuts::nhits);
 			// if (rp_trkAlgo[rp_trkIdx]!=0) continue;
-			if ( std::abs(rp_trkDz1[rp_trkIdx]/rp_trkDzError1[rp_trkIdx]) 	< cut_dzSig && 
-			     // std::abs(rp_trkDxy1[rp_trkIdx]/rp_trkDxyError1[rp_trkIdx]) < cut_dxySig && 
-			     rp_trkChi2[rp_trkIdx]/((int) rp_trkNdof[rp_trkIdx])
-			     			  /((int) rp_trkNlayer[rp_trkIdx]) 	< cut_chi2 && 
-			     (int) rp_trkNHit[rp_trkIdx] 				>=cut_nhits && 
-			     std::abs(rp_trkPtError[rp_trkIdx]/rp_trkPt[rp_trkIdx]) 	< cut_ptRes ) // &&
-			     // rp_trkAlgo[rp_trkIdx]!=0 &&
-			     // rp_trkAlgo[rp_trkIdx]!=4 &&
-			     // rp_trkAlgo[rp_trkIdx]!=22
-			     // )
-			{
-				rp_goodtrack[rp_idx].push_back(rp_trkIdx);
-				pt_avg_rp += rp_trkPt[rp_trkIdx];
-				h_pt_tot_rp->Fill( rp_trkPt[rp_trkIdx] );
-				h_dcaxyres_tot_rp->Fill( rp_trkDxy1[rp_trkIdx]/rp_trkDxyError1[rp_trkIdx] );
-				h_dcazres_tot_rp->Fill( rp_trkDz1[rp_trkIdx]/rp_trkDzError1[rp_trkIdx]);
-				h_etaphi_rp->Fill( rp_trkEta[rp_trkIdx], rp_trkPhi[rp_trkIdx]);
-				h_eta_rp->Fill( rp_trkEta[rp_trkIdx] );
-				if(rp_trkAlgo[rp_trkIdx]==0) h_eta_rp_trkAlgo0->Fill( rp_trkEta[rp_trkIdx]);
-				if(rp_trkAlgo[rp_trkIdx]==2) h_eta_rp_trkAlgo2->Fill( rp_trkEta[rp_trkIdx]);
-				if(rp_trkAlgo[rp_trkIdx]==4) h_eta_rp_trkAlgo4->Fill( rp_trkEta[rp_trkIdx]);
-				if(rp_trkAlgo[rp_trkIdx]==5) h_eta_rp_trkAlgo5->Fill( rp_trkEta[rp_trkIdx]);
-				if(rp_trkAlgo[rp_trkIdx]==6) h_eta_rp_trkAlgo6->Fill( rp_trkEta[rp_trkIdx]);
-				if(rp_trkAlgo[rp_trkIdx]==7) h_eta_rp_trkAlgo7->Fill( rp_trkEta[rp_trkIdx]);
-				if(rp_trkAlgo[rp_trkIdx]==8) h_eta_rp_trkAlgo8->Fill( rp_trkEta[rp_trkIdx]);
-				if(rp_trkAlgo[rp_trkIdx]==9) h_eta_rp_trkAlgo9->Fill( rp_trkEta[rp_trkIdx]);
-				if(rp_trkAlgo[rp_trkIdx]==10) h_eta_rp_trkAlgo10->Fill( rp_trkEta[rp_trkIdx]);
-				if(rp_trkAlgo[rp_trkIdx]==13) h_eta_rp_trkAlgo13->Fill( rp_trkEta[rp_trkIdx]);
-				if(rp_trkAlgo[rp_trkIdx]==22) h_eta_rp_trkAlgo22->Fill( rp_trkEta[rp_trkIdx]);
-				if(rp_trkAlgo[rp_trkIdx]==23) h_eta_rp_trkAlgo23->Fill( rp_trkEta[rp_trkIdx]);
-				if(rp_trkAlgo[rp_trkIdx]==24) h_eta_rp_trkAlgo24->Fill( rp_trkEta[rp_trkIdx]);
-			}
+		        rp_goodtrack[rp_idx].push_back(rp_trkIdx);
+			pt_avg_rp += rp_trkPt[rp_trkIdx];
+			h_pt_tot_rp->Fill( rp_trkPt[rp_trkIdx] );
+			h_dcaxyres_tot_rp->Fill( rp_trkDxy1[rp_trkIdx]/rp_trkDxyError1[rp_trkIdx] );
+			h_dcazres_tot_rp->Fill( rp_trkDz1[rp_trkIdx]/rp_trkDzError1[rp_trkIdx]);
+			h_etaphi_rp->Fill( rp_trkEta[rp_trkIdx], rp_trkPhi[rp_trkIdx]);
+			h_eta_rp->Fill( rp_trkEta[rp_trkIdx] );
+			if(rp_trkAlgo[rp_trkIdx]==0) h_eta_rp_trkAlgo0->Fill( rp_trkEta[rp_trkIdx]);
+			if(rp_trkAlgo[rp_trkIdx]==2) h_eta_rp_trkAlgo2->Fill( rp_trkEta[rp_trkIdx]);
+			if(rp_trkAlgo[rp_trkIdx]==4) h_eta_rp_trkAlgo4->Fill( rp_trkEta[rp_trkIdx]);
+			if(rp_trkAlgo[rp_trkIdx]==5) h_eta_rp_trkAlgo5->Fill( rp_trkEta[rp_trkIdx]);
+			if(rp_trkAlgo[rp_trkIdx]==6) h_eta_rp_trkAlgo6->Fill( rp_trkEta[rp_trkIdx]);
+			if(rp_trkAlgo[rp_trkIdx]==7) h_eta_rp_trkAlgo7->Fill( rp_trkEta[rp_trkIdx]);
+			if(rp_trkAlgo[rp_trkIdx]==8) h_eta_rp_trkAlgo8->Fill( rp_trkEta[rp_trkIdx]);
+			if(rp_trkAlgo[rp_trkIdx]==9) h_eta_rp_trkAlgo9->Fill( rp_trkEta[rp_trkIdx]);
+			if(rp_trkAlgo[rp_trkIdx]==10) h_eta_rp_trkAlgo10->Fill( rp_trkEta[rp_trkIdx]);
+			if(rp_trkAlgo[rp_trkIdx]==13) h_eta_rp_trkAlgo13->Fill( rp_trkEta[rp_trkIdx]);
+			if(rp_trkAlgo[rp_trkIdx]==22) h_eta_rp_trkAlgo22->Fill( rp_trkEta[rp_trkIdx]);
+			if(rp_trkAlgo[rp_trkIdx]==23) h_eta_rp_trkAlgo23->Fill( rp_trkEta[rp_trkIdx]);
+			if(rp_trkAlgo[rp_trkIdx]==24) h_eta_rp_trkAlgo24->Fill( rp_trkEta[rp_trkIdx]);
 		}
 
 	}
@@ -654,7 +643,12 @@ int LHCC_rawprime_tracks() {
                                             numBins, customBins);
 	TH1F* h_matchedtrkpPt = new TH1F("matched_trkpPt", "; track p_{T} [GeV/#it{c}]; normalized distributions",
                                             numBins, customBins);
-	TH1F* h_deltar = new TH1F("deltaR", "; deltaR; yield", 50, 0, 0.1);
+	//TH1F* h_unmatchedtrkPt = new TH1F("unmatched_trkPt", "; track p_{T} [GeV/#it{c}]; normalized distributions",
+          //                                  numBins, customBins);
+	TH1F* h_unmatchedtrkPt = createhist("unmatched_trkPt", "; track p_{T} [GeV/#it{c}]; normalized distributions", numBins, customBins);
+        TH1F* h_unmatchedtrkpPt = new TH1F("unmatched_trkpPt", "; track p_{T} [GeV/#it{c}]; normalized distributions",
+                                            numBins, customBins);
+	TH1F* h_deltar = createhist("deltaR", "; deltaR; yield", 50, {}, 0., 0.2);
 
 	int not_matched_trk(0), not_matched_trk_p(0);
 	int total_track_p(0), total_track(0);
@@ -666,7 +660,7 @@ int LHCC_rawprime_tracks() {
 	  {
             int evt = evt_trk.first;
             trackTree_r->GetEntry(evt);
-
+            
 	    total_track += r_goodtrack[evt].size();
 	    
 	    //int matched_trk_idx;
@@ -683,34 +677,38 @@ int LHCC_rawprime_tracks() {
 	     if(evt_p == -1) {
 	        std::cout << "common event is not found" << std::endl;
 	        break;
-	     } 
+	     }
 	     total_track_p   += rp_goodtrack[evt_p].size();
 
 	     for(unsigned int trk_idx=0; trk_idx<evt_trk.second.size(); trk_idx++) {
-	            
+              
+	        int r_trkidx = r_goodtrack[evt][trk_idx];
 	        float drmin = 9999;
 	        matched_trk_p_idx = -1;
 	
 	        for(unsigned int trk_p_idx=0; trk_p_idx<rp_goodtrack[evt_p].size(); trk_p_idx++) {
+		    
+		    int rp_trkidx = rp_goodtrack[evt_p][trk_p_idx];
 		    if(matched_trk_p.find(evt_p) != matched_trk_p.end()) {
-		       if(std::find(matched_trk_p[evt_p].begin(), matched_trk_p[evt_p].end(), trk_p_idx) != matched_trk_p[evt_p].end()) continue;
+		       if(std::find(matched_trk_p[evt_p].begin(), matched_trk_p[evt_p].end(), rp_trkidx) != matched_trk_p[evt_p].end()) continue;
 		    }
-		    auto dr = deltaR(r_trkEta[trk_idx], rp_trkEta[trk_p_idx], r_trkPhi[trk_idx], rp_trkPhi[trk_p_idx]);
+		    auto dr = deltaR(r_trkEta[r_trkidx], rp_trkEta[rp_trkidx], r_trkPhi[r_trkidx], rp_trkPhi[rp_trkidx]);
 		    if (dr < 0.5 && dr < drmin) {
                           drmin = dr;
-		          matched_trk_p_idx = trk_p_idx;
+		          matched_trk_p_idx = rp_trkidx;
 		    }
 	         } // end of track_p loop
 		 fillWithOverFlow(h_deltar, drmin);
 		 if(matched_trk_p_idx != -1) {
 		   if (matched_trk_p.find(evt_p) == matched_trk_p.end())
 	              matched_trk_p[evt_p] = {};
-		   h_matchedtrkPt->Fill(r_trkPt[trk_idx]);
+		   h_matchedtrkPt->Fill(r_trkPt[r_trkidx]);
 		   h_matchedtrkpPt->Fill(rp_trkPt[matched_trk_p_idx]);
-		   fillWithOverFlow(h_matchtrack_pt_ratio, r_trkPt[trk_idx]/rp_trkPt[matched_trk_p_idx]);
+		   fillWithOverFlow(h_matchtrack_pt_ratio, r_trkPt[r_trkidx]/rp_trkPt[matched_trk_p_idx]);
 		   matched_trk_p[evt_p].push_back(matched_trk_p_idx);
 		  }
 		  else {
+		    h_unmatchedtrkPt->Fill(r_trkPt[r_trkidx]);
 		    not_matched_trk += 1;
 		  }
 	    } // end of track loop
@@ -719,11 +717,14 @@ int LHCC_rawprime_tracks() {
         for(auto& evt_trk: rp_goodtrack)
           {
             int evt = evt_trk.first;
+            trackTree_rp->GetEntry(evt);
             for(unsigned int trk_p_idx=0; trk_p_idx<evt_trk.second.size(); trk_p_idx++) {
-      
+
+                    int rp_trkidx = rp_goodtrack[evt][trk_p_idx];
                     if (matched_trk_p.find(evt) != matched_trk_p.end()) {
-		       if(std::find(matched_trk_p[evt].begin(), matched_trk_p[evt].end(), trk_p_idx) != matched_trk_p[evt].end()) continue; // track_p is already matched with other track
+		       if(std::find(matched_trk_p[evt].begin(), matched_trk_p[evt].end(), rp_trkidx) != matched_trk_p[evt].end()) continue; // track_p is already matched with other track
 		    }
+		    h_unmatchedtrkpPt->Fill(rp_trkPt[rp_trkidx]);
                     not_matched_trk_p += 1;
             } // end of track loop
           } // end of event loop
@@ -910,7 +911,11 @@ int LHCC_rawprime_tracks() {
         canvSingle0->SaveAs(("../img/"+expTag+"_deltaR.pdf").c_str());
 
         h_matchedtrkpPt->Write();
+	h_unmatchedtrkpPt->Write();
 	h_matchedtrkPt->Write();
+	h_unmatchedtrkPt->Write();
+
+	h_matchtrack_pt_ratio->Scale(1/h_matchtrack_pt_ratio->Integral());
 	h_matchtrack_pt_ratio->Write();
 
 	h_trk_dzDdzerr->Write();
