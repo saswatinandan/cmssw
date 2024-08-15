@@ -26,6 +26,8 @@
 #include "TError.h"
 #include "TMath.h"
 
+#include "hist_auxiliary.h"
+
 using namespace std;
 
 std::vector<std::string> getFileList(std::string inFileName) // fileListTxt, root file
@@ -122,37 +124,10 @@ void formatLegend(TLegend* leg, double textsize=27)
         leg->SetLineColor(0);
 }
 
-template <typename T,
-            typename = typename std::enable_if<std::is_arithmetic<T>::value>>
-T
-constrainValue(T value,
-                 T lowerBound,
-                 T upperBound)
-  {
-    assert(lowerBound <= upperBound);
-    value = std::max(value, lowerBound);
-    value = std::min(value, upperBound);
-    return value;
-}
-
 enum cuts {nocut=1, dzSig, chi2, ptRes, nhits};
 std::map<int, std::string> cutToname = { {cuts::nocut, "nocut"}, {cuts::dzSig, "dzSig"}, {cuts::ptRes, "ptRes"},{cuts::chi2, "chi2"},{cuts::nhits, "nhits"}};
 
 
-int fillWithOverFlow(TH1 * histogram,
-                 double x,
-                 double evtWeight=1,
-                 double evtWeightErr=0.)
-{
-  if(!histogram) assert(0);
-  const TAxis * const xAxis = histogram->GetXaxis();
-  const int bin = constrainValue(xAxis->FindBin(x), 1, xAxis->GetNbins());
-  const double binContent = histogram->GetBinContent(bin);
-  const double binError   = histogram->GetBinError(bin);
-  histogram->SetBinContent(bin, binContent + evtWeight);
-//  histogram->SetBinError(bin, std::sqrt(pow(binError,2) + 1));
-  return ((bin == xAxis->GetNbins()) || (bin == 1)) ? 1 : 0;
-}
 
 struct test{
 	string f1name;
