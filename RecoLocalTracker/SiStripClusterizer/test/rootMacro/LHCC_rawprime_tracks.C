@@ -284,11 +284,11 @@ int LHCC_rawprime_tracks() {
 	map< int, map< int, map<int, bool> > > evtMatchedMap;
 	map< int, map< int, map<int, bool> > > evtMap;
 	
-        TFile* f1               = TFile::Open("/eos/home-s/snandan/flatTrackRawprime.root", "read");
+        TFile* f1               = TFile::Open("flatTrackRawprime.root", "read");
         TDirectoryFile* _1      = (TDirectoryFile*) f1->Get("trackAnalyzer");
         TTree* trackTree_rp     = (TTree*) _1->Get("trackTree");
         
-        TFile* f2               = TFile::Open("/eos/home-s/snandan/flatTrackRawrereco.root", "read");
+        TFile* f2               = TFile::Open("flatTrackRaw.root", "read");
         TDirectoryFile* _2      = (TDirectoryFile*) f2->Get("trackAnalyzer");
         TTree* trackTree_r      = (TTree*) _2->Get("trackTree");
 
@@ -503,7 +503,7 @@ int LHCC_rawprime_tracks() {
         TH1F * h_trk_p_pterrDpt = new TH1F("trk_p_pterrDpt", "Raw';trk_p_pterrDpt;yield;", 50, 0,1);
 	TH1F * h_cutflow_p = new TH1F("cutflow_p", "cutflow'", cuts::nhits, cuts::nocut, cuts::nhits+1);
 
-	TH1F * h_matchtrack_pt_ratio = new TH1F("ratio", "ratio_Raw_vs_Raw'", 50, 0.5,1.5);
+	TH1F * h_matchtrack_pt_ratio = new TH1F("ratio", ";Raw_pt/Raw'_pt;yield", 50, 0.95,1.05);
 
 	for(int ibin=cuts::nocut; ibin<=cuts::nhits; ibin++) {
 		h_cutflow->GetXaxis()->SetBinLabel(ibin, cutToname[ibin].c_str());
@@ -693,7 +693,7 @@ int LHCC_rawprime_tracks() {
 		       if(std::find(matched_trk_p[evt_p].begin(), matched_trk_p[evt_p].end(), rp_trkidx) != matched_trk_p[evt_p].end()) continue;
 		    }
 		    auto dr = deltaR(r_trkEta[r_trkidx], rp_trkEta[rp_trkidx], r_trkPhi[r_trkidx], rp_trkPhi[rp_trkidx]);
-		    if (dr < 0.5 && dr < drmin) {
+		    if (dr < 0.05 && dr < drmin) {
                           drmin = dr;
 		          matched_trk_p_idx = rp_trkidx;
 		    }
@@ -917,6 +917,21 @@ int LHCC_rawprime_tracks() {
 
 	h_matchtrack_pt_ratio->Scale(1/h_matchtrack_pt_ratio->Integral());
 	h_matchtrack_pt_ratio->Write();
+	canvSingle0->GetPad(0)->SetMargin(0.22, 0.16, 0.14, 0.07);
+        canvSingle0->SetLogy(true);
+        gPad->SetLogx(0);
+        h_matchtrack_pt_ratio->Draw("hist");
+        gPad->SetGridy(0);
+        latex.SetTextFont(63);
+        latex.SetTextSize(31);
+        latex.DrawLatexNDC(0.53,0.84,"CMS");
+        latex.SetTextFont(53);
+        latex.SetTextSize(22);
+        latex.DrawLatexNDC(0.63,0.84,"Preliminary");
+        latex.SetTextFont(43);
+        latex.SetTextSize(24);
+        //latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
+        canvSingle0->SaveAs(("../img/"+expTag+"_ratio.pdf").c_str());
 
 	h_trk_dzDdzerr->Write();
         h_trk_chi2->Write();
