@@ -24,6 +24,8 @@
 #include "TLine.h"
 #include "TError.h"
 
+#include "hist_auxiliary.h"
+
 using namespace std;
 
 template<class T>
@@ -109,7 +111,7 @@ struct cluster{
 	// for approxCluster
 	uint32_t    detId;
 	uint16_t    firstStrip;
-	uint16_t    endStrip;
+        uint16_t    endStrip;
 	float       barycenter;
 	uint16_t    size;
 	int         charge;
@@ -187,34 +189,6 @@ struct test{
 		}
 	}
 };
-
-template <typename T,
-            typename = typename std::enable_if<std::is_arithmetic<T>::value>>
-T
-constrainValue(T value,
-                 T lowerBound,
-                 T upperBound)
-  {
-    assert(lowerBound <= upperBound);
-    value = std::max(value, lowerBound);
-    value = std::min(value, upperBound);
-    return value;
-}
-
-int fillWithOverFlow(TH1 * histogram,
-                 double x,
-                 double evtWeight,
-                 double evtWeightErr=0.)
-{
-  if(!histogram) assert(0);
-  const TAxis * const xAxis = histogram->GetXaxis();
-  const int bin = constrainValue(xAxis->FindBin(x), 1, xAxis->GetNbins());
-  const double binContent = histogram->GetBinContent(bin);
-  const double binError   = histogram->GetBinError(bin);
-  histogram->SetBinContent(bin, binContent + evtWeight);
-//  histogram->SetBinError(bin, std::sqrt(pow(binError,2) + 1));
-  return ((bin == xAxis->GetNbins()) || (bin == 1)) ? 1 : 0;
-}
 
 int LHCC_rawprime_clusters()
 {
@@ -296,22 +270,23 @@ int LHCC_rawprime_clusters()
 	/* *******************************
 	 * 0.2 Loading clusters & dead strips
 	 * *******************************/
-        TFile* f1               = TFile::Open("/eos/home-s/snandan/Muon_sep19_2_1_dump_rawprime.root", "read"); 
+        //TFile* f1               = TFile::Open("Muon_sep19_2_1_dump_rawprime.root","read");//RawPrimeFlatTupleInt8.root", "read"); 
 		// /eos/home-v/vmuralee/PREanalysis/outputFiles/test/step2_dump_Rawprime_check.root);
-        TDirectoryFile* _1      = (TDirectoryFile*) f1->Get("sep19_2_1_dump_rawprime");
+        TFile* f1 = TFile::Open("RawPrimeFlatTupleInt8.root","read");//RawPrimeFlatTupleInt8.root", "read");
+        TDirectoryFile* _1      = (TDirectoryFile*) f1->Get("dump_rawprime");//dump_rawprime");
         TTree* onlineClusterTree= (TTree*) _1->Get("onlineClusterTree");
 
-        TFile* f2               = TFile::Open("/eos/home-s/snandan/Muon_sep19_2_2_dump_raw.root", "read");
+        TFile* f2               = TFile::Open("Muon_sep19_2_2_dump_raw.root", "read");
 			// /eos/home-v/vmuralee/PREanalysis/outputFiles/test/step2_dump_Raw.root);
         TDirectoryFile* _2      = (TDirectoryFile*) f2->Get("sep19_2_2_dump_raw");
         TTree* offlineClusterTree= (TTree*) _2->Get("offlineClusterTree");
 
-        TFile* f3               = TFile::Open("/eos/home-s/snandan/Muon_sep19_2_1_deadStrip_rawprime.root", "read");
+        TFile* f3               = TFile::Open("RawPrimeFlatTupleInt8.root", "read");
 			// /eos/home-v/vmuralee/PREanalysis/outputFiles/test/step2_dump_Rawprime_check.root);
-        TDirectoryFile* _3      = (TDirectoryFile*) f3->Get("sep19_3_dump_deadStrips");
+        TDirectoryFile* _3      = (TDirectoryFile*) f3->Get("dead_dump_rawprime");
         TTree* onlineDeadStripTree= (TTree*) _3->Get("deadStripTree");
 
-        TFile* f4               = TFile::Open("/eos/home-s/snandan/Muon_sep19_2_2_deadStrip_raw.root", "read");
+        TFile* f4               = TFile::Open("Muon_sep19_2_2_dead_raw.root", "read");
 	// /eos/home-v/vmuralee/PREanalysis/outputFiles/test/step2_dump_Raw_check.root);
         TDirectoryFile* _4      = (TDirectoryFile*) f4->Get("sep19_3_dump_deadStrips");
         TTree* offlineDeadStripTree= (TTree*) _4->Get("deadStripTree");
@@ -481,7 +456,7 @@ int LHCC_rawprime_clusters()
 												r_detId, r_firstStrip, r_endStrip, r_barycenter,
 												r_size, r_charge );
 	}
-
+        
 
 	const Int_t rp_nEntries = onlineClusterTree->GetEntries();
 	for (int ac_idx = 0; ac_idx < rp_nEntries; ++ac_idx)
@@ -498,7 +473,6 @@ int LHCC_rawprime_clusters()
 		h_charge_tot_ac->Fill( rp_charge );
 		h_barycenter_tot_ac->Fill( rp_barycenter );
 	}
-
 	const Int_t r_d_nEntries = offlineDeadStripTree->GetEntries();
 	for (int idx = 0; idx < r_d_nEntries; ++idx)
 	{
@@ -506,13 +480,11 @@ int LHCC_rawprime_clusters()
 		offlineDeadStripTree->GetEntry(idx);
 
 		if (r_dict.find(r_d_event)==r_dict.end()) continue;
-
 		if (r_d_size==0) continue;
 		r_d_dict[ r_d_event ][ r_d_detId ][ idx ] = cluster( idx, r_d_event, r_d_run, r_d_lumi,
 												r_d_detId, -1, -1, -1,
 												r_d_size, -1 );
 	}
-
 	const Int_t rp_d_nEntries = onlineDeadStripTree->GetEntries();
 	for (int idx = 0; idx < rp_d_nEntries; ++idx)
 	{
@@ -610,14 +582,6 @@ int LHCC_rawprime_clusters()
 	// leg0 = canvSingle0->GetPad(0)->BuildLegend(.62, .6, .87, .8);
 	formatLegend(leg0);
 	leg0->Draw();
-	latex.SetTextFont(63);
-	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.22,0.84,"CMS");
-	latex.SetTextFont(53);
-	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.32,0.84,"Preliminary");
-	latex.SetTextFont(43);
-	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_charge.png").c_str());
 
@@ -627,20 +591,10 @@ int LHCC_rawprime_clusters()
 	// leg0 = canvSingle0->GetPad(0)->BuildLegend(.62, .6, .87, .8);
 	formatLegend(leg0);
 	leg0->Draw();
-	latex.SetTextFont(63);
-	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.22,0.84,"CMS");
-	latex.SetTextFont(53);
-	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.32,0.84,"Preliminary");
-	latex.SetTextFont(43);
-	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_barycenter.png").c_str());
 	
 	delete canvSingle0;
-
-
 	/*
 	cout << "map of raw clusters: " << endl;
 	for(auto& _cs_perEvt: r_dict) 
@@ -789,29 +743,6 @@ int LHCC_rawprime_clusters()
 	matched_sc2ac_txt.open(Form("log/%s_matched_sc2ac.txt", expTag.c_str()));
 	matched_sc2ac_txt << "event detId sc_idx barycenter size charge firstStrip endStrip ac_idx barycenter size charge firstStrip endStrip\n";
 	
-	TH1F * h_dfirstStrip_overflow = new TH1F("dfirstStrip_overflow", "delta_firstStrip; delta_firstStrip; yield", 10, -0.5, 9.5);
-        TH1F * h_dendStrip_overflow = new TH1F("dendStrip_overflow", "delta_endStrip; delta_endStrip; yield", 10, -0.5, 9.5);
-
-	TH1F * h_dfirstStrip = new TH1F("dfirstStrip", "delta_firstStrip; delta_firstStrip; yield", 10, -0.5, 9.5);
-        TH1F * h_dendStrip = new TH1F("dendStrip", "delta_endStrip; delta_endStrip; yield", 10, -0.5, 9.5);
-       
-        TH1F * h_barycenter_res_overflow = new TH1F( "barycenter_res_overflow",
-                                            "for matched cluster with overflowbin; barycenter RAW'-RAW; yield",
-                                            50, -.1, .1);
-	TH2F * h_adc_overflow = new TH2F("adc_overflow", ";Raw adc; Raw' adc", 256, 0., 256, 256, 0., 256.);
-	TH2F * h_hitx_overflow = new TH2F("hitx_overflow", ";Raw hitX; Raw' hit_X", 400, -100., 100, 100, -100., 100.);
-	TH2F * h_hity_overflow = new TH2F("hity_overflow", ";Raw hitY; Raw' hit_Y", 400, -100., 100, 100, -100., 100.);
-
-	TH2F * h_adc = new TH2F("adc", ";Raw adc; Raw' adc", 256, 0., 256, 256, 0., 256.);
-        TH2F * h_hitx = new TH2F("hitx", ";Raw hitX; Raw' hit_X", 400, -100., 100, 100, -100., 100.);
-        TH2F * h_hity = new TH2F("hity", ";Raw hitY; Raw' hit_Y", 400, -100., 100, 100, -100., 100.);
-
-	TCanvas *canvSingle = new TCanvas("canvSingle", "canvSingle", 700, 600);
-        gStyle->SetOptTitle(0);
-        gErrorIgnoreLevel = kWarning;
-        canvSingle->GetPad(0)->SetMargin (0.18, 0.20, 0.12, 0.07);
-        canvSingle->cd();
-        
 	TFile * f = new TFile("cluster_study.root", "recreate");
 	f->cd();
 	for (auto& idx_pair: matched_sc2ac) 
@@ -829,12 +760,11 @@ int LHCC_rawprime_clusters()
 
 		h_size_res     ->Fill( ( rp_size - r_size )/((float) r_size) );
 		int charge_withovrflow = fillWithOverFlow(h_charge_res, ( rp_charge - r_charge )/((float) r_charge), 1 );
-		h_barycenter_res->Fill( rp_barycenter - r_barycenter );
-
+		int bary = fillWithOverFlow(h_barycenter_res, rp_barycenter - r_barycenter,1);
 		matched_sc2ac_txt << r_event << " " << r_detId << " " 
 						  << idx_pair.first << " " << r_barycenter << " " << r_size << " " << r_charge << " " << r_firstStrip << " " << r_endStrip << " "
 						  << idx_pair.second << " " << rp_barycenter << " " << rp_size << " " << rp_charge << " " << rp_firstStrip << " " << rp_endStrip << "\n";
-		if (charge_withovrflow) {
+		/*if (charge_withovrflow) {
 			h_dfirstStrip_overflow->Fill(abs(r_firstStrip-rp_firstStrip));
                         h_dendStrip_overflow->Fill(abs(r_endStrip-rp_endStrip));
 
@@ -934,94 +864,10 @@ int LHCC_rawprime_clusters()
                                 h_hitx->Fill(r_hitX[i], rp_hitX[i]);
                                 h_hity->Fill(r_hitY[i], rp_hitY[i]);
                         }
-	      }
+	      }*/
 	}
 	f->Close();
 	matched_sc2ac_txt.close();
-        
-	PlotStyle(h_dfirstStrip); h_dfirstStrip->SetLineColor(46);
-        h_dfirstStrip->Draw("");
-        latex.SetTextFont(63);
-        latex.SetTextSize(31);
-        latex.DrawLatexNDC(0.22,0.84,"CMS");
-        latex.SetTextFont(53);
-        latex.SetTextSize(22);
-        latex.DrawLatexNDC(0.32,0.84,"Preliminary");
-        latex.SetTextFont(43);
-	canvSingle0->SaveAs(("../img/"+expTag+"_wo_overflowfirstStrip.png").c_str());
-
-	PlotStyle(h_dendStrip); h_dendStrip->SetLineColor(46);
-        h_dendStrip->Draw("");
-        latex.SetTextFont(63);
-        latex.SetTextSize(31);
-        latex.DrawLatexNDC(0.22,0.84,"CMS");
-        latex.SetTextFont(53);
-        latex.SetTextSize(22);
-        latex.DrawLatexNDC(0.32,0.84,"Preliminary");
-        latex.SetTextFont(43);
-        canvSingle0->SaveAs(("../img/"+expTag+"_wo_overflowlastStrip.png").c_str());
-
-	PlotStyle(h_dfirstStrip_overflow); h_dfirstStrip_overflow->SetLineColor(46);
-        h_dfirstStrip_overflow->Draw("");
-        latex.SetTextFont(63);
-        latex.SetTextSize(31);
-        latex.DrawLatexNDC(0.22,0.84,"CMS");
-        latex.SetTextFont(53);
-        latex.SetTextSize(22);
-        latex.DrawLatexNDC(0.32,0.84,"Preliminary");
-        latex.SetTextFont(43);
-        canvSingle0->SaveAs(("../img/"+expTag+"_overflowfirstStrip.png").c_str());
-
-        PlotStyle(h_dendStrip_overflow); h_dendStrip_overflow->SetLineColor(46);
-        h_dendStrip_overflow->Draw("");
-        latex.SetTextFont(63);
-        latex.SetTextSize(31);
-        latex.DrawLatexNDC(0.22,0.84,"CMS");
-        latex.SetTextFont(53);
-        latex.SetTextSize(22);
-        latex.DrawLatexNDC(0.32,0.84,"Preliminary");
-        latex.SetTextFont(43);
-        canvSingle0->SaveAs(("../img/"+expTag+"_overflowlastStrip.png").c_str());
-      
-        PlotStyle(h_barycenter_res_overflow); h_barycenter_res_overflow->SetLineColor(46);
-        h_barycenter_res_overflow->Draw("");	
-        canvSingle0->SaveAs(("../img/"+expTag+"_overflowbarycenter.png").c_str());
-
-	PlotStyle(h_adc_overflow); h_adc_overflow->SetLineColor(46);
-        h_adc_overflow->Draw("colz");
-        canvSingle0->SaveAs(("../img/"+expTag+"_overflow_adc.png").c_str());
-
-	PlotStyle(h_hitx_overflow); h_hitx_overflow->SetLineColor(46);
-        h_hitx_overflow->Draw("colz");
-        canvSingle0->SaveAs(("../img/"+expTag+"_overflow_hitx.png").c_str());
-
-	PlotStyle(h_hity_overflow); h_hity_overflow->SetLineColor(46);
-        h_hity_overflow->Draw("colz");
-        canvSingle0->SaveAs(("../img/"+expTag+"_overflow_hity.png").c_str());
-
-	PlotStyle(h_adc); h_adc->SetLineColor(46);
-        h_adc->Draw("colz");
-        canvSingle0->SaveAs(("../img/"+expTag+"_adc.png").c_str());
-
-        PlotStyle(h_hitx); h_hitx->SetLineColor(46);
-        h_hitx->Draw("colz");
-        canvSingle0->SaveAs(("../img/"+expTag+"_hitx.png").c_str());
-
-        PlotStyle(h_hity); h_hity->SetLineColor(46);
-        h_hity->Draw("colz");
-        canvSingle0->SaveAs(("../img/"+expTag+"_hity.png").c_str());
-
-	delete h_dfirstStrip_overflow;
-        delete h_dendStrip_overflow;
-	delete h_barycenter_res_overflow;
-	delete h_adc_overflow;
-	delete h_hitx_overflow; delete h_hity_overflow;
-
-	delete h_dfirstStrip;
-        delete h_dendStrip;
-        delete h_adc;
-        delete h_hitx; delete h_hity;
-
         
 	TCanvas *canv = new TCanvas("canv", "canv", 700*4, 600*2);
 
@@ -1050,74 +896,35 @@ int LHCC_rawprime_clusters()
 	delete canv;
 
 
-	/*TCanvas *canvSingle = new TCanvas("canvSingle", "canvSingle", 700, 600);
+	TCanvas *canvSingle = new TCanvas("canvSingle", "canvSingle", 700, 600);
 	gStyle->SetOptTitle(0);
 	gErrorIgnoreLevel = kWarning;
 	canvSingle->GetPad(0)->SetMargin (0.18, 0.20, 0.12, 0.07);
-	canvSingle->cd();*/
+	canvSingle->cd();
+	
 	h_size->GetZaxis()->SetTitleOffset(1.8);
 	h_size->GetZaxis()->SetTitle("number of clusters");
 	h_size->Draw("COLZ");
-	latex.SetTextFont(63);
-	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.21,0.84,"CMS");
-	latex.SetTextFont(53);
-	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
-	latex.SetTextFont(43);
-	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_size_scat.png").c_str());
 
 	h_charge->GetZaxis()->SetTitleOffset(1.8);
 	h_charge->GetZaxis()->SetTitle("number of clusters");
 	h_charge->Draw("COLZ");
-	latex.SetTextFont(63);
-	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.21,0.84,"CMS");
-	latex.SetTextFont(53);
-	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
-	latex.SetTextFont(43);
-	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_charge_scat.png").c_str());
 
 	h_barycenter->GetZaxis()->SetTitleOffset(1.8);
 	h_barycenter->GetZaxis()->SetTitle("number of clusters");
 	h_barycenter->Draw("COLZ");
-	latex.SetTextFont(63);
-	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.21,0.84,"CMS");
-	latex.SetTextFont(53);
-	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
-	latex.SetTextFont(43);
-	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_barycenter_scat.png").c_str());
 
 	h_barycenter_vs_charge->Draw("COLZ");
-	latex.SetTextFont(63);
-	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.21,0.84,"CMS");
-	latex.SetTextFont(53);
-	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
-	latex.SetTextFont(43);
-	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_del_barycenter_del_charge_scat.png").c_str());
 
 	h_size_res->Draw("");
-	latex.SetTextFont(63);
-	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.21,0.84,"CMS");
-	latex.SetTextFont(53);
-	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
-	latex.SetTextFont(43);
-	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	
 	latex.SetTextFont(43);
@@ -1126,14 +933,8 @@ int LHCC_rawprime_clusters()
 	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_size_res.png").c_str());
 
 	h_charge_res->Draw("");
-	latex.SetTextFont(63);
-	latex.SetTextSize(31);
 	latex.DrawLatexNDC(0.21,0.84,"CMS");
-	latex.SetTextFont(53);
-	latex.SetTextSize(22);
 	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
-	latex.SetTextFont(43);
-	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	latex.SetTextFont(43);
 	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_charge_res->GetMean()));
@@ -1142,14 +943,7 @@ int LHCC_rawprime_clusters()
 	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_charge_res.png").c_str());
 
 	h_barycenter_res->Draw("");
-	latex.SetTextFont(63);
-	latex.SetTextSize(31);
-	latex.DrawLatexNDC(0.21,0.84,"CMS");
-	latex.SetTextFont(53);
-	latex.SetTextSize(22);
 	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
-	latex.SetTextFont(43);
-	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	latex.SetTextFont(43);
 	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_barycenter_res->GetMean()));
@@ -1186,7 +980,6 @@ int LHCC_rawprime_clusters()
 	{
 		offlineClusterTree->GetEntry(sc.idx);
 		if (!faster) sc.print();
-
 		// find ac
 		if( rp_dict.find( sc.event ) == rp_dict.end() ) continue;
 		if( rp_dict[ sc.event ].find( sc.detId ) == rp_dict[ sc.event ].end() ) {
@@ -1292,7 +1085,7 @@ int LHCC_rawprime_clusters()
 		/* *******************************
 		 * 3.2.2 plot ds of raw on the same detId
 		 * *******************************/
-		map<int, cluster> r_ds_map = r_d_dict[sc.event][sc.detId]; 
+		map<int, cluster> r_ds_map = r_d_dict[sc.event][sc.detId];
 		if (!faster) printf("found %ld online (raw') ds in same event and same detId\n", r_ds_map.size());
 
 		if (r_ds_map.size()==1)
