@@ -270,10 +270,10 @@ int LHCC_rawprime_clusters()
 	/* *******************************
 	 * 0.2 Loading clusters & dead strips
 	 * *******************************/
-        //TFile* f1               = TFile::Open("Muon_sep19_2_1_dump_rawprime.root","read");//RawPrimeFlatTupleInt8.root", "read"); 
+        TFile* f1    = TFile::Open("Muon_sep19_2_1_dump_rawprime.root","read");//RawPrimeFlatTupleInt8.root", "read"); 
 		// /eos/home-v/vmuralee/PREanalysis/outputFiles/test/step2_dump_Rawprime_check.root);
-        TFile* f1 = TFile::Open("RawPrimeFlatTupleInt8.root","read");//RawPrimeFlatTupleInt8.root", "read");
-        TDirectoryFile* _1      = (TDirectoryFile*) f1->Get("dump_rawprime");//dump_rawprime");
+        //TFile* f1 = TFile::Open("RawPrimeFlatTupleInt8.root","read");//RawPrimeFlatTupleInt8.root", "read");
+        TDirectoryFile* _1      = (TDirectoryFile*) f1->Get("sep19_2_1_dump_rawprime");//dump_rawprime");
         TTree* onlineClusterTree= (TTree*) _1->Get("onlineClusterTree");
 
         TFile* f2               = TFile::Open("Muon_sep19_2_2_dump_raw.root", "read");
@@ -764,16 +764,7 @@ int LHCC_rawprime_clusters()
 		matched_sc2ac_txt << r_event << " " << r_detId << " " 
 						  << idx_pair.first << " " << r_barycenter << " " << r_size << " " << r_charge << " " << r_firstStrip << " " << r_endStrip << " "
 						  << idx_pair.second << " " << rp_barycenter << " " << rp_size << " " << rp_charge << " " << rp_firstStrip << " " << rp_endStrip << "\n";
-		/*if (charge_withovrflow) {
-			h_dfirstStrip_overflow->Fill(abs(r_firstStrip-rp_firstStrip));
-                        h_dendStrip_overflow->Fill(abs(r_endStrip-rp_endStrip));
-
-                        h_barycenter_res_overflow->Fill( r_barycenter - rp_barycenter );
-			for(uint16_t i=0; i < r_size; ++i) {
-				h_adc_overflow->Fill(r_adc[i], rp_adc[i]);
-				h_hitx_overflow->Fill(r_hitX[i], rp_hitX[i]);
-				h_hity_overflow->Fill(r_hitY[i], rp_hitY[i]);
-			}
+		if (charge_withovrflow) {
 		        map<int, cluster> r_map = r_dict[r_event][r_detId];
 			map<int, cluster> rp_map = rp_dict[rp_event][rp_detId];
 			if ((r_event != rp_event) | (r_detId != rp_detId)) return 0;
@@ -855,16 +846,6 @@ int LHCC_rawprime_clusters()
                         canvSingle->SaveAs(Form("../img/%sRawp_overflow_matched_vs_unmatched_idx_%d.png",expTag.c_str(), idx_pair.first));
 			delete canvSingle;
 		}
-	      else {
-                 h_dfirstStrip->Fill(abs(r_firstStrip-rp_firstStrip));
-                 h_dendStrip->Fill(abs(r_endStrip-rp_endStrip));
-                        //h_barycenter_res_overflow->Fill( r_barycenter - rp_barycenter );
-                        for(uint16_t i=0; i < r_size; ++i) {
-                                h_adc->Fill(r_adc[i], rp_adc[i]);
-                                h_hitx->Fill(r_hitX[i], rp_hitX[i]);
-                                h_hity->Fill(r_hitY[i], rp_hitY[i]);
-                        }
-	      }*/
 	}
 	f->Close();
 	matched_sc2ac_txt.close();
