@@ -157,19 +157,16 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
 
   const auto& tkGeom = &es.getData(tkGeomToken_);
   const auto tkDets = tkGeom->dets();
+
   for (const auto& detApproxClusters : *approxClusterCollection) {
     eventN = event.id().event();
     runN   = (int) event.id().run();
     lumi   = (int) event.id().luminosityBlock();
     detId  = detApproxClusters.id();
-    std::cout << "event: " << eventN << "\t" << runN << "\t" << lumi << std::endl; 
-    if ((eventN != 8180236 ) && (runN != 382216) && (lumi != 99)) continue;
-    auto _size = detApproxClusters.end() - detApproxClusters.begin();
-    std::cout << "new event " << std::endl;
-    std::cout << "_size: " << size << std::endl; 
-    int count(0);
+
+
     for (const auto& approxCluster : detApproxClusters) {
-      count += 1;
+
       ///// 1. converting approxCluster to stripCluster: for the estimation of firstStrip, endStrip, adc info
       uint16_t nStrips{0};
       const auto& _detId = detId; // for the capture clause in the lambda function
@@ -236,7 +233,6 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
       }
       onlineClusterTree->Fill();
     }
-    std::cout << "count: " << count << std::endl;
   }
 }
 
