@@ -631,22 +631,20 @@ int LHCC_rawprime_tracks() {
 	std::map<int, std::vector<int> >matched_trk_p;
 	std::map<int, std::vector<int> >matched_trk;
 	
-	for(auto& evt_trk: r_goodtrack)
+	for(auto const & [evt, tracks]: r_goodtrack)
 	  {
-            int evt = evt_trk.first;
             trackTree_r->GetEntry(evt);
             
 	    total_track += r_goodtrack[evt].size();
 	    
-	    //int matched_trk_idx;
             int matched_trk_p_idx;
 
 	    int evt_p(-1);
-	    for(auto& evt_trk_p: rp_goodtrack)
+	    for(auto const & [evt_rp, tracks_p]: rp_goodtrack)
             {
-             trackTree_rp->GetEntry(evt_trk_p.first);
+             trackTree_rp->GetEntry(evt_rp);
              if ( r_event != rp_event) continue;
-	     evt_p = evt_trk_p.first;
+	     evt_p = evt_rp;
 	     break;
 	     }
 	     if(evt_p == -1) {
@@ -655,7 +653,7 @@ int LHCC_rawprime_tracks() {
 	     }
 	     total_track_p   += rp_goodtrack[evt_p].size();
 
-	     for(unsigned int trk_idx=0; trk_idx<evt_trk.second.size(); trk_idx++) {
+	     for(unsigned int trk_idx=0; trk_idx<tracks.size(); trk_idx++) {
               
 	        int r_trkidx = r_goodtrack[evt][trk_idx];
 	        float drmin = 9999;
