@@ -254,8 +254,9 @@ class match_obj_histManager
    : public histManagerBase
 {
      public:
-       match_obj_histManager(const string& obj):
-       histManagerBase(obj) {
+       match_obj_histManager(const string& obj, const float& in_drcut):
+       histManagerBase(obj)
+       ,drcut(in_drcut)	{
 
 	 
 	  for (const auto match_type: {"matched", "unmatched"})
@@ -270,8 +271,8 @@ class match_obj_histManager
 	     }
 	  }
 
-         hists["deltar"] = createhist(Form("%s_delta_r", base_name.c_str()), "delta_r;delta_r;yield", 50, 0., 0.2);
-         hists["ratio"] = createhist(Form("%s_ratio", base_name.c_str()), ";Raw_pt/Raw'_pt;yield", 50, 0.95,1.05);
+          hists["deltar"] = createhist(Form("%s_delta_r", base_name.c_str()), "delta_r;delta_r;yield", 50, 0., drcut);
+         hists["ratio"] = createhist(Form("%s_ratio", base_name.c_str()), ";Raw_pt/Raw'_pt;yield", 50, 0.95, 1.05);
 
        };
 
@@ -293,13 +294,21 @@ class match_obj_histManager
 	 Plot_single({"deltar", "ratio"});
 
        };
+
+       const float get_drcut() const
+       {
+         return drcut;
+       }; 
+
+     private:
+       float drcut;
 };
 
 
 template<class T>
 
 void do_matching(const map<int, vector<T> > & r_objs, const map<int, vector<T> >& rp_objs,
-	        match_obj_histManager & obj_hists, float drcut=0.05f
+	        match_obj_histManager & obj_hists
 		) 
         {
 
@@ -332,7 +341,7 @@ void do_matching(const map<int, vector<T> > & r_objs, const map<int, vector<T> >
 		         if(std::find(matched_trk_p[e_rp].begin(), matched_trk_p[e_rp].end(), obj_rp.idx) != matched_trk_p[e_rp].end()) continue; // obj_rp already matched with obj_r
 		      }
 	             auto dr = deltaR(obj_r.eta, obj_rp.eta, obj_r.phi, obj_rp.phi);
-		     if (dr < drcut && dr < drmin) {
+		     if (dr < obj_hists.get_drcut() && dr < drmin) {
                         drmin = dr;
 		        matched_trk_p_idx = obj_rp.idx;
 		        matched_pt_rp = obj_rp.pt;
@@ -384,11 +393,13 @@ int LHCC_raw_vs_rawprime() {
 	map< int, map< int, map<int, bool> > > evtMatchedMap;
 	map< int, map< int, map<int, bool> > > evtMap;
  
- 	TFile* f1                = TFile::Open("flatMuonRawprimeRECOInt_16bit.root", "read");//TFile::Open("flatTrackRawprime.root", "read");
+ 	TFile* f1                = TFile::Open("flatntuple_MuonRawprimeRECOInt16bit_Run3_approx_2024.root", "read");//TFile::Open("flatTrackRawprime.root", "read");
+	//TFile* f1                = TFile::Open(argv[1], "read");
 	//TFile* f1                = TFile::Open("flatTrackRECO.root", "read");
         TreeReader treereader_rp ((TTree*) f1->Get("trackAnalyzer/trackTree"));
         
-	TFile* f2               = TFile::Open("flatMuonRawprimeRECOInt_default.root", "read");
+	TFile* f2               = TFile::Open("flatntuple_MuonRawRECO_Run3_approx.root", "read");
+	//TFile* f2               = TFile::Open(argv[2], "read");
         TreeReader treereader_r ((TTree*) f2->Get("trackAnalyzer/trackTree"));
 
 	TFile* f = new TFile("jet_study.root", "recreate"); 
@@ -413,7 +424,7 @@ int LHCC_raw_vs_rawprime() {
 	cout << "creating hists for raw " << endl;
 
 	EvthistManager evthist_r("raw");
-	match_obj_histManager trk_hists("tracks"), jet_hists("jets");
+	match_obj_histManager trk_hists("tracks", 0.05), jet_hists("jets", 0.8);
         
 	//// raw ///
 
@@ -446,8 +457,8 @@ int LHCC_raw_vs_rawprime() {
 	            trk_hists		
         );
 
-	do_matching(rp_goodjet, rp_goodjet,
-                      jet_hists, 0.8
+	do_matching(r_goodjet, rp_goodjet,
+                      jet_hists
         );
 
 	cout << "matching done" << endl;
