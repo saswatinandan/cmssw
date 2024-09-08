@@ -2,6 +2,7 @@
 #define HIST_AUXILIARY_H
 
 #include "TH1F.h"
+#include "TH2.h"
 
 template<class T>
 void set_properties(T* h){

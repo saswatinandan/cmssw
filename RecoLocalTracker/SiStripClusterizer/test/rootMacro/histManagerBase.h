@@ -4,6 +4,7 @@
 ////// Saswati Nandan, Inida/INFN,Pisa /////
 #include "hist_auxiliary.h"
 #include "plot_auxiliary.h"
+#include "TCanvas.h"
 
 using namespace std;
 
@@ -68,6 +69,7 @@ public:
  {
    for (auto & [key_name, hist] : hists_1)
     {
+
       string type = typeid(hist).name();
 
       auto other_hist = hists_2[key_name];

@@ -11,8 +11,9 @@ TCanvas * create_canvas()
 {
  TCanvas* canv = new TCanvas("", "", 700, 600);
  gStyle->SetOptTitle(0);
+ //gROOT->SetBatch( 1 );
  gStyle->SetOptStat(0);
- gErrorIgnoreLevel = kWarning;
+ //gErrorIgnoreLevel = kWarning;
  return canv;
 }
 
