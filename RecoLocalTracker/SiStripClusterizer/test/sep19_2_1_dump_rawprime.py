@@ -5,7 +5,7 @@ from Configuration.StandardSequences.Eras import eras
 import os
 import glob as glob
 
-process = cms.Process('USER',eras.Run3_2023)
+process = cms.Process('Rawp',eras.Run3_2023)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -41,7 +41,7 @@ if options.n != -1:
 process.source = cms.Source(
     "NewEventStreamFileReader" if ".dat" in options.inputFiles[0] else "PoolSource",
     fileNames = cms.untracked.vstring(['file:'+f for f in options.inputFiles]),
-    # secondaryFileNames = cms.untracked.vstring(),
+    #secondaryFileNames = cms.untracked.vstring(),
     # eventsToProcess = cms.untracked.VEventRange( list( open(options.eventsToProcessTxt).readlines() ) )
 )
 
@@ -90,8 +90,20 @@ process.analyzer_step = cms.Path(process.sep19_2_1_dump_rawprime)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.output_step = cms.EndPath(process.outputClusters)
 
+# dead strip
+process.sep19_3_dump_deadStrips = cms.EDAnalyzer("sep19_3_dump_deadStrips")
+process.deadstrip_step = cms.Path(process.sep19_3_dump_deadStrips)
+
+# object analyzer
+process.flatNtuple = cms.EDAnalyzer('flatNtuple_producer',
+              tracks = cms.InputTag('generalTracks',"", 'reRECO'),
+              jets   = cms.InputTag("ak4PFJets","","reRECO"),
+)
+process.flatNtuple_path = cms.Path(process.flatNtuple)
+
 # Schedule definition
-process.schedule = cms.Schedule(process.analyzer_step, process.endjob_step,process.output_step)
+process.schedule = cms.Schedule(process.analyzer_step, process.deadstrip_step, process.flatNtuple_path, process.endjob_step,process.output_step)
+
 from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
 
