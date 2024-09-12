@@ -17,17 +17,15 @@ def replace_line(infile, to_replaces, vals):
             for idx, to_replace in enumerate(to_replaces):
                if to_replace in line:
                   line = line.replace(to_replace, vals[idx])
-                  to_replaces.pop(idx)
-                  vals.pop(idx)
                   break
             f.write(line)
 
 ### SiStripApproxCluster.h ####
 
-bit_no = int(bit.strip('bit')[0])
+bit_no = int(bit.strip('bit'))
 maxRange_ = (1<<bit_no) -1
-replace_line('DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h',
-             ['maxRange_ = 255.'], [f'maxRange_ = {maxRange_}'])
+replace_line('../../../DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h',
+             ['maxRange_ = '], [f'maxRange_ = {maxRange_}; //'])
 
 run_cmd = 'scram b -j 8'
 print(run_cmd)
@@ -46,6 +44,8 @@ run_cmd = 'cmsRun prehlt.py'
 print(run_cmd)
 os.system(run_cmd)
 os.system(f'mv outputPhysicsHIPhysicsRawPrime0.root outputPhysicsHIPhysicsRawPrime0_{bit}.root')
+
+
 #### step2 ####
 
 cmd_step2 = "cmsDriver.py step2 --scenario pp --conditions auto:run3_data_prompt -s REPACK:DigiToApproxClusterRaw --datatier GEN-SIM-DIGI-RAW-HLTDEBUG --era Run3_pp_on_PbPb_approxSiStripClusters --eventcontent REPACKRAW -n 100 --customise_commands"
@@ -63,7 +63,7 @@ os.system(run_cmd)
 
 ###step3 ####
 
-cmd_step3 = f'cmsDriver.py step3 --conditions auto:run3_data_prompt -s RAW2DIGI,L1Reco,RECO --datatier RECO --eventcontent RECO --data --process reRECO --scenario pp -n 100 --repacked --era Run3_pp_on_PbPb_approxSiStripClusters --filein file:step2_REPACK_{bit}.root --no_exec --nThreads 4'
+cmd_step3 = f'cmsDriver.py step3 --conditions auto:run3_data_prompt -s RAW2DIGI,L1Reco,RECO --datatier RECO --eventcontent RECO --data --process reRECO --scenario pp -n 100 --repacked --era Run3_pp_on_PbPb_approxSiStripClusters --filein file:step2_REPACK_{bit}.root --no_exec --nThreads 20'
 
 print(cmd_step3)
 os.system(cmd_step3)
@@ -75,4 +75,7 @@ print(run_cmd)
 os.system(run_cmd)
 
 #### object comparison ####
-os.system(f'python3 run_flatNtuplizer.py -r step5_RAW2DIGI_L1Reco_RECO.root -rp step3_RAW2DIGI_L1Reco_RECO_{bit}.root -c')
+
+run_cmd = f'python3 run_flatNtuplizer.py -r step5_RAW2DIGI_L1Reco_RECO.root -rp step3_RAW2DIGI_L1Reco_RECO_{bit}.root'
+print(run_cmd)
+os.system(run_cmd)
