@@ -458,7 +458,7 @@ process.options.numberOfStreams = 0
 # override the GlobalTag, connection string and pfnPrefix
 if 'GlobalTag' in process.__dict__:
     from Configuration.AlCa.GlobalTag import GlobalTag as customiseGlobalTag
-    process.GlobalTag = customiseGlobalTag(process.GlobalTag, globaltag = '140X_dataRun3_HLT_for2024TSGStudies_v1')
+    process.GlobalTag = customiseGlobalTag(process.GlobalTag, globaltag = '140X_dataRun3_Prompt_v3')
 
 # show summaries from trigger analysers used at HLT
 if 'MessageLogger' in process.__dict__:
@@ -489,7 +489,7 @@ _customInfo['inputFiles']={}
 _customInfo['inputFiles'][True]  = "file:RelVal_Raw_GRun_DATA.root"
 _customInfo['inputFiles'][False] = "file:RelVal_Raw_GRun_MC.root"
 _customInfo['maxEvents' ]=  100
-_customInfo['globalTag' ]= "140X_dataRun3_HLT_for2024TSGStudies_v1"
+_customInfo['globalTag' ]= "140X_dataRun3_Prompt_v3"
 _customInfo['inputFile' ]=  ['/store/data/Run2024F/Muon0/RAW-RECO/ZMu-PromptReco-v1/000/382/216/00000/aadd1ab9-4eb8-4fb2-ac62-bdd1bebe882e.root']
 _customInfo['realData'  ]=  True
 
