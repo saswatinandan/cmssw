@@ -372,7 +372,7 @@ int main(int argc, char const *argv[])
 	PlotStyle(h_barycenter_tot_ac); h_barycenter_tot_ac->SetLineColor(46); 	h_barycenter_tot_ac->Draw("");
 	PlotStyle(h_barycenter_tot_sc); h_barycenter_tot_sc->SetLineWidth(0); h_barycenter_tot_sc->SetFillColorAlpha(31, 0.4); h_barycenter_tot_sc->SetLineColorAlpha(31, 0.4); 	h_barycenter_tot_sc->Draw("same");
 	
-	canv0->SaveAs(("../img/"+expTag+"_TotalClusters.png").c_str());
+	canv0->SaveAs((expTag+"_TotalClusters.png").c_str());
 
 	delete canv0;
 
@@ -404,7 +404,7 @@ int main(int argc, char const *argv[])
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
-	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_size.png").c_str());
+	canvSingle0->SaveAs((expTag+"_TotalClusters_size.png").c_str());
 
 	h_charge_tot_ac->GetYaxis()->SetRangeUser(
 		h_charge_tot_ac->GetYaxis()->GetXmin(),
@@ -416,7 +416,7 @@ int main(int argc, char const *argv[])
 	formatLegend(leg0);
 	leg0->Draw();
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
-	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_charge.png").c_str());
+	canvSingle0->SaveAs((expTag+"_TotalClusters_charge.png").c_str());
 
 	h_barycenter_tot_ac->Draw("");
 	h_barycenter_tot_sc->Draw("same");
@@ -425,7 +425,7 @@ int main(int argc, char const *argv[])
 	formatLegend(leg0);
 	leg0->Draw();
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
-	canvSingle0->SaveAs(("../img/"+expTag+"_TotalClusters_barycenter.png").c_str());
+	canvSingle0->SaveAs((expTag+"_TotalClusters_barycenter.png").c_str());
 	
 	delete canvSingle0;
 	/*
@@ -676,7 +676,7 @@ int main(int argc, char const *argv[])
 			TLegend* leg = canvSingle->BuildLegend(.5, .6, .85, .9);
                         gPad->Modified();
                         gPad->Update();
-                        canvSingle->SaveAs(Form("../img/%sRawp_overflow_matched_vs_unmatched_idx_%d.png",expTag.c_str(), idx_pair.first));
+                        canvSingle->SaveAs(Form("%sRawp_overflow_matched_vs_unmatched_idx_%d.png",expTag.c_str(), idx_pair.first));
 			delete canvSingle;
 		}
 	}
@@ -740,7 +740,7 @@ int main(int argc, char const *argv[])
               TLegend* leg = canvSingle->BuildLegend(.5, .6, .85, .9);
               gPad->Modified();
               gPad->Update();
-              canvSingle->SaveAs(Form("../img/%sunmatched_cluster_%d.png",expTag.c_str(), sc.idx));
+              canvSingle->SaveAs(Form("%sunmatched_cluster_%d.png",expTag.c_str(), sc.idx));
               delete canvSingle;
 	      count++;
 
@@ -771,7 +771,7 @@ int main(int argc, char const *argv[])
 	PlotStyle(h_barycenter_res);  	h_barycenter_res->Draw("");
 
 
-	canv->SaveAs(("../img/"+expTag+"_MatchedClusters.png").c_str());
+	canv->SaveAs((expTag+"_MatchedClusters.png").c_str());
 
 	delete canv;
 
@@ -786,23 +786,23 @@ int main(int argc, char const *argv[])
 	h_size->GetZaxis()->SetTitle("number of clusters");
 	h_size->Draw("COLZ");
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
-	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_size_scat.png").c_str());
+	canvSingle->SaveAs((expTag+"_MatchedClusters_size_scat.png").c_str());
 
 	h_charge->GetZaxis()->SetTitleOffset(1.8);
 	h_charge->GetZaxis()->SetTitle("number of clusters");
 	h_charge->Draw("COLZ");
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
-	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_charge_scat.png").c_str());
+	canvSingle->SaveAs((expTag+"_MatchedClusters_charge_scat.png").c_str());
 
 	h_barycenter->GetZaxis()->SetTitleOffset(1.8);
 	h_barycenter->GetZaxis()->SetTitle("number of clusters");
 	h_barycenter->Draw("COLZ");
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
-	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_barycenter_scat.png").c_str());
+	canvSingle->SaveAs((expTag+"_MatchedClusters_barycenter_scat.png").c_str());
 
 	h_barycenter_vs_charge->Draw("COLZ");
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
-	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_del_barycenter_del_charge_scat.png").c_str());
+	canvSingle->SaveAs((expTag+"_MatchedClusters_del_barycenter_del_charge_scat.png").c_str());
 
 	h_size_res->Draw("");
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
@@ -810,7 +810,7 @@ int main(int argc, char const *argv[])
 	latex.SetTextFont(43);
 	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_size_res->GetMean()));
 	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_size_res->GetStdDev()));
-	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_size_res.png").c_str());
+	canvSingle->SaveAs((expTag+"_MatchedClusters_size_res.png").c_str());
 
 	h_charge_res->Draw("");
 	latex.DrawLatexNDC(0.21,0.84,"CMS");
@@ -820,7 +820,7 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_charge_res->GetMean()));
 	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_charge_res->GetStdDev()));
 	canvSingle->SetLogy(true);
-	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_charge_res.png").c_str());
+	canvSingle->SaveAs((expTag+"_MatchedClusters_charge_res.png").c_str());
 
 	h_barycenter_res->Draw("");
 	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
@@ -828,7 +828,7 @@ int main(int argc, char const *argv[])
 	latex.SetTextFont(43);
 	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_barycenter_res->GetMean()));
 	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_barycenter_res->GetStdDev()));
-	canvSingle->SaveAs(("../img/"+expTag+"_MatchedClusters_barycenter_res.png").c_str());
+	canvSingle->SaveAs((expTag+"_MatchedClusters_barycenter_res.png").c_str());
 
 	ofstream unmatched_scs_txt;
 	unmatched_scs_txt.open(Form("log/%s_unmatched_scs.txt",expTag.c_str()));
@@ -1039,7 +1039,7 @@ int main(int argc, char const *argv[])
 		delete h_sc;
 
 		
-		canv2->SaveAs(Form("../img/%s_%sUnmatchedStripClusters_idx%d.png",expTag.c_str(),prefix.c_str(),sc.idx));
+		canv2->SaveAs(Form("%s_%sUnmatchedStripClusters_idx%d.png",expTag.c_str(),prefix.c_str(),sc.idx));
 
 		delete canv2;
 		if (!faster || prefix=="Warning2_") printf("===========================================\n");
