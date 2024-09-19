@@ -38,7 +38,7 @@ python3 run_cmsDriver.py -b $bit -n $env -t $thread
 eval "cd $current_dir/for_$bit"
 eval "cp $tmp_dir/*png ."
 echo $current_dir, $tmp_dir
-eval "cp $tmp_dir/*pdf ."
+eval "cp $tmp_dir/*log ."
 
 echo "remove", $remove
 if [ $remove -eq 1 ]; then

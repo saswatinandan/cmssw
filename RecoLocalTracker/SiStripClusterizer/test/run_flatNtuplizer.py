@@ -23,8 +23,8 @@ os.system(cmd)
 
 ### cluster ###
 os.system('g++ `root-config --cflags --glibs` -O3 rootMacro/LHCC_rawprime_clusters.cc -o rootMacro/LHCC_rawprime_clusters.o')
-os.system(f'./rootMacro/LHCC_rawprime_clusters.o flatntuple_{input_for_rawp} flatntuple_{input_for_raw}')
+os.system(f'./rootMacro/LHCC_rawprime_clusters.o flatntuple_{input_for_rawp} flatntuple_{input_for_raw} > cluster.log')
 
 ### objects ###
 os.system('g++ `root-config --cflags --glibs` -O3 rootMacro/LHCC_raw_vs_rawprime.cc -o rootMacro/LHCC_raw_vs_rawprime.o')
-os.system(f'./rootMacro/LHCC_raw_vs_rawprime.o flatntuple_{input_for_rawp} flatntuple_{input_for_raw}')
+os.system(f'./rootMacro/LHCC_raw_vs_rawprime.o flatntuple_{input_for_rawp} flatntuple_{input_for_raw} > object.log')
