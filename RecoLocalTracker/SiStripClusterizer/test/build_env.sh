@@ -19,8 +19,8 @@ eval "mkdir /home/users/$(whoami)/$bit"
 eval "cd /home/users/$(whoami)/$bit"
 
 eval ". /cvmfs/cms.cern.ch/cmsset_default.sh"
-eval "cmsrel CMSSW_14_1_0_pre6"
-eval "cd CMSSW_14_1_0_pre6/src/"
+eval "cmsrel CMSSW_14_0_11"
+eval "cd CMSSW_14_0_11/src/"
 eval "cmsenv"
 eval "git cms-init"
 eval "git pull git@github.com:saswatinandan/cmssw.git saswati"
@@ -41,6 +41,6 @@ echo $current_dir, $tmp_dir
 eval "cp $tmp_dir/*pdf ."
 
 echo "remove", $remove
-if [ $remove ]; then
+if [ $remove -eq 1 ]; then
   eval "rm -rf ~/$bit"
 fi
