@@ -95,5 +95,5 @@ print(run_cmd)
 os.system(run_cmd)
 
 run_cmd = f"edmEventSize -v step3_RAW2DIGI_L1Reco_RECO_{bit}.root > size.log"
-prin(run_cmd)
+print(run_cmd)
 os.system(run_cmd)
