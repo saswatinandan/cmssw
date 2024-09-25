@@ -11,23 +11,30 @@ bits = options.bits
 x = np.array(bits)
 x = np.sort(x)
 
-for obj in ['cluster', 'tracks', 'jets']:
+for obj in ['size', 'cluster', 'tracks', 'jets']:
 
    y = []
 
    for bit in x:
 
-      if obj in ['tracks', 'jets']:
-         input = os.path.join('/gpfs/ddn/users/', os.getlogin(), f'{bit}bit', os.environ['CMSSW_BASE'].split('/')[-1], f'src/RecoLocalTracker/SiStripClusterizer/test/object.log')
-      else:
-         input = os.path.join('/gpfs/ddn/users/', os.getlogin(), f'{bit}bit', os.environ['CMSSW_BASE'].split('/')[-1], f'src/RecoLocalTracker/SiStripClusterizer/test/cluster.log')
+      input = os.path.join('/gpfs/ddn/users/', os.getlogin(), f'{bit}bit', os.environ['CMSSW_BASE'].split('/')[-1], f'src/RecoLocalTracker/SiStripClusterizer/test/')
 
-      with open(input, 'r') as f:
+      if obj == 'size':
+         input_file = os.path.join(input, 'size.log')
+      elif obj in ['tracks', 'jets']:
+         input_file = os.path.join(input, 'object.log')
+      else:
+         input_file = os.path.join(input, 'cluster.log')
+
+      with open(input_file, 'r') as f:
          lines = f.readlines()
 
       for line in lines:
-        if f'not matched {obj}' in line and 'raw ' in line:
+        if obj == 'size' and 'SiStripApproximateClusterCollection_hltSiStripClusters2ApproxClusters__ReHLT' in line:
+          y.append(float(line.split(' ')[-1]))
+        elif f'not matched {obj}' in line and 'raw ' in line:
              y.append(float(line.split('in raw')[-1].split('%')[0]))
+  
    y = np.array(y)
    print(obj)
    print(x)
@@ -37,7 +44,10 @@ for obj in ['cluster', 'tracks', 'jets']:
    plt.scatter(x,y)
    plt.title(obj)
    plt.xlabel('bit')
-   plt.ylabel(f'unmatched {obj} in raw data in %')
+   if obj == 'size':
+      plt.ylabel('Average Compressed Size (Bytes/Event) for hltSiStripClusters2ApproxClusters')
+   else:
+      plt.ylabel(f'unmatched {obj} in raw data in %')
    plt.savefig(f'{obj}.png')
    plt.close('all')
 
