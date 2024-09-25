@@ -93,3 +93,7 @@ os.system(run_cmd)
 run_cmd = f'python3 run_flatNtuplizer.py -r step5_RAW2DIGI_L1Reco_RECO.root -rp step3_RAW2DIGI_L1Reco_RECO_{bit}.root -c -n {number}'
 print(run_cmd)
 os.system(run_cmd)
+
+run_cmd = f"edmEventSize -v step3_RAW2DIGI_L1Reco_RECO_{bit}.root > size.log"
+prin(run_cmd)
+os.system(run_cmd)
