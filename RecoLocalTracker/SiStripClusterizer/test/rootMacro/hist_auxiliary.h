@@ -70,7 +70,7 @@ int fillWithOverFlow(TH1 * histogram,
   const double binContent = histogram->GetBinContent(bin);
   const double binError   = histogram->GetBinError(bin);
   histogram->SetBinContent(bin, binContent + evtWeight);
-//  histogram->SetBinError(bin, std::sqrt(pow(binError,2) + 1));
+  histogram->SetBinError(bin, std::sqrt(pow(binError,2) + 1));
   return ((bin == xAxis->GetNbins()) || (bin == 1)) ? 1 : 0;
 }
 

@@ -95,27 +95,29 @@ public:
 
 	 TLegend* leg = new TLegend(.62, .6, .87, .8);
          leg->AddEntry(hist, obj_name_1.c_str(), "f");
-         leg->AddEntry(other_hist, obj_name_2.c_str(), "l");
+         leg->AddEntry(other_hist, obj_name_2.c_str(), "f");
          formatLegend(leg);
 
-	 hist->Draw("same");
-         other_hist->Draw("same");
+	 hist->Draw("hist same");
+         other_hist->Draw("hist same");
          leg->Draw("same");
 
 	 canv->cd();
          bottomPad->Draw();
          bottomPad->cd();
          bottomPad->SetLogy(0);
-         bottomPad->SetMargin (0.18, 0.20, 0.12, 0.07);
+         bottomPad->SetMargin (0.18, 0.20, 0.30, 0.07);
 
          TH1F* h_ratio = (TH1F*) hist->Clone("ratio");
          h_ratio->GetYaxis()->SetTitle("Ratio");
-         h_ratio->GetXaxis()->SetLabelSize(0.);
-         h_ratio->GetXaxis()->SetTitleOffset(0.90);
-         h_ratio->GetXaxis()->SetTitleSize(1);
+         h_ratio->GetYaxis()->SetLabelSize(20);
+         h_ratio->GetXaxis()->SetLabelOffset(0.01);
+         h_ratio->GetXaxis()->SetLabelSize(20);
+         h_ratio->GetXaxis()->SetTitleOffset(0.6);
+         h_ratio->GetXaxis()->SetTitleSize(20);
          h_ratio->Divide(other_hist);
-         h_ratio->GetYaxis()->SetRangeUser(0.70*h_ratio->GetMinimum(),1.60*h_ratio->GetMaximum());
-         h_ratio->Draw("E");
+         h_ratio->GetYaxis()->SetRangeUser(0.90*h_ratio->GetMinimum(),1.10*h_ratio->GetMaximum());
+         h_ratio->Draw("e");
       }
       else
       {

@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <sys/stat.h>
@@ -540,8 +541,10 @@ int main(int argc, char const *argv[])
 
 	printf("[Summary] matched_sc2ac.size(): %ld, unmatched_acs.size(): %ld, unmatched_scs.size(): %ld\n", 
 	                matched_sc2ac.size(), unmatched_acs.size(), unmatched_scs.size());
-
-
+        
+        cout << setprecision(2); 
+        cout << "not matched cluster in raw " << (100.*unmatched_scs.size() / r_nEntries) << "%" << endl;
+        cout << "not matched cluster in rawp " << (100.*unmatched_acs.size() / rp_nEntries) << "%" << endl;;
 	/* *******************************
 	 * 3.1 plotting matched cluster pairs
 	 * *******************************/
