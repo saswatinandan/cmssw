@@ -452,7 +452,7 @@ process.maxEvents = cms.untracked.PSet(
 
 # enable TrigReport, TimeReport and MultiThreading
 process.options.wantSummary = True
-process.options.numberOfThreads = 4
+process.options.numberOfThreads = 100
 process.options.numberOfStreams = 0
 
 # override the GlobalTag, connection string and pfnPrefix
@@ -503,3 +503,4 @@ process = customizeHLTforCMSSW(process,"GRun")
 from HLTrigger.Configuration.Eras import modifyHLTforEras
 modifyHLTforEras(process)
 
+#process.source.inputCommands = cms.untracked.vstring('drop *_*_*_RECO', 'keep FEDRawDataCollection_*_*_*')
