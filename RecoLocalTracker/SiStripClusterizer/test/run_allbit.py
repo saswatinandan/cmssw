@@ -22,5 +22,5 @@ with open('makefile', 'w') as f:
     bits = ' '.join([b for b in bits])
     f.write(f'\t python3 plot_comparison.py -b {bits}')
 
-#os.system(f'make -f makefile -j {len(bits)}')
+os.system(f'make -f makefile -j {len(bits)}')
  
