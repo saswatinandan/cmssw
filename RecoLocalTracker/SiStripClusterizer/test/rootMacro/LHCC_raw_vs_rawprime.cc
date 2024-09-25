@@ -384,7 +384,7 @@ void do_matching(const map<int, vector<T> > & r_objs, const map<int, vector<T> >
           cout << Form("total %s in raw: ", obj_hists.get_base_name().c_str()) << total_obj_r << "\t in raw_p: " << total_obj_rp << endl;
           cout << Form("total unmatched %s in raw: ", obj_hists.get_base_name().c_str()) << not_matched_obj_r << endl;
           cout << Form("total unmatched %s in rawp: ", obj_hists.get_base_name().c_str()) << not_matched_obj_rp << endl;	
-          cout << Form("not matched %s: in raw ", obj_hists.get_base_name().c_str()) << (100.*not_matched_obj_r/total_obj_r) << endl;
+          cout << Form("not matched %s: in raw ", obj_hists.get_base_name().c_str()) << (100.*not_matched_obj_r/total_obj_r) << "%" << endl;
           cout << Form("not matched %s: in rawp ", obj_hists.get_base_name().c_str()) << (not_matched_obj_rp*100./total_obj_rp) << "%" << endl;
 
 }
