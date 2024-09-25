@@ -503,4 +503,4 @@ process = customizeHLTforCMSSW(process,"GRun")
 from HLTrigger.Configuration.Eras import modifyHLTforEras
 modifyHLTforEras(process)
 
-#process.source.inputCommands = cms.untracked.vstring('drop *_*_*_RECO', 'keep FEDRawDataCollection_*_*_*')
+process.source.inputCommands = cms.untracked.vstring('drop *_*_*_RECO', 'keep FEDRawDataCollection_*_*_*')
