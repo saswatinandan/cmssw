@@ -90,7 +90,7 @@ os.system(run_cmd)
 
 #### object comparison ####
 
-run_cmd = f'python3 run_flatNtuplizer.py -r step5_RAW2DIGI_L1Reco_RECO.root -rp step3_RAW2DIGI_L1Reco_RECO_{bit}.root -c -n {number}'
+run_cmd = f'python3 run_flatNtuplizer.py -rp step3_RAW2DIGI_L1Reco_RECO_{bit}.root -c -n {number}'
 print(run_cmd)
 os.system(run_cmd)
 
