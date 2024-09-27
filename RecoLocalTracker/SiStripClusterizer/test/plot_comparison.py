@@ -1,7 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import sys
 import argparse
+from ROOT import TFile, TH1
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-b", type=int, dest="bits", nargs='+', default=[], help="bit to be studied")
@@ -11,17 +13,57 @@ bits = options.bits
 x = np.array(bits)
 x = np.sort(x)
 
-for obj in ['size', 'cluster', 'tracks', 'jets']:
+def draw_plot(x, y_raw,
+              x_title, y_title,
+              title, filename,
+              y_rawp=np.array([])):
 
-   y = []
+   fig = plt.figure(figsize=(8,6))
+   ax = fig.add_subplot(111)
+   plt.scatter(x,y_raw,label='raw')
+
+   if np.any(y_rawp):
+       plt.scatter(x,y_rawp,color='r',label='rawp')
+
+   plt.title(title)
+   plt.xlabel(x_title)
+   plt.ylabel(y_title)
+   plt.legend()
+   plt.savefig(filename)
+   plt.close('all')
+ 
+for obj in ['size', 'cluster', 'track', 'jet']:
+
+   y_raw  = []
+   y_rawp = []
+   y_total_before_cut_raw =  []
+   y_total_before_cut_rawp = []
+   y_total_after_cut_raw =  []
+   y_total_after_cut_rawp = []
 
    for bit in x:
 
-      input = os.path.join('/gpfs/ddn/users/', os.getlogin(), f'{bit}bit', os.environ['CMSSW_BASE'].split('/')[-1], f'src/RecoLocalTracker/SiStripClusterizer/test/')
+      input = os.path.join('/gpfs/ddn/users/', os.getlogin(), f'test_v1_{bit}bit', os.environ['CMSSW_BASE'].split('/')[-1], f'src/RecoLocalTracker/SiStripClusterizer/test/')
+      cutflow_file = TFile(os.path.join(input, 'object_study.root'), 'r')
+      
+      if obj in ['track', 'jet']:
+         
+         for raw_type in ['raw', 'rawp']:
+            
+            cutflow = cutflow_file.Get(f'{raw_type}_{obj}_cutflow')
+            before_cut = cutflow.GetBinContent(1)
+            after_cut  = cutflow.GetBinContent(cutflow.GetNbinsX())
+        
+            if raw_type == 'raw':
+               y_total_before_cut_raw.append(before_cut)
+               y_total_after_cut_raw.append(after_cut)
+            else:
+               y_total_before_cut_rawp.append(before_cut)
+               y_total_after_cut_rawp.append(after_cut)
 
       if obj == 'size':
          input_file = os.path.join(input, 'size.log')
-      elif obj in ['tracks', 'jets']:
+      elif obj in ['track', 'jet']:
          input_file = os.path.join(input, 'object.log')
       else:
          input_file = os.path.join(input, 'cluster.log')
@@ -29,25 +71,51 @@ for obj in ['size', 'cluster', 'tracks', 'jets']:
       with open(input_file, 'r') as f:
          lines = f.readlines()
 
-      for line in lines:
+      for idx, line in enumerate(lines):
         if obj == 'size' and 'SiStripApproximateClusterCollection_hltSiStripClusters2ApproxClusters__ReHLT' in line:
-          y.append(float(line.split(' ')[-1]))
-        elif f'not matched {obj}' in line and 'raw ' in line:
-             y.append(float(line.split('in raw')[-1].split('%')[0]))
-  
-   y = np.array(y)
-   print(obj)
-   print(x)
-   print(y)
-   fig = plt.figure(figsize=(8,6))
-   ax = fig.add_subplot(111)
-   plt.scatter(x,y)
-   plt.title(obj)
-   plt.xlabel('bit')
+          y_raw.append(float(line.split(' ')[-1]))
+        else:
+             for raw_type in ['raw', 'rawp']:
+                
+                if f'not matched {obj}' in line and  f'{raw_type} ' in line:
+                   if raw_type == 'raw':
+                      y_raw.append(float(line.split('in raw')[-1].split('%')[0]))
+                   else:
+                       y_rawp.append(float(line.split('in rawp')[-1].split('%')[0]))
+                elif obj == 'cluster' and f'total {obj} in {raw_type}:' in line:
+                     if raw_type == 'raw':
+                           y_total_after_cut_raw.append(int(line.split(f'{raw_type}:')[-1]))
+                     else:
+                           y_total_after_cut_rawp.append(int(line.split(f'{raw_type}:')[-1]))
+   
+   y_raw   = np.array(y_raw)
+   y_rawp  = np.array(y_rawp)
+   y_total_before_cut_raw = np.array(y_total_before_cut_raw)
+   y_total_after_cut_raw = np.array(y_total_after_cut_raw)
+   
    if obj == 'size':
-      plt.ylabel('Average Compressed Size (Bytes/Event) for hltSiStripClusters2ApproxClusters')
+      title = 'Average Compressed Size (Bytes/Event) for hltSiStripClusters2ApproxClusters'
    else:
-      plt.ylabel(f'unmatched {obj} in raw data in %')
-   plt.savefig(f'{obj}.png')
-   plt.close('all')
+      title = obj
 
+   draw_plot(x, y_raw,
+             'bit', f'unmatched {obj} in %',
+             obj, f'{obj}.png',
+             y_rawp)
+
+   if obj != 'size':
+        if obj != 'cluster': 
+            draw_plot(x, y_total_before_cut_raw,
+              'bit', f'total # of {obj}',
+              f'total # of {obj} before selection', f'size_before_cut_{obj}.png',
+              y_total_before_cut_rawp
+             ) 
+        if obj == 'cluster':
+           title = f'total # of {obj}'
+        else:
+            title = f'total # of {obj} after selection'
+        draw_plot(x, y_total_after_cut_raw,
+             'bit', f'total # of {obj}',
+             title, f'size_after_cut_{obj}.png',
+             y_total_after_cut_rawp
+             )

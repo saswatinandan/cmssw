@@ -24,7 +24,7 @@ using namespace std;
 constexpr float cut_dzSig = 3.0;  
 constexpr float cut_dxySig = 3.0; 
 constexpr float cut_ptRes = 0.10; 
-constexpr float cut_chi2 = 0.18;  
+constexpr float cut_chi2 = 2;//0.18;  
 constexpr float cut_nhits = 11;
 
 auto deltaR(float e1, float e2, float p1, float p2) {
@@ -209,17 +209,23 @@ void event_loop( map< int, map< int, map<int, bool> > >& evtMatchedMap,
                 {
 
   	          evthist.fill("trk_dzDdzerr", std::abs(treereader.trkDz1[trkIdx]/treereader.trkDzError1[trkIdx]));
-  	          evthist.fill("trk_chi2", treereader.trkChi2[trkIdx]/((int) treereader.trkNdof[trkIdx]));
+  	          evthist.fill("trk_chi2", treereader.trkChi2[trkIdx]);
                   evthist.fill("trk_nhits", treereader.trkNHit[trkIdx]);
                   evthist.fill("trk_pterrDpt", std::abs(treereader.trkPtError[trkIdx]/treereader.trkPt[trkIdx]));
 
-                  evthist.fill("cutflow", cuts::nocut);
-                  evthist.fill("cutflow", cuts::dzSig);
+                  evthist.fill("trk_cutflow", trk_cuts::nocut);
+                  evthist.fill("trk_cutflow", trk_cuts::dzSig);
 
-                  if(treereader.trkChi2[trkIdx]/((int) treereader.trkNdof[trkIdx])
-                         /((int) treereader.trkNlayer[trkIdx]) >= cut_chi2) continue;
+                  /*if(treereader.trkChi2[trkIdx]/((int) treereader.trkNdof[trkIdx])
+                         /((int) treereader.trkNlayer[trkIdx]) >= cut_chi2) continue;*/
+                  if(treereader.trkChi2[trkIdx] > cut_chi2) continue;
+                  evthist.fill("trk_cutflow", trk_cuts::chi2);
+
                   if(std::abs(treereader.trkPtError[trkIdx]/treereader.trkPt[trkIdx]) >= cut_ptRes) continue;
+                  evthist.fill("trk_cutflow", trk_cuts::ptRes);
+
                   if((int) treereader.trkNHit[trkIdx] < cut_nhits) continue;
+                  evthist.fill("trk_cutflow", trk_cuts::nhits);
 
                   evthist.fill("trk_pt", treereader.trkPt[trkIdx]);
 		  evthist.fill("trk_eta", treereader.trkEta[trkIdx]);
@@ -240,12 +246,21 @@ void event_loop( map< int, map< int, map<int, bool> > >& evtMatchedMap,
 
                  for (int jetIdx = 0; jetIdx < treereader.nJet; ++jetIdx)
                  {
-                    if(treereader.jetPt[jetIdx] > 20 && abs(treereader.jetEta[jetIdx]) < 2.4)
-                    {
-                       r_goodjet[treereader.event].emplace_back(jetIdx,
-                           treereader.jetPt[jetIdx], treereader.jetEta[jetIdx],
-                           treereader.jetPhi[jetIdx], treereader.jetMass[jetIdx]);
-                    }
+
+                   evthist.fill("jet_pt",  treereader.jetPt[jetIdx]);
+                   evthist.fill("jet_eta", treereader.jetEta[jetIdx]);
+
+                   evthist.fill("jet_cutflow", jet_cuts::nocut);
+
+                   if(treereader.jetPt[jetIdx] < 20 ) continue;
+                   evthist.fill("jet_cutflow", jet_cuts::pt);
+
+                   if(abs(treereader.jetEta[jetIdx]) > 2.4) continue;
+                   evthist.fill("jet_cutflow", jet_cuts::eta);
+
+                   r_goodjet[treereader.event].emplace_back(jetIdx,
+                      treereader.jetPt[jetIdx], treereader.jetEta[jetIdx],
+                      treereader.jetPhi[jetIdx], treereader.jetMass[jetIdx]);
                  }
            }
 }
@@ -271,7 +286,7 @@ class match_obj_histManager
 	     }
 	  }
 
-          hists["deltar"] = createhist(Form("%s_delta_r", base_name.c_str()), "delta_r;delta_r;yield", 50, 0., drcut);
+         hists["deltar"] = createhist(Form("%s_delta_r", base_name.c_str()), "delta_r;delta_r;yield", 50, 0., drcut);
          hists["ratio"] = createhist(Form("%s_ratio", base_name.c_str()), ";Raw_pt/Raw'_pt;yield", 50, 0.95, 1.05);
 
        };
@@ -381,7 +396,8 @@ void do_matching(const map<int, vector<T> > & r_objs, const map<int, vector<T> >
 	  } // end of e_rp loop
         
 	  cout << setprecision(2);
-          cout << Form("total %s in raw: ", obj_hists.get_base_name().c_str()) << total_obj_r << "\t in raw_p: " << total_obj_rp << endl;
+          cout << Form("total %s in raw: ", obj_hists.get_base_name().c_str()) << total_obj_r << endl;
+          cout << Form("total %s in rawp: ", obj_hists.get_base_name().c_str()) << total_obj_rp << endl;
           cout << Form("total unmatched %s in raw: ", obj_hists.get_base_name().c_str()) << not_matched_obj_r << endl;
           cout << Form("total unmatched %s in rawp: ", obj_hists.get_base_name().c_str()) << not_matched_obj_rp << endl;	
           cout << Form("not matched %s: in raw ", obj_hists.get_base_name().c_str()) << (100.*not_matched_obj_r/total_obj_r) << "%" << endl;
@@ -401,7 +417,7 @@ int main(int argc, char const *argv[]) { //LHCC_raw_vs_rawprime() {
 	TFile* f2               = TFile::Open(argv[2], "read");
         TreeReader treereader_r ((TTree*) f2->Get("flatNtuple/tree"));
 
-	TFile* f = new TFile("jet_study.root", "recreate"); 
+	TFile* f = new TFile("object_study.root", "recreate"); 
 
 	for (int r_idx = 0; r_idx < treereader_r.nentries; ++r_idx) {
                 treereader_r.tree->GetEntry(r_idx);
@@ -423,7 +439,7 @@ int main(int argc, char const *argv[]) { //LHCC_raw_vs_rawprime() {
 	cout << "creating hists for raw " << endl;
 
 	EvthistManager evthist_r("raw");
-	match_obj_histManager trk_hists("tracks", 0.05), jet_hists("jets", 0.8);
+	match_obj_histManager trk_hists("tracks", 0.05), jet_hists("jets", 0.4);
         
 	//// raw ///
 

@@ -106,7 +106,7 @@ struct cluster{
 int main(int argc, char const *argv[])
 {
 	bool faster = 1;
-	std::string expTag = "clusterStudy_4bit";
+	std::string expTag = "clusterStudy";
 	
 	/* *******************************
 	 * 0.2 Loading clusters & dead strips
@@ -542,7 +542,9 @@ int main(int argc, char const *argv[])
 	printf("[Summary] matched_sc2ac.size(): %ld, unmatched_acs.size(): %ld, unmatched_scs.size(): %ld\n", 
 	                matched_sc2ac.size(), unmatched_acs.size(), unmatched_scs.size());
         
-        cout << setprecision(2); 
+        cout << setprecision(2);
+        cout << "total cluster in raw: " << r_nEntries << endl;
+        cout << "total cluster in rawp: " << rp_nEntries << endl;  
         cout << "not matched cluster in raw " << (100.*unmatched_scs.size() / r_nEntries) << "%" << endl;
         cout << "not matched cluster in rawp " << (100.*unmatched_acs.size() / rp_nEntries) << "%" << endl;;
 	/* *******************************
