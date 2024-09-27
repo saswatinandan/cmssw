@@ -7,6 +7,7 @@ from ROOT import TFile, TH1
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-b", type=int, dest="bits", nargs='+', default=[], help="bit to be studied")
+parser.add_argument("-i", dest="input", default='', help="name of input directory")
 options = parser.parse_args()
 bits = options.bits
 
@@ -43,7 +44,7 @@ for obj in ['size', 'cluster', 'track', 'jet']:
 
    for bit in x:
 
-      input = os.path.join('/gpfs/ddn/users/', os.getlogin(), f'test_v1_{bit}bit', os.environ['CMSSW_BASE'].split('/')[-1], f'src/RecoLocalTracker/SiStripClusterizer/test/')
+      input = os.path.join(os.getcwd(), f'output_{options.input}_{bit}bit')
       cutflow_file = TFile(os.path.join(input, 'object_study.root'), 'r')
       
       if obj in ['track', 'jet']:
