@@ -3,21 +3,20 @@ export bit=$1
 export env=$2
 export thread=$3
 export remove=$4
-export version=$5
 
 export current_dir=$(pwd)
 echo 'current dir: ', $current_dir
 
-if  ! [ -d "output_${version}_${bit}" ]; then
-  eval "mkdir output_${version}_${bit}"
+if  ! [ -d "output_${bit}" ]; then
+  eval "mkdir output_${bit}"
 fi
 
-if [ -d "/home/users/$(whoami)/${version}_${bit}" ]; then
-  eval "rm -rf /home/users/$(whoami)/${version}_${bit}"
+if [ -d "/home/users/$(whoami)/${bit}" ]; then
+  eval "rm -rf /home/users/$(whoami)/${bit}"
 fi
 
-eval "mkdir /home/users/$(whoami)/${version}_${bit}"
-eval "cd /home/users/$(whoami)/${version}_${bit}"
+eval "mkdir /home/users/$(whoami)/${bit}"
+eval "cd /home/users/$(whoami)/${bit}"
 
 eval ". /cvmfs/cms.cern.ch/cmsset_default.sh"
 eval "cmsrel CMSSW_14_0_11"
@@ -35,7 +34,7 @@ echo 'tmp dir: ', $tmp_dir
 
 python3 run_cmsDriver.py -b $bit -n $env -t $thread
 
-eval "cd $current_dir/output_${version}_${bit}"
+eval "cd $current_dir/output_${bit}"
 eval "cp $tmp_dir/*png ."
 eval "cp $tmp_dir/step*root ."
 eval "cp $tmp_dir/*study*root ."

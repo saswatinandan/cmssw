@@ -7,7 +7,6 @@ from ROOT import TFile, TH1
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-b", type=int, dest="bits", nargs='+', default=[], help="bit to be studied")
-parser.add_argument("-i", dest="input", default='', help="name of input directory")
 options = parser.parse_args()
 bits = options.bits
 
@@ -26,9 +25,9 @@ def draw_plot(x, y_raw,
    if np.any(y_rawp):
        plt.scatter(x,y_rawp,color='r',label='rawp')
 
-   plt.title(title)
-   plt.xlabel(x_title)
-   plt.ylabel(y_title)
+   plt.title(title, fontsize=20)
+   plt.xlabel(x_title, fontsize=20)
+   plt.ylabel(y_title, fontsize=20)
    plt.legend()
    plt.savefig(filename)
    plt.close('all')
@@ -44,7 +43,7 @@ for obj in ['size', 'cluster', 'track', 'jet']:
 
    for bit in x:
 
-      input = os.path.join(os.getcwd(), f'output_{options.input}_{bit}bit')
+      input = os.path.join(os.getcwd(), f'output_{bit}bit')
       cutflow_file = TFile(os.path.join(input, 'object_study.root'), 'r')
       
       if obj in ['track', 'jet']:

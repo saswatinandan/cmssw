@@ -26,7 +26,7 @@ class EvthistManager
 	 hists["trk_eta"] = createhist(Form("%s_track_eta", base_name.c_str()), "track_eta;track_eta;yield", 16, -2.4, 2.4);
 	 hists["trk_dxyDdxyerr"] = createhist(Form("%s_track_dxyDdxyerr", base_name.c_str()), "track_dxyDdxyerr;xy/#sigma;yield", 30, -5., 5.);
          hists["trk_dzDdzerr"] = createhist(Form("%s_track_dzDdzerr", base_name.c_str()), "track_dzDdzerr;z/#sigma;yield", 50, 0., 10.);
-         hists["trk_chi2"] = createhist(Form("%s_track_chi2", base_name.c_str()), "track_chi2;track_chi2;yield", 400, 0,100);
+         hists["trk_chi2"] = createhist(Form("%s_track_chi2", base_name.c_str()), "track_chi2;track_chi2;yield", 100, 0,20);
          hists["trk_nhits"] = createhist(Form("%s_track_nhits", base_name.c_str()), "track_nhits;track_nhits;yield", 100, -0.5, 99.5);
          hists["trk_pterrDpt"] = createhist(Form("%s_track_pterrDpt", base_name.c_str()), "track_pterrDpt;track_pterrDpt;yield", 50, 0, 1);
          hists["trk_cutflow"] = createhist(Form("%s_track_cutflow", base_name.c_str()), "cutflow;cutflow;yield", trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
