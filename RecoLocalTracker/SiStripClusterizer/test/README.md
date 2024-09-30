@@ -47,3 +47,9 @@ for each bit in ```output_${bit}bit``` folder inside the ```test``` directory an
 - `"n"`: # of events to be run.
 - `"t"`: how many threads to be used.
 - `"r"`: above command will create separate folders for separate bits. Once everything is made, if you want you can delete those folders by setting r to 1.
+
+If ```step2, step3 and flatntuples``` are ctrated and only ```.cc``` files are required to run to do some studies or to change the plotting style or for other reasons for which ```cmsDriver``` command is not required, run the following command:
+```sh
+   python3 run_allbit.py  -b 16 12 14 10 8 6 4 -c
+```
+-`"c"`: it gives the option whether cmsDriver commands need to be run or not. ```default value``` set to ```1```.
