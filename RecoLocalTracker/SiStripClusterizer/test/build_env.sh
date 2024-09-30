@@ -36,7 +36,7 @@ python3 run_cmsDriver.py -b $bit -n $env -t $thread
 
 eval "cd $current_dir/output_${bit}"
 eval "cp $tmp_dir/*png ."
-eval "cp $tmp_dir/step*root ."
+eval "cp $tmp_dir/*step*root ."
 eval "cp $tmp_dir/*study*root ."
 eval "cp $tmp_dir/outputPhy*root ."
 eval "cp $tmp_dir/*log ."

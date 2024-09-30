@@ -281,7 +281,10 @@ class match_obj_histManager
               for (const auto raw_type: {"r", "rp"})
               {
 	        auto key = Form("%s_%s_%s", match_type, var_type, raw_type);
-                hists[key] = createhist(Form("%s_%s", base_name.c_str(), key), Form("%s;pt;yield", key), numBins, customBins);
+                if (obj == "tracks")
+                   hists[key] = createhist(Form("%s_%s", base_name.c_str(), key), Form("%s;pt;yield", key), numBins, customBins);
+               else
+                  hists[key] = createhist(Form("%s_%s", base_name.c_str(), key), Form("%s;pt;yield", key), numBins_jets, customBins_jets);
 	      } 
 	     }
 	  }

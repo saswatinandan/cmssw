@@ -574,7 +574,7 @@ int main(int argc, char const *argv[])
 	                                    "; charge (RAW'-RAW)/RAW; yield",
 	                                    50, -.1, .1);
 	TH1F * h_barycenter_res = new TH1F( "barycenter_res", 
-	                                    "; barycenter RAW'-RAW; yield",
+	                                    "; barycenter (RAW'-RAW)/RAW; yield",
 	                                    50, -.1, .1);
 
 	ofstream matched_sc2ac_txt;
@@ -598,7 +598,7 @@ int main(int argc, char const *argv[])
 
 		h_size_res     ->Fill( ( rp_size - r_size )/((float) r_size) );
 		int charge_withovrflow = fillWithOverFlow(h_charge_res, ( rp_charge - r_charge )/((float) r_charge), 1 );
-		int bary = fillWithOverFlow(h_barycenter_res, rp_barycenter - r_barycenter,1);
+		int bary = fillWithOverFlow(h_barycenter_res, (rp_barycenter - r_barycenter)/r_barycenter,1);
 		matched_sc2ac_txt << r_event << " " << r_detId << " " 
 						  << idx_pair.first << " " << r_barycenter << " " << r_size << " " << r_charge << " " << r_firstStrip << " " << r_endStrip << " "
 						  << idx_pair.second << " " << rp_barycenter << " " << rp_size << " " << rp_charge << " " << rp_firstStrip << " " << rp_endStrip << "\n";
@@ -817,6 +817,7 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_size_res->GetStdDev()));
 	canvSingle->SaveAs((expTag+"_MatchedClusters_size_res.png").c_str());
 
+        h_charge_res->Scale(1/h_charge_res->Integral());
 	h_charge_res->Draw("");
 	latex.DrawLatexNDC(0.21,0.84,"CMS");
 	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
@@ -827,6 +828,7 @@ int main(int argc, char const *argv[])
 	canvSingle->SetLogy(true);
 	canvSingle->SaveAs((expTag+"_MatchedClusters_charge_res.png").c_str());
 
+        h_barycenter_res->Scale(1/h_barycenter_res->Integral());
 	h_barycenter_res->Draw("");
 	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
 	latex.DrawLatexNDC(0.33,0.945,"2023 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");

@@ -13,17 +13,17 @@ bits = options.bits
 x = np.array(bits)
 x = np.sort(x)
 
-def draw_plot(x, y_raw,
+def draw_plot(x, y_rawp,
               x_title, y_title,
               title, filename,
-              y_rawp=np.array([])):
+              y_raw=np.array([])):
 
    fig = plt.figure(figsize=(8,6))
    ax = fig.add_subplot(111)
-   plt.scatter(x,y_raw,label='raw')
+   plt.scatter(x,y_rawp,color='r',label='rawp')
 
-   if np.any(y_rawp):
-       plt.scatter(x,y_rawp,color='r',label='rawp')
+   if np.any(y_raw):
+       plt.scatter(x,y_raw,label='raw')
 
    plt.title(title, fontsize=20)
    plt.xlabel(x_title, fontsize=20)
@@ -73,7 +73,7 @@ for obj in ['size', 'cluster', 'track', 'jet']:
 
       for idx, line in enumerate(lines):
         if obj == 'size' and 'SiStripApproximateClusterCollection_hltSiStripClusters2ApproxClusters__ReHLT' in line:
-          y_raw.append(float(line.split(' ')[-1]))
+          y_rawp.append(float(line.split(' ')[-1]))
         else:
              for raw_type in ['raw', 'rawp']:
                 
@@ -94,28 +94,28 @@ for obj in ['size', 'cluster', 'track', 'jet']:
    y_total_after_cut_raw = np.array(y_total_after_cut_raw)
    
    if obj == 'size':
-      title = 'Average Compressed Size (Bytes/Event) for hltSiStripClusters2ApproxClusters'
+      y_title = 'Average Compressed Size (Bytes/Event) for hltSiStripClusters2ApproxClusters'
    else:
-      title = obj
+      y_title = f'unmatched {obj} in %'
 
-   draw_plot(x, y_raw,
-             'bit', f'unmatched {obj} in %',
+   draw_plot(x, y_rawp,
+             'bit', y_title,
              obj, f'{obj}.png',
-             y_rawp)
+             y_raw)
 
    if obj != 'size':
         if obj != 'cluster': 
-            draw_plot(x, y_total_before_cut_raw,
+            draw_plot(x, y_total_before_cut_rawp,
               'bit', f'total # of {obj}',
               f'total # of {obj} before selection', f'size_before_cut_{obj}.png',
-              y_total_before_cut_rawp
+              y_total_before_cut_raw
              ) 
         if obj == 'cluster':
            title = f'total # of {obj}'
         else:
             title = f'total # of {obj} after selection'
-        draw_plot(x, y_total_after_cut_raw,
+        draw_plot(x, y_total_after_cut_rawp,
              'bit', f'total # of {obj}',
              title, f'size_after_cut_{obj}.png',
-             y_total_after_cut_rawp
+             y_total_after_cut_raw
              )

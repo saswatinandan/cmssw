@@ -25,8 +25,8 @@ auto createhist(const std::string& name, const std::string& title, const int& nx
          return h;
 }
 
-//template<typename std::size_t S>
-auto createhist(const std::string& name, const std::string& title, const int& nbins, const double (&arry)[8]){
+template<typename std::size_t S>
+auto createhist(const std::string& name, const std::string& title, const int& nbins, const double (&arry)[S]){
 
          TH1F* h = new TH1F(name.c_str(), title.c_str(), nbins, arry);
 	 set_properties(h);
