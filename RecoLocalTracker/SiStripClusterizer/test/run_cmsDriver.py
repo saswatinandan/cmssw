@@ -39,7 +39,7 @@ os.system(run_cmd)
 
 ### hlt ###
 
-cmd_hlt = f'hltGetConfiguration /users/vmuralee/PREmenu/V9 --globaltag 140X_dataRun3_HLT_for2024TSGStudies_v1 --data --unprescale --max-events {number} --eras Run3 --input /store/data/Run2024F/Muon0/RAW-RECO/ZMu-PromptReco-v1/000/382/216/00000/aadd1ab9-4eb8-4fb2-ac62-bdd1bebe882e.root > prehlt.py'
+cmd_hlt = f'hltGetConfiguration /users/vmuralee/PREmenu/V9 --globaltag 410X_dataRun3_HLT_for2024TSGStudies_v1 --data --unprescale --max-events {number} --eras Run3 --input /store/data/Run2024F/Muon0/RAW-RECO/ZMu-PromptReco-v1/000/382/216/00000/aadd1ab9-4eb8-4fb2-ac62-bdd1bebe882e.root > prehlt.py'
 
 #os.system(cmd_hlt)
 
@@ -54,7 +54,7 @@ os.system(f'mv outputPhysicsHIPhysicsRawPrime0.root outputPhysicsHIPhysicsRawPri
 
 #### step2 ####
 #Run3_pp_on_PbPb_approxSiStripClusters
-cmd_step2 = f"cmsDriver.py step2 --scenario pp --conditions auto:run3_data_prompt -s REPACK:DigiToApproxClusterRaw --datatier GEN-SIM-DIGI-RAW-HLTDEBUG --era Run3_pp_on_PbPb_approxSiStripClusters --eventcontent REPACKRAW -n {number} --customise_commands"
+cmd_step2 = f"cmsDriver.py step2 --scenario pp --conditions 140X_dataRun3_Prompt_v3 -s REPACK:DigiToApproxClusterRaw --datatier GEN-SIM-DIGI-RAW-HLTDEBUG --era Run3_pp_on_PbPb_approxSiStripClusters --eventcontent REPACKRAW -n {number} --customise_commands"
 cmd_step2 += ' "process.rawPrimeDataRepacker.src='
 cmd_step2 += "'rawDataRepacker'"
 cmd_step2 += f'" --repacked --process ReHLT --filein file:outputPhysicsHIPhysicsRawPrime0_{bit}.root --no_exec'
@@ -72,7 +72,7 @@ os.system(run_cmd)
 
 ###step3 ####
 
-cmd_step3 = f'cmsDriver.py step3 --conditions auto:run3_data_prompt -s RAW2DIGI,L1Reco,RECO --datatier RECO --eventcontent RECO --data --process reRECO --scenario pp -n {number} --repacked --era Run3_pp_on_PbPb_approxSiStripClusters --filein file:step2_REPACK_{bit}.root --no_exec --nThreads {threads}'
+cmd_step3 = f'cmsDriver.py step3 --conditions 140X_dataRun3_Prompt_v3 -s RAW2DIGI,L1Reco,RECO --datatier RECO --eventcontent RECO --data --process reRECO --scenario pp -n {number} --repacked --era Run3_pp_on_PbPb_approxSiStripClusters --filein file:step2_REPACK_{bit}.root --no_exec --nThreads {threads}'
 
 print(cmd_step3)
 os.system(cmd_step3)
