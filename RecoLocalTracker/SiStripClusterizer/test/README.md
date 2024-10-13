@@ -15,7 +15,7 @@
 ```
 ## Command to add track information for raw
 ```sh
-cmsDriver.py step5 --conditions auto:run3_data_prompt -s RAW2DIGI,L1Reco,RECO --datatier RECO --eventcontent RECO --data --process reRECO --scenario pp -n 100 --repacked --era Run3_2024 --nThreads 254 --filein /store/data/Run2024F/Muon0/RAW-RECO/ZMu-PromptReco-v1/000/382/216/00000/aadd1ab9-4eb8-4fb2-ac62-bdd1bebe882e.root
+cmsDriver.py step5 --conditions 140X_dataRun3_Prompt_v3 -s RAW2DIGI,L1Reco,RECO --datatier RECO --eventcontent RECO --data --process reRECO --scenario pp -n -1 --repacked --era Run3_2024 --nThreads 254 --filein /store/data/Run2024F/Muon0/RAW-RECO/ZMu-PromptReco-v1/000/382/216/00000/aadd1ab9-4eb8-4fb2-ac62-bdd1bebe882e.root
 cmsRun sep19_2_2_dump_raw.py inputFiles=step5_RAW2DIGI_L1Reco_RECO.root outputFile=flatntuple_step5_RAW2DIGI_L1Reco_RECO.root c=1
 ```
 One should run the above command first as the output of the previous command will be used for next command. Since it is time consuming process, no need to run it
