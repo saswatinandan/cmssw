@@ -52,48 +52,27 @@ os.system(run_cmd)
 os.system(f'mv outputPhysicsHIPhysicsRawPrime0.root outputPhysicsHIPhysicsRawPrime0_{bit}.root')
 
 
-#### step2 ####
-#Run3_pp_on_PbPb_approxSiStripClusters
-cmd_step2 = f"cmsDriver.py step2 --scenario pp --conditions 140X_dataRun3_Prompt_v3 -s REPACK:DigiToApproxClusterRaw --datatier GEN-SIM-DIGI-RAW-HLTDEBUG --era Run3_pp_on_PbPb_approxSiStripClusters --eventcontent REPACKRAW -n {number} --customise_commands"
-cmd_step2 += ' "process.rawPrimeDataRepacker.src='
-cmd_step2 += "'rawDataRepacker'"
-cmd_step2 += f'" --repacked --process ReHLT --filein file:outputPhysicsHIPhysicsRawPrime0_{bit}.root --no_exec'
+cmd_reco_step = 'cmsDriver.py step_reco tep3 --conditions 140X_dataRun3_Prompt_v3 -s RAW2DIGI,L1Reco,RECO --datatier RECO --eventcontent RECO --data --process reRECO --scenario pp -n -1 --repacked --era Run3_pp_on_PbPb_approxSiStripClusters --filein file:outputPhysicsHIPhysicsRawPrime0_{bit}.root --no_exec --nThreads {threads}'
+print(cmd_reco_step)
+os.system(cmd_reco_step)
 
-print(cmd_step2)
-os.system(cmd_step2)
-replace_line('step2_REPACK.py', 
-               [( 'step2_REPACK.root', f'step2_REPACK_{bit}.root'),
-                ('from Configuration.Eras.Era_Run3_pp_on_PbPb_approxSiStripClusters_cff import Run3_pp_on_PbPb_approxSiStripClusters', 'from Configuration.Eras.Era_Run2024_pp_on_PbPb_approxSiStripCluster import Run3_pp_on_PbPb_approxSiStripClusters_2024'),
-               ("process = cms.Process('ReHLT',Run3_pp_on_PbPb_approxSiStripClusters)", "process = cms.Process('ReHLT',Run3_pp_on_PbPb_approxSiStripClusters_2024)")
-])
-run_cmd = ('cmsRun step2_REPACK.py')
-print(run_cmd)
-os.system(run_cmd)
-
-###step3 ####
-
-cmd_step3 = f'cmsDriver.py step3 --conditions 140X_dataRun3_Prompt_v3 -s RAW2DIGI,L1Reco,RECO --datatier RECO --eventcontent RECO --data --process reRECO --scenario pp -n {number} --repacked --era Run3_pp_on_PbPb_approxSiStripClusters --filein file:step2_REPACK_{bit}.root --no_exec --nThreads {threads}'
-
-print(cmd_step3)
-os.system(cmd_step3)
-
-replace_line('step3_RAW2DIGI_L1Reco_RECO.py',
+replace_line('step_reco_RAW2DIGI_L1Reco_RECO.py',
              [
-               ('step3_RAW2DIGI_L1Reco_RECO.root', f'step3_RAW2DIGI_L1Reco_RECO_{bit}.root'),
+               ('step_reco_RAW2DIGI_L1Reco_RECO.root', f'step_reco_RAW2DIGI_L1Reco_RECO_{bit}.root'),
                ('from Configuration.Eras.Era_Run3_pp_on_PbPb_approxSiStripClusters_cff import Run3_pp_on_PbPb_approxSiStripClusters', 'from Configuration.Eras.Era_Run2024_pp_on_PbPb_approxSiStripCluster import Run3_pp_on_PbPb_approxSiStripClusters_2024'),
                ("process = cms.Process('reRECO',Run3_pp_on_PbPb_approxSiStripClusters)", "process = cms.Process('reRECO',Run3_pp_on_PbPb_approxSiStripClusters_2024)"),
                ('outputCommands = process.RECOEventContent.outputCommands', "outputCommands = cms.untracked.vstring( 'drop *',\n'keep *_*siStripClusters*_*_*',\n'keep *_*generalTracks*_*_*',\n'keep *_hltSiStripClusters2ApproxClusters_*_*',\n'keep *_ak4PFJets_*_*',\n'keep *_*pfMet*_*_*',\n'keep DetIds_hltSiStripRawToDigi_*_ReHLT',\n'keep FEDRawDataCollection_raw*_*_ReHLT',\n'keep FEDRawDataCollection_hltSiStripDigiToZSRaw_*_ReHLT',\n'keep GlobalObjectMapRecord_hltGtStage2ObjectMap_*_ReHLT',\n'keep edmTriggerResults_*_*_ReHLT',\n'keep triggerTriggerEvent_*_*_ReHLT')\n")
             ])
-run_cmd = 'cmsRun step3_RAW2DIGI_L1Reco_RECO.py'
+run_cmd = 'cmsRun step_reco_RAW2DIGI_L1Reco_RECO.py'
 print(run_cmd)
 os.system(run_cmd)
 
 #### object comparison ####
 
-run_cmd = f'python3 run_flatNtuplizer.py -rp step3_RAW2DIGI_L1Reco_RECO_{bit}.root -c -n {number}'
+run_cmd = f'python3 run_flatNtuplizer.py -rp step_reco_RAW2DIGI_L1Reco_RECO_{bit}.root -c -n {number}'
 print(run_cmd)
 os.system(run_cmd)
 
-run_cmd = f"edmEventSize -v step3_RAW2DIGI_L1Reco_RECO_{bit}.root > size.log"
+run_cmd = f"edmEventSize -v step_reco_RAW2DIGI_L1Reco_RECO_{bit}.root > size.log"
 print(run_cmd)
 os.system(run_cmd)
