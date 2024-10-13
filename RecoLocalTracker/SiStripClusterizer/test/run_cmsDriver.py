@@ -52,7 +52,7 @@ os.system(run_cmd)
 os.system(f'mv outputPhysicsHIPhysicsRawPrime0.root outputPhysicsHIPhysicsRawPrime0_{bit}.root')
 
 
-cmd_reco_step = 'cmsDriver.py step_reco tep3 --conditions 140X_dataRun3_Prompt_v3 -s RAW2DIGI,L1Reco,RECO --datatier RECO --eventcontent RECO --data --process reRECO --scenario pp -n -1 --repacked --era Run3_pp_on_PbPb_approxSiStripClusters --filein file:outputPhysicsHIPhysicsRawPrime0_{bit}.root --no_exec --nThreads {threads}'
+cmd_reco_step = 'cmsDriver.py step_reco --conditions 140X_dataRun3_Prompt_v3 -s RAW2DIGI,L1Reco,RECO --datatier RECO --eventcontent RECO --data --process reRECO --scenario pp -n -1 --repacked --era Run3_pp_on_PbPb_approxSiStripClusters --filein file:outputPhysicsHIPhysicsRawPrime0_{bit}.root --no_exec --nThreads {threads}'
 print(cmd_reco_step)
 os.system(cmd_reco_step)
 
