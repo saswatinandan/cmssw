@@ -57,8 +57,8 @@ private:
   uint16_t nTracks;
   int nJets; /// uint16_t doesn't work here, give -ve number, why???
   
-  int runN;
-  int lumi;
+  edm::RunNumber_t runN;
+  edm::LuminosityBlockNumber_t lumi;
 
   float trkPt[nMax];
   float trkEta[nMax];
@@ -67,10 +67,10 @@ private:
   float trkDxyError1[nMax];
   float trkDz1[nMax];
   float trkDzError1[nMax];
-  unsigned char trkAlgo[nMax];
-  uint8_t trkNHit[nMax];
-  uint8_t trkNdof[nMax];
-  uint8_t trkNlayer[nMax];
+  int trkAlgo[nMax];
+  int trkNHit[nMax];
+  int trkNdof[nMax];
+  int trkNlayer[nMax];
 
   float trkChi2[nMax];
   float trkPtError[nMax];
@@ -108,7 +108,7 @@ flatNtuple_producer::flatNtuple_producer(const edm::ParameterSet& iConfig){
   trackTree->Branch("trkChi2",  trkChi2, "trkChi2[nTracks]/F");
   trackTree->Branch("trkPtError",  trkPtError, "trkPtError[nTracks]/F");
 
-  trackTree->Branch("trkAlgo",trkAlgo,"trkAlgo[nTracks]/s");
+  trackTree->Branch("trkAlgo",trkAlgo,"trkAlgo[nTracks]/I");
   trackTree->Branch("trkNHit",trkNHit,"trkNHit[nTracks]/I");
   trackTree->Branch("trkNdof",trkNdof,"trkNdof[nTracks]/I");
   trackTree->Branch("trkNlayer",trkNlayer,"trkNlayer[nTracks]/I");

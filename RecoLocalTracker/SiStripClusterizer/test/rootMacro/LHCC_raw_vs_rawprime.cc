@@ -57,7 +57,7 @@ struct TreeReader{
    float trkDz1[nMax] = {0};
    float trkDzError1[nMax] = {0};
 
-   UShort_t trkAlgo[nMax] = {0};
+   Int_t trkAlgo[nMax] = {0};
    Int_t trkNHit[nMax] = {0};
    Int_t trkNdof[nMax] = {0};
    Int_t trkNlayer[nMax] = {0};
@@ -144,7 +144,7 @@ struct Track{
         float Dz1;
         float DzError1;
 
-        UShort_t trkAlgo;
+        Int_t trkAlgo;
         Int_t    trkNHit;
         Int_t    trkNdof;
         Int_t    trkNlayer;
@@ -163,7 +163,7 @@ struct Track{
             const float& in_DxyError1,
             const float& in_Dz1,
             const float& in_DzError1,
-            const UShort_t& in_trkAlgo,
+            const Int_t& in_trkAlgo,
             const Int_t&  in_trkNHit,
             const Int_t&  in_trkNdof,
             const Int_t&  in_trkNlayer,
