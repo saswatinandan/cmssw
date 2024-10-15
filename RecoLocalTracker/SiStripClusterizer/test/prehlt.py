@@ -65,7 +65,7 @@ process.ClusterShapeHitFilterESProducer = cms.ESProducer( "ClusterShapeHitFilter
   doStripShapeCut = cms.bool( True ),
   clusterChargeCut = cms.PSet( 
     value = cms.double( -1.0 ),
-    refToPSet_ = cms.string( "HLTSiStripClusterChargeCutTight" )
+    refToPSet_ = cms.string( "HLTSiStripClusterChargeCutNone" )
   ),
   appendToDataLabel = cms.string( "" )
 )
@@ -361,7 +361,7 @@ process.hltSiStripClusterizerForRawPrime = cms.EDProducer( "SiStripClusterizer",
       MaxAdjacentBad = cms.uint32( 0 ),
       MaxClusterSize = cms.uint32( 768 ),
       RemoveApvShots = cms.bool( True ),
-      clusterChargeCut = cms.PSet(  refToPSet_ = cms.string( "HLTSiStripClusterChargeCutTight" ) ),
+      clusterChargeCut = cms.PSet(  refToPSet_ = cms.string( "HLTSiStripClusterChargeCutNone" ) ),
       ConditionsLabel = cms.string( "" )
     ),
     DigiProducersList = cms.VInputTag( 'hltSiStripRawToDigi:ZeroSuppressed','hltSiStripZeroSuppression:VirginRaw','hltSiStripZeroSuppression:ProcessedRaw','hltSiStripZeroSuppression:ScopeMode' )
