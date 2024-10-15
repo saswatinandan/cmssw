@@ -61,7 +61,7 @@ replace_line('step_reco_RAW2DIGI_L1Reco_RECO.py',
                ('step_reco_RAW2DIGI_L1Reco_RECO.root', f'step_reco_RAW2DIGI_L1Reco_RECO_{bit}.root'),
                ('from Configuration.Eras.Era_Run3_pp_on_PbPb_approxSiStripClusters_cff import Run3_pp_on_PbPb_approxSiStripClusters', 'from Configuration.Eras.Era_Run2024_pp_on_PbPb_approxSiStripCluster import Run3_pp_on_PbPb_approxSiStripClusters_2024'),
                ("process = cms.Process('reRECO',Run3_pp_on_PbPb_approxSiStripClusters)", "process = cms.Process('reRECO',Run3_pp_on_PbPb_approxSiStripClusters_2024)"),
-               ('outputCommands = process.RECOEventContent.outputCommands', "outputCommands = cms.untracked.vstring( 'drop *',\n'keep *_*siStripClusters*_*_*',\n'keep *_*generalTracks*_*_*',\n'keep *_hltSiStripClusters2ApproxClusters_*_*',\n'keep *_ak4PFJets_*_*',\n'keep *_*pfMet*_*_*',\n'keep DetIds_hltSiStripRawToDigi_*_ReHLT',\n'keep FEDRawDataCollection_raw*_*_ReHLT',\n'keep FEDRawDataCollection_hltSiStripDigiToZSRaw_*_ReHLT',\n'keep GlobalObjectMapRecord_hltGtStage2ObjectMap_*_ReHLT',\n'keep edmTriggerResults_*_*_ReHLT',\n'keep triggerTriggerEvent_*_*_ReHLT')\n")
+               ('outputCommands = process.RECOEventContent.outputCommands', "outputCommands = cms.untracked.vstring( 'drop *',\n'keep *_*siStripClusters*_*_*',\n'keep *_*generalTracks*_*_*',\n'keep *_hltSiStripClusters2ApproxClusters_*_*',\n'keep *_ak4PFJets_*_*',\n'keep *_*pfMet*_*_*')\n")
             ])
 run_cmd = 'cmsRun step_reco_RAW2DIGI_L1Reco_RECO.py'
 print(run_cmd)
