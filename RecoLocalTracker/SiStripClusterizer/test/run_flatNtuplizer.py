@@ -2,7 +2,7 @@ import os
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-r", dest="input_raw", default='/home/users/nandan/backup/flatntuple_step5_RAW2DIGI_L1Reco_RECO_wGT140.root', help="flatntuple for raw")
+parser.add_argument("-r", dest="input_raw", default='/home/users/nandan/backup/flatntuple_step5_RAW2DIGI_L1Reco_RECO_wchargecut.root', help="flatntuple for raw")
 parser.add_argument("-rp", dest="input_rawp", default='', help="input for rawp")
 parser.add_argument("-n", dest="n", default='-1', help="number of events to be run")
 parser.add_argument("-c", action='store_true', dest="cluster", default=False, help="make flatntuple for cluster")
