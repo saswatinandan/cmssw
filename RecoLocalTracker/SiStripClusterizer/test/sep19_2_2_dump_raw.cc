@@ -117,7 +117,7 @@ sep19_2_2_dump_raw::~sep19_2_2_dump_raw() = default;
 void sep19_2_2_dump_raw::analyze(const edm::Event& event, const edm::EventSetup& es) {
   edm::Handle<edmNew::DetSetVector<SiStripCluster>> clusterCollection 		= event.getHandle(clusterToken);
 
-
+  std::cout << clusterCollection->size() << std::endl;
   using namespace edm;
 
   const auto& tkGeom = &es.getData(tkGeomToken_);
@@ -128,7 +128,6 @@ void sep19_2_2_dump_raw::analyze(const edm::Event& event, const edm::EventSetup&
     runN   = (int) event.id().run();
     lumi   = (int) event.id().luminosityBlock();
     detId = detSiStripClusters.detId();
-    if ((eventN != 8180236 ) && (runN != 382216) && (lumi != 99)) continue;
     for (const auto& stripCluster : detSiStripClusters) {
 
       firstStrip  = stripCluster.firstStrip();
