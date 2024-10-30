@@ -89,7 +89,8 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '132X_dataRun3_HLT_v2', '')
 process.sep19_2_1_dump_rawprime = cms.EDAnalyzer("sep19_2_1_dump_rawprime",
     approxSiStripClustersTag = cms.InputTag("hltSiStripClusters2ApproxClusters"),
     doDumpInputOfSiStripClusters2ApproxClusters = cms.bool(False),
-    hltSiStripClusterizerForRawPrimeTag = cms.InputTag("hltSiStripClusterizerForRawPrime")
+    hltSiStripClusterizerForRawPrimeTag = cms.InputTag("hltSiStripClusterizerForRawPrime"),
+    tracks = cms.InputTag('generalTracks',"", 'reRECO')
 )
 
 # Path and EndPath definitions

@@ -86,6 +86,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '132X_dataRun3_Express_v4', '')
 
 process.sep19_2_2_dump_raw = cms.EDAnalyzer("sep19_2_2_dump_raw",
     siStripClustersTag = cms.InputTag("siStripClusters"),
+    tracks = cms.InputTag('generalTracks',"", 'reRECO')
 )
 
 # dead strip

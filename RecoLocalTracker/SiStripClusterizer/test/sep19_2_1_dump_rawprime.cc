@@ -32,6 +32,13 @@
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/CommonTopologies/interface/StripTopology.h"
 
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2D.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2D.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit1D.h"
+
+#include "assert.h"
 //ROOT inclusion
 #include "TROOT.h"
 #include "TFile.h"
@@ -40,7 +47,10 @@
 #include "TMath.h"
 #include "TList.h"
 #include "TString.h"
+#include "cluster_property.h"
 
+const int kBPIX = PixelSubdetector::PixelBarrel;
+const int kFPIX = PixelSubdetector::PixelEndcap;
 //
 // class decleration
 //
@@ -59,6 +69,8 @@ private:
 
   edm::InputTag inputTagApproxClusters;
   edm::InputTag inputTagClustersForRawPrime;
+
+  edm::EDGetTokenT<reco::TrackCollection> tracksToken_; 
 
   // Event Data
   edm::EDGetTokenT<SiStripApproximateClusterCollection> approxClusterToken;
@@ -81,6 +93,8 @@ private:
   float       barycenter;
   uint16_t    size;
   int         charge;
+  bool low_pt_trk_cluster;
+  bool high_pt_trk_cluster;
 
   const static int nMax = 8000000;
   float       hitX[nMax];
@@ -105,6 +119,7 @@ private:
 sep19_2_1_dump_rawprime::sep19_2_1_dump_rawprime(const edm::ParameterSet& conf) {
   inputTagApproxClusters = conf.getParameter<edm::InputTag>("approxSiStripClustersTag");
   approxClusterToken 	 = consumes<SiStripApproximateClusterCollection>(inputTagApproxClusters);
+  tracksToken_           = consumes<reco::TrackCollection>(conf.getParameter<edm::InputTag>("tracks"));
   doDumpInputOfSiStripClusters2ApproxClusters = conf.getParameter<bool>("doDumpInputOfSiStripClusters2ApproxClusters");
   inputTagClustersForRawPrime = conf.getParameter<edm::InputTag>("hltSiStripClusterizerForRawPrimeTag");
   clusterForRawPrimeToken = consumes<edmNew::DetSetVector<SiStripCluster>>(inputTagClustersForRawPrime);
@@ -125,6 +140,8 @@ sep19_2_1_dump_rawprime::sep19_2_1_dump_rawprime(const edm::ParameterSet& conf) 
   onlineClusterTree->Branch("barycenter", &barycenter, "barycenter/F");
   onlineClusterTree->Branch("size", &size, "size/s");
   onlineClusterTree->Branch("charge", &charge, "charge/I");
+  onlineClusterTree->Branch("low_pt_trk_cluster", &low_pt_trk_cluster, "low_pt_trk_cluster/b");
+  onlineClusterTree->Branch("high_pt_trk_cluster", &high_pt_trk_cluster, "high_pt_trk_cluster/b");
 
   onlineClusterTree->Branch("x", hitX, "x[size]/F");
   onlineClusterTree->Branch("y", hitY, "y[size]/F");
@@ -152,9 +169,51 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
   edm::Handle<SiStripApproximateClusterCollection>  approxClusterCollection 	= event.getHandle(approxClusterToken);
   edm::Handle<edmNew::DetSetVector<SiStripCluster>> clusterForRawPrimeCollection = event.getHandle(clusterForRawPrimeToken);
 
-
+  const auto& tracksHandle = event.getHandle(tracksToken_);
+  
   using namespace edm;
 
+  if (!tracksHandle.isValid()) {
+    edm::LogError("flatNtuple_producer") << "No valid track collection found";
+    return;
+  }
+
+  const reco::TrackCollection& tracks = *tracksHandle;
+  std::map<uint32_t, std::vector<cluster_property>> matched_cluster;
+ 
+  for(unsigned int i=0; i<tracks.size(); i++) {
+
+     auto trk = tracks.at(i);
+     for (auto ih = trk.recHitsBegin(); ih != trk.recHitsEnd(); ih++) {
+         const SiStripCluster* strip=NULL;
+         const TrackingRecHit& hit = **ih;
+         const DetId detId((hit).geographicalId());
+         if (detId.det() == DetId::Tracker) { 
+           if (detId.subdetId() == kBPIX || detId.subdetId() == kFPIX) continue;  // pixel is always 2D
+           else {        // should be SiStrip now
+               if (dynamic_cast<const SiStripRecHit1D *>(&hit)) {
+                   strip = dynamic_cast<const SiStripRecHit1D *>(&hit)->cluster().get();
+               }
+               else if ( dynamic_cast<const SiStripRecHit2D *>(&hit)) {
+                 //std::cout << "found SiStripRecHit2D " << std::endl;
+                 strip = dynamic_cast<const SiStripRecHit2D *>(&hit)->cluster().get();
+               }
+               else if (dynamic_cast<const SiStripMatchedRecHit2D *>(&hit)) {
+                  //std::cout << "found SiStripMatchedRecHit2D " << std::endl;
+                  strip = &(dynamic_cast<const SiStripMatchedRecHit2D *>(&hit))->monoCluster();
+              }
+           }
+           if(strip) {
+               bool low_pt_trk = trk.pt() < 0.75;
+               matched_cluster[detId].emplace_back(
+                      low_pt_trk, !low_pt_trk, strip->barycenter(),
+                      strip->size(), strip->firstStrip(), strip->endStrip(),
+                      strip->charge() 
+               );
+         }
+        }
+    }
+  }    
   const auto& tkGeom = &es.getData(tkGeomToken_);
   const auto tkDets = tkGeom->dets();
 
@@ -194,6 +253,26 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
         adc    [strip - firstStrip] = convertedCluster[strip - firstStrip];
       }
 
+      low_pt_trk_cluster = false;
+      high_pt_trk_cluster = false;
+
+      if(matched_cluster.find(detId) != matched_cluster.end())
+      {
+        for(auto& trk_cluster_property: matched_cluster[detId])
+        {
+           if (trk_cluster_property.barycenter == barycenter)
+           {
+               assert( (size == trk_cluster_property.size)
+                      && (firstStrip == trk_cluster_property.firstStrip)
+                      && (endStrip == trk_cluster_property.endStrip)
+                      && (charge == trk_cluster_property.charge)
+               );
+               low_pt_trk_cluster = trk_cluster_property.low_pt_trk_cluster;
+               high_pt_trk_cluster = trk_cluster_property.high_pt_trk_cluster; 
+           }
+        }
+      }
+ 
       if (doDumpInputOfSiStripClusters2ApproxClusters) {
         ///// 2. calculating distance metric (delta barycenter), and finding the reference
         float distance{9999.};
@@ -241,6 +320,7 @@ void sep19_2_1_dump_rawprime::fillDescriptions(edm::ConfigurationDescriptions& d
   desc.add<edm::InputTag>("approxSiStripClustersTag", edm::InputTag("hltSiStripClusters2ApproxClusters"));
   desc.add<bool>("doDumpInputOfSiStripClusters2ApproxClusters" , false);
   desc.add<edm::InputTag>("hltSiStripClusterizerForRawPrimeTag", edm::InputTag("hltSiStripClusterizerForRawPrime"));
+  desc.add<edm::InputTag>("tracks", edm::InputTag("generalTracks","","reRECO"));
   descriptions.add("sep19_2_1_dump_rawprime", desc);
 }
 

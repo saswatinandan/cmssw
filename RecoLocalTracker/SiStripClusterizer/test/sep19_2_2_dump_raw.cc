@@ -30,7 +30,14 @@
 #include "Geometry/TrackerGeometryBuilder/interface/StripGeomDetUnit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/CommonTopologies/interface/StripTopology.h"
-
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2D.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2D.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit1D.h"
+#include "DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h"
+#include "DataFormats/SiStripCluster/interface/SiStripApproximateClusterCollection.h"
+#include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
 //ROOT inclusion
 #include "TROOT.h"
 #include "TFile.h"
@@ -39,7 +46,10 @@
 #include "TMath.h"
 #include "TList.h"
 #include "TString.h"
+#include "cluster_property.h"
 
+const int kBPIX = PixelSubdetector::PixelBarrel;
+const int kFPIX = PixelSubdetector::PixelEndcap;
 //
 // class decleration
 //
@@ -56,6 +66,7 @@ private:
 
   edm::InputTag inputTagClusters;
 
+  edm::EDGetTokenT<reco::TrackCollection> tracksToken_;
   // Event Data
   edm::EDGetTokenT<edmNew::DetSetVector<SiStripCluster>> clusterToken;
 
@@ -76,6 +87,8 @@ private:
   float       barycenter;
   uint16_t    size;
   int         charge;
+  bool low_pt_trk_cluster;
+  bool high_pt_trk_cluster;
 
   const static int nMax = 800000;
   float       hitX[nMax];
@@ -87,6 +100,7 @@ private:
 sep19_2_2_dump_raw::sep19_2_2_dump_raw(const edm::ParameterSet& conf) {
   inputTagClusters 	 = conf.getParameter<edm::InputTag>("siStripClustersTag");
   clusterToken 		 = consumes<edmNew::DetSetVector<SiStripCluster>>(inputTagClusters);
+  tracksToken_           = consumes<reco::TrackCollection>(conf.getParameter<edm::InputTag>("tracks"));
 
   tkGeomToken_ = esConsumes();
 
@@ -103,6 +117,8 @@ sep19_2_2_dump_raw::sep19_2_2_dump_raw(const edm::ParameterSet& conf) {
   offlineClusterTree->Branch("barycenter", &barycenter, "barycenter/F");
   offlineClusterTree->Branch("size", &size, "size/s");
   offlineClusterTree->Branch("charge", &charge, "charge/I");
+  offlineClusterTree->Branch("low_pt_trk_cluster", &low_pt_trk_cluster, "low_pt_trk_cluster/b");
+  offlineClusterTree->Branch("high_pt_trk_cluster", &high_pt_trk_cluster, "high_pt_trk_cluster/b"); 
 
   offlineClusterTree->Branch("x", hitX, "x[size]/F");
   offlineClusterTree->Branch("y", hitY, "y[size]/F");
@@ -116,9 +132,51 @@ sep19_2_2_dump_raw::~sep19_2_2_dump_raw() = default;
 
 void sep19_2_2_dump_raw::analyze(const edm::Event& event, const edm::EventSetup& es) {
   edm::Handle<edmNew::DetSetVector<SiStripCluster>> clusterCollection 		= event.getHandle(clusterToken);
+  const auto& tracksHandle = event.getHandle(tracksToken_);
 
   using namespace edm;
 
+  if (!tracksHandle.isValid()) {
+    edm::LogError("flatNtuple_producer") << "No valid track collection found";
+    return;
+  }
+  const reco::TrackCollection& tracks = *tracksHandle;
+  std::map<uint32_t, std::vector<cluster_property>> matched_cluster;
+
+  for(unsigned int i=0; i<tracks.size(); i++) {
+    
+     auto trk = tracks.at(i);
+     for (auto ih = trk.recHitsBegin(); ih != trk.recHitsEnd(); ih++) {
+         const SiStripCluster* strip=NULL;
+         const TrackingRecHit& hit = **ih;
+         const DetId detId((hit).geographicalId());
+         if (detId.det() == DetId::Tracker) {
+           if (detId.subdetId() == kBPIX || detId.subdetId() == kFPIX) continue;  // pixel is always 2D
+           else {        // should be SiStrip now
+               if (dynamic_cast<const SiStripRecHit1D *>(&hit)) {
+                   strip = dynamic_cast<const SiStripRecHit1D *>(&hit)->cluster().get();
+               }
+               else if ( dynamic_cast<const SiStripRecHit2D *>(&hit)) {
+                 //std::cout << "found SiStripRecHit2D " << std::endl;
+                 strip = dynamic_cast<const SiStripRecHit2D *>(&hit)->cluster().get();
+               }
+               else if (dynamic_cast<const SiStripMatchedRecHit2D *>(&hit)) {
+                  //std::cout << "found SiStripMatchedRecHit2D " << std::endl;
+                  strip = &(dynamic_cast<const SiStripMatchedRecHit2D *>(&hit))->monoCluster();
+               }
+           }
+         }
+         if(strip) {
+            bool low_pt_trk = trk.pt() < 0.75;
+            matched_cluster[detId].emplace_back(
+                 low_pt_trk, !low_pt_trk, strip->barycenter(),
+                 strip->size(), strip->firstStrip(), strip->endStrip(),
+                 strip->charge()
+            );
+         }
+     }
+  }
+  
   const auto& tkGeom = &es.getData(tkGeomToken_);
   const auto tkDets = tkGeom->dets();
 
@@ -149,6 +207,27 @@ void sep19_2_2_dump_raw::analyze(const edm::Event& event, const edm::EventSetup&
         channel[strip - firstStrip] = strip;
         adc    [strip - firstStrip] = stripCluster[strip - firstStrip];
       }
+      
+      low_pt_trk_cluster = false;
+      high_pt_trk_cluster = false;
+
+      if(matched_cluster.find(detId) != matched_cluster.end())
+      { 
+        for(auto& trk_cluster_property: matched_cluster[detId])
+        {  
+           if (trk_cluster_property.barycenter == barycenter)
+           {
+               assert( (size == trk_cluster_property.size)
+                      && (firstStrip == trk_cluster_property.firstStrip)
+                      && (endStrip == trk_cluster_property.endStrip)
+                      && (charge == trk_cluster_property.charge)
+               );
+               low_pt_trk_cluster = trk_cluster_property.low_pt_trk_cluster;
+               high_pt_trk_cluster = trk_cluster_property.high_pt_trk_cluster;
+           }
+        }
+      }
+ 
       offlineClusterTree->Fill();
     }
   }
@@ -158,6 +237,7 @@ void sep19_2_2_dump_raw::analyze(const edm::Event& event, const edm::EventSetup&
 void sep19_2_2_dump_raw::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
   desc.add<edm::InputTag>("siStripClustersTag", edm::InputTag("siStripClusters"));
+  desc.add<edm::InputTag>("tracks", edm::InputTag("generalTracks","","reRECO"));
   descriptions.add("sep19_2_2_dump_raw", desc);
 }
 
