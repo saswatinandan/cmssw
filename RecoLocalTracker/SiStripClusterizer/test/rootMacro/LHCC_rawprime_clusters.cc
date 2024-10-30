@@ -138,6 +138,8 @@ int main(int argc, char const *argv[])
 	float       rp_barycenter;
 	uint16_t    rp_size;
 	int         rp_charge;
+        UChar_t        rp_low_pt_trk_cluster;
+        UChar_t        rp_high_pt_trk_cluster;
 
 	float       rp_hitX[nMax];
 	float       rp_hitY[nMax];
@@ -177,6 +179,8 @@ int main(int argc, char const *argv[])
 	float       r_barycenter;
 	uint16_t    r_size;
 	int         r_charge;
+        UChar_t        r_low_pt_trk_cluster;
+        UChar_t        r_high_pt_trk_cluster;
 
 	float       r_hitX[nMax];
 	float       r_hitY[nMax];
@@ -201,6 +205,8 @@ int main(int argc, char const *argv[])
 	onlineClusterTree->SetBranchAddress("barycenter", &rp_barycenter);
 	onlineClusterTree->SetBranchAddress("size", &rp_size);
 	onlineClusterTree->SetBranchAddress("charge", &rp_charge);
+        onlineClusterTree->SetBranchAddress("low_pt_trk_cluster", &rp_low_pt_trk_cluster);
+        onlineClusterTree->SetBranchAddress("high_pt_trk_cluster", &rp_high_pt_trk_cluster);
 
 	onlineClusterTree->SetBranchAddress("x", rp_hitX);
 	onlineClusterTree->SetBranchAddress("y", rp_hitY);
@@ -235,6 +241,8 @@ int main(int argc, char const *argv[])
 	offlineClusterTree->SetBranchAddress("barycenter", &r_barycenter);
 	offlineClusterTree->SetBranchAddress("size", &r_size);
 	offlineClusterTree->SetBranchAddress("charge", &r_charge);
+        offlineClusterTree->SetBranchAddress("low_pt_trk_cluster", &r_low_pt_trk_cluster);
+        offlineClusterTree->SetBranchAddress("high_pt_trk_cluster", &r_high_pt_trk_cluster);
 
 	offlineClusterTree->SetBranchAddress("x", r_hitX);
 	offlineClusterTree->SetBranchAddress("y", r_hitY);
@@ -279,25 +287,89 @@ int main(int argc, char const *argv[])
 
 
 
-
+        std::map<string, TH1F* >hists;
+        gStyle->SetOptStat(1); 
+        for(auto& raw: {"raw", "rawp"})
+        {
+            for(const auto& pt: {"all", "low_pt", "high_pt", "unmatched"})
+            {
+               for(const auto& var: {"width", "charge", "avg_charge", "detId"})
+               {
+                   auto key = Form("%s_%s_cluster_%s", raw, pt, var);
+                   if(var=="width")
+                         hists[key] = new TH1F(key, Form(";%s;yield", var), 40,0,40);
+                   else if(var=="detId")
+                         hists[key] = new TH1F(key, Form(";%s;yield", var), 8,-0.5,7.5);
+                   else
+                         hists[key] = new TH1F(key, Form(";cluster_%s;yield", var), 100,0,1000);
+               }
+            }
+        }
+        gStyle->SetOptStat(0);
 	const Int_t r_nEntries = offlineClusterTree->GetEntries();
 	for (int sc_idx = 0; sc_idx < r_nEntries; ++sc_idx)
 	{
 		if(sc_idx%1000000 == 0) std::cout << "Scanning raw clusters: " << sc_idx << "/" << r_nEntries << std::endl;
 		offlineClusterTree->GetEntry(sc_idx);
-
+                fillWithOverFlow(hists["raw_all_cluster_width"], r_size);
+                fillWithOverFlow(hists["raw_all_cluster_charge"], r_charge);
+                fillWithOverFlow(hists["raw_all_cluster_avg_charge"], r_charge/r_size);
+                fillWithOverFlow(hists["raw_all_cluster_detId"], (r_detId >> 25)&0x7);
+                if(int(r_low_pt_trk_cluster))
+                {
+                   fillWithOverFlow(hists["raw_low_pt_cluster_width"], r_size);
+                   fillWithOverFlow(hists["raw_low_pt_cluster_charge"], r_charge);
+                   fillWithOverFlow(hists["raw_low_pt_cluster_avg_charge"], r_charge/r_size);
+                   fillWithOverFlow(hists["raw_low_pt_cluster_detId"], (r_detId >>25 )&0x7);
+                }
+                else if (int(r_high_pt_trk_cluster))
+                {
+                   fillWithOverFlow(hists["raw_high_pt_cluster_width"], r_size);
+                   fillWithOverFlow(hists["raw_high_pt_cluster_charge"], r_charge);
+                   fillWithOverFlow(hists["raw_high_pt_cluster_avg_charge"], r_charge/r_size);
+                   fillWithOverFlow(hists["raw_high_pt_cluster_detId"], (r_detId >>25 )&0x7);
+                }
+                else if (int(r_low_pt_trk_cluster) == int(r_high_pt_trk_cluster))
+                {
+                 fillWithOverFlow(hists["raw_unmatched_cluster_width"], r_size);
+                   fillWithOverFlow(hists["raw_unmatched_cluster_charge"], r_charge);
+                   fillWithOverFlow(hists["raw_unmatched_cluster_avg_charge"], r_charge/r_size);
+                   fillWithOverFlow(hists["raw_unmatched_cluster_detId"], (r_detId >>25 )&0x7); 
+                }
 		r_dict[ r_event ][ r_detId ][ sc_idx ] = cluster( sc_idx, r_event, r_run, r_lumi,
 												r_detId, r_firstStrip, r_endStrip, r_barycenter,
 												r_size, r_charge );
 	}
-        
-
 	const Int_t rp_nEntries = onlineClusterTree->GetEntries();
 	for (int ac_idx = 0; ac_idx < rp_nEntries; ++ac_idx)
 	{
 		if(ac_idx%1000000 == 0) std::cout << "Scanning rawprime clusters: " << ac_idx << "/" << rp_nEntries << std::endl;
 		onlineClusterTree->GetEntry(ac_idx);
-
+                fillWithOverFlow(hists["rawp_all_cluster_width"], rp_size);
+                fillWithOverFlow(hists["rawp_all_cluster_charge"], rp_charge);
+                fillWithOverFlow(hists["rawp_all_cluster_avg_charge"], rp_charge/rp_size);
+                fillWithOverFlow(hists["rawp_all_cluster_detId"], (rp_detId >> 25)&0x7);
+                if(rp_low_pt_trk_cluster)
+                {
+                   fillWithOverFlow(hists["rawp_low_pt_cluster_width"], rp_size);
+                   fillWithOverFlow(hists["rawp_low_pt_cluster_charge"], rp_charge);
+                   fillWithOverFlow(hists["rawp_low_pt_cluster_avg_charge"], rp_charge/rp_size);
+                   fillWithOverFlow(hists["rawp_low_pt_cluster_detId"], (rp_detId >>25 )&0x7);
+                }
+                else if (rp_high_pt_trk_cluster)
+                {
+                   fillWithOverFlow(hists["rawp_high_pt_cluster_width"], rp_size);
+                   fillWithOverFlow(hists["rawp_high_pt_cluster_charge"], rp_charge);
+                   fillWithOverFlow(hists["rawp_high_pt_cluster_avg_charge"], rp_charge/rp_size);
+                   fillWithOverFlow(hists["rawp_high_pt_cluster_detId"], (rp_detId >> 25)&0x7);
+                }
+                else if (rp_low_pt_trk_cluster == rp_high_pt_trk_cluster)
+                {
+                 fillWithOverFlow(hists["rawp_unmatched_cluster_width"], r_size);
+                   fillWithOverFlow(hists["rawp_unmatched_cluster_charge"], r_charge);
+                   fillWithOverFlow(hists["rawp_unmatched_cluster_avg_charge"], r_charge/r_size);
+                   fillWithOverFlow(hists["rawp_unmatched_cluster_detId"], (r_detId >>25 )&0x7);
+                }
 		if (r_dict.find(rp_event)==r_dict.end()) continue;
 
 		rp_dict[ rp_event ][ rp_detId ][ ac_idx ] = cluster( ac_idx, rp_event, rp_run, rp_lumi,
@@ -307,6 +379,7 @@ int main(int argc, char const *argv[])
 		h_charge_tot_ac->Fill( rp_charge );
 		h_barycenter_tot_ac->Fill( rp_barycenter );
 	}
+
 	const Int_t r_d_nEntries = offlineDeadStripTree->GetEntries();
 	for (int idx = 0; idx < r_d_nEntries; ++idx)
 	{
@@ -580,9 +653,13 @@ int main(int argc, char const *argv[])
 	ofstream matched_sc2ac_txt;
 	matched_sc2ac_txt.open(Form("log/%s_matched_sc2ac.txt", expTag.c_str()));
 	matched_sc2ac_txt << "event detId sc_idx barycenter size charge firstStrip endStrip ac_idx barycenter size charge firstStrip endStrip\n";
-	
-	TFile * f = new TFile("cluster_study.root", "recreate");
-	f->cd();
+        TFile * f = new TFile("cluster_study.root", "recreate");
+        f->cd();
+        for(auto [key, hist]: hists)
+        {
+           hist->Write();
+           delete hist;
+        }
 	for (auto& idx_pair: matched_sc2ac) 
 	{
 		// printf("[Debug] approxCluster %p, SiStripCluster %p\n", ac_ptr, sc_ptr);
