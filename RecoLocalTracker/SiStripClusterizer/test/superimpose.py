@@ -3,7 +3,7 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", dest="input_file", default='', help="name of input file")
-parser.add_argument("-v", dest="vars", nargs='+', default=['width', 'charge', 'avg_charge'], help="list of variables")
+parser.add_argument("-v", dest="vars", nargs='+', default=['width', 'charge', 'avg_charge', 'detId'], help="list of variables")
 
 options = parser.parse_args()
 
@@ -27,8 +27,8 @@ for hist in options.vars:#['cluster_width', 'cluster_charge', 'cluster_avgcharge
     stat1 = h1.GetListOfFunctions().FindObject("stats")
     stat1.SetX1NDC(0.4);
     stat1.SetX2NDC(0.6);
-    stat1.SetY1NDC(0.2);
-    stat1.SetY2NDC(0.4);
+    stat1.SetY1NDC(0.6);
+    stat1.SetY2NDC(0.8);
     stat1.SetTextColor(2);
     c.Modified()
 
@@ -37,10 +37,10 @@ for hist in options.vars:#['cluster_width', 'cluster_charge', 'cluster_avgcharge
     h2.Draw('hist sames')
     c.Update()
     stat2 = h2.GetListOfFunctions().FindObject("stats")
-    stat2.SetX1NDC(0.4);
-    stat2.SetX2NDC(0.6);
-    stat2.SetY1NDC(0.4);
-    stat2.SetY2NDC(0.6);
+    stat2.SetX1NDC(0.6);
+    stat2.SetX2NDC(0.8);
+    stat2.SetY1NDC(0.6);
+    stat2.SetY2NDC(0.8);
     
     h3.SetLineColor(3)
     h3.Draw(' sames hist')
@@ -48,24 +48,24 @@ for hist in options.vars:#['cluster_width', 'cluster_charge', 'cluster_avgcharge
     stat3 = h3.GetListOfFunctions().FindObject("stats")
     stat3.SetX1NDC(0.4);
     stat3.SetX2NDC(0.6);
-    stat3.SetY1NDC(0.6);
-    stat3.SetY2NDC(0.8);
+    stat3.SetY1NDC(0.4);
+    stat3.SetY2NDC(0.6);
     stat3.SetTextColor(3);
 
     h4.SetLineColor(4)
     h4.Draw(' sames hist')
     c.Update()
     stat4 = h4.GetListOfFunctions().FindObject("stats")
-    stat4.SetX1NDC(0.4);
-    stat4.SetX2NDC(0.6);
-    stat4.SetY1NDC(0.8);
-    stat4.SetY2NDC(1.0);
+    stat4.SetX1NDC(0.6);
+    stat4.SetX2NDC(0.8);
+    stat4.SetY1NDC(0.4);
+    stat4.SetY2NDC(0.6);
     stat4.SetTextColor(4);
     
-    leg = r.TLegend(.62, .6, .87, .8);
+    '''leg = r.TLegend(.62, .6, .87, .8);
     leg.AddEntry(h1, 'matched_cluster', "f");
     leg.AddEntry(h2, 'unmatched_cluster', "f");
     leg.AddEntry(h3, 'low_pt', "f");
     leg.AddEntry(h4, 'high_pt', "f");
-    leg.Draw('same')
+    leg.Draw('same')'''
     c.SaveAs(f'{hist}.png')
