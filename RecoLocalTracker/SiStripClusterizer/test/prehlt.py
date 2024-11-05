@@ -508,15 +508,11 @@ process.hltOutputPhysicsHIPhysicsRawPrime0 = cms.OutputModule( "PoolOutputModule
     ),
     SelectEvents = cms.untracked.PSet(  SelectEvents = cms.vstring( 'Dataset_HIPhysicsRawPrime' ) ),
      outputCommands = cms.untracked.vstring('drop *',
-      'keep *_*siStripClusters*_*_*',
-      'keep *_*generalTracks*_*_*',
       'keep *_hltSiStripClusters2ApproxClusters_*_*',
       'keep DetIds_hltSiStripRawToDigi_*_HLTX',
       'keep FEDRawDataCollection_rawPrime*_*_HLTX',
-      'keep FEDRawDataCollection_hltSiStripDigiToZSRaw_*_HLTX',
       'keep GlobalObjectMapRecord_hltGtStage2ObjectMap_*_HLTX',
-      'keep edmTriggerResults_*_*_HLTX',
-      'keep triggerTriggerEvent_*_*_HLTX')
+      'keep edmTriggerResults_*_*_HLTX')
 
     )
 
