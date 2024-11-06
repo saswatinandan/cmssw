@@ -2,14 +2,16 @@ import os
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-b", dest="bit", default='8bit', help="bit to be studied")
+parser.add_argument("-b", dest="barycenter_bit", default='8bit', help="bit to be studied for barycenter")
+parser.add_argument("-w", dest="width_bit", default='8bit', help="bit to be studied for width")
 parser.add_argument("-n", dest="number", default='100', help="how many numbers of events")
 parser.add_argument("-t", dest="threads", default='20', help="how many threads")
 
 options = parser.parse_args()
-bit = options.bit
+barycenter_bit = options.barycenter_bit
 number = options.number
 threads = options.threads
+width_bit = options.width_bit
 
 def replace_line(infile, replaces_to_vals):
 
@@ -28,10 +30,15 @@ def replace_line(infile, replaces_to_vals):
 
 ### SiStripApproxCluster.h ####
 
-bit_no = int(bit.strip('bit'))
-maxRange_ = (1<<bit_no) -1
+#barycenter_bit = int(barycenter_bit.strip('bit'))
+maxRange_ = (1<<int(barycenter_bit.strip('bit'))) -1
 replace_line('../../../DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h',
              [('maxRange_ = ', f'maxRange_ = {maxRange_}; //')])
+    
+#width_bit = int(width_bit.strip('bit'))
+maxRange_ = (1<<int(width_bit.strip('bit'))) -1
+replace_line('../../../DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h',
+               [('width() const {', 'width() const {' + f'return std::min({maxRange_},(int)width_);' +'}//')])
 
 run_cmd = 'scram b -j 8'
 print(run_cmd)
@@ -49,16 +56,20 @@ cmd_hlt = f'hltGetConfiguration /users/vmuralee/PREmenu/V9 --globaltag 410X_data
 run_cmd = 'cmsRun prehlt.py'
 print(run_cmd)
 os.system(run_cmd)
-os.system(f'mv outputPhysicsHIPhysicsRawPrime0.root outputPhysicsHIPhysicsRawPrime0_{bit}.root')
+output_prehlt = f'outputPhysicsHIPhysicsRawPrime0_barycenter_{barycenter_bit}_width_{width_bit}.root'
+
+os.system(f'mv outputPhysicsHIPhysicsRawPrime0.root {output_prehlt}')
 
 
-cmd_reco_step = f'cmsDriver.py step_reco --conditions 140X_dataRun3_Prompt_v3 -s RAW2DIGI,L1Reco,RECO --datatier RECO --eventcontent RECO --data --process reRECO --scenario pp -n {number} --repacked --era Run3_pp_on_PbPb_approxSiStripClusters --filein file:outputPhysicsHIPhysicsRawPrime0_{bit}.root --no_exec --nThreads {threads}'
+cmd_reco_step = f'cmsDriver.py step_reco --conditions 140X_dataRun3_Prompt_v3 -s RAW2DIGI,L1Reco,RECO --datatier RECO --eventcontent RECO --data --process reRECO --scenario pp -n {number} --repacked --era Run3_pp_on_PbPb_approxSiStripClusters --filein file:{output_prehlt} --no_exec --nThreads {threads}'
 print(cmd_reco_step)
 os.system(cmd_reco_step)
 
+output_step_reco = f'step_reco_RAW2DIGI_L1Reco_RECO_barycenter_{barycenter_bit}_width_{width_bit}.root'
+
 replace_line('step_reco_RAW2DIGI_L1Reco_RECO.py',
              [
-               ('step_reco_RAW2DIGI_L1Reco_RECO.root', f'step_reco_RAW2DIGI_L1Reco_RECO_{bit}.root'),
+               ('step_reco_RAW2DIGI_L1Reco_RECO.root', output_step_reco),
                ('from Configuration.Eras.Era_Run3_pp_on_PbPb_approxSiStripClusters_cff import Run3_pp_on_PbPb_approxSiStripClusters', 'from Configuration.Eras.Era_Run2024_pp_on_PbPb_approxSiStripCluster import Run3_pp_on_PbPb_approxSiStripClusters_2024'),
                ("process = cms.Process('reRECO',Run3_pp_on_PbPb_approxSiStripClusters)", "process = cms.Process('reRECO',Run3_pp_on_PbPb_approxSiStripClusters_2024)"),
                ('outputCommands = process.RECOEventContent.outputCommands', "outputCommands = cms.untracked.vstring( 'drop *',\n'keep *_*siStripClusters*_*_*',\n'keep *_*generalTracks*_*_*',\n'keep *_hltSiStripClusters2ApproxClusters_*_*',\n'keep *_ak4PFJets_*_*',\n'keep *_*pfMet*_*_*')\n")
@@ -69,10 +80,10 @@ os.system(run_cmd)
 
 #### object comparison ####
 
-run_cmd = f'python3 run_flatNtuplizer.py -rp step_reco_RAW2DIGI_L1Reco_RECO_{bit}.root -c -n {number}'
+run_cmd = f'python3 run_flatNtuplizer.py -rp {output_step_reco} -c -n {number}'
 print(run_cmd)
 os.system(run_cmd)
 
-run_cmd = f"edmEventSize -v step_reco_RAW2DIGI_L1Reco_RECO_{bit}.root > size.log"
+run_cmd = f"edmEventSize -v {output_step_reco} > size.log"
 print(run_cmd)
 os.system(run_cmd)
