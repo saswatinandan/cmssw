@@ -23,7 +23,7 @@ with open('makefile', 'w') as f:
     for bb in barycenter_bits:
       for wb in width_bits:
          f.write(f'{bb}bit_{wb}bit:\n')
-         output += f'_barycenter_{bb}bit_width_{wb}bit'
+         output = f'{options.output}_barycenter_{bb}bit_width_{wb}bit'
          if options.cms_command:
             f.write(f'\tbash build_env.sh {bb}bit {wb}bit {options.number} {options.threads} {options.remove} {output}\n')
          else:
