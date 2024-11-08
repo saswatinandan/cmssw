@@ -37,8 +37,8 @@ replace_line('../../../DataFormats/SiStripCluster/interface/SiStripApproximateCl
     
 #width_bit = int(width_bit.strip('bit'))
 maxRange_ = (1<<int(width_bit.strip('bit'))) -1
-replace_line('../../../DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h',
-               [('width() const {', 'width() const {' + f'return std::min({maxRange_},(int)width_);' +'}//')])
+replace_line('../../../DataFormats/SiStripCluster/src/SiStripApproximateCluster.cc',
+               [('width_ = ', 'width_ = ' + f'std::min({maxRange_},(int)cluster.size());//')])
 
 run_cmd = 'scram b -j 8'
 print(run_cmd)

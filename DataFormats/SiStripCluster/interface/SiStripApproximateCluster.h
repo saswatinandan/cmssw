@@ -32,7 +32,7 @@ public:
     float _barycenter = compBarycenter_ * maxBarycenter_/maxRange_ ;
     assert(_barycenter <= maxBarycenter_ && "Returning barycenter > maxBarycenter");
     return _barycenter; }
-  cms_uint8_t width() const { return width_; }
+  cms_uint8_t width() const {return width_; }
   cms_uint8_t avgCharge() const { return avgCharge_; }
   bool filter() const { return filter_; }
   bool isSaturated() const { return isSaturated_; }
@@ -45,7 +45,7 @@ private:
   bool filter_ = false;
   bool isSaturated_ = false;
   bool peakFilter_ = false;
-  static constexpr double maxRange_ = 255;
+  static constexpr double maxRange_ = 65535; //4095; //1023; //255;
   static constexpr double maxBarycenter_ = 768.;
   static constexpr double trimMaxADC_ = 30.;
   static constexpr double trimMaxFracTotal_ = .15;
