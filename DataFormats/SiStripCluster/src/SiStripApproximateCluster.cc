@@ -11,7 +11,7 @@ SiStripApproximateCluster::SiStripApproximateCluster(const SiStripCluster& clust
   compBarycenter_ = std::round(cluster.barycenter() * maxRange_/maxBarycenter_);
   assert(cluster.barycenter() <= maxBarycenter_ && "Got a barycenter > maxBarycenter");
   assert(compBarycenter_ <= maxRange_ && "Filling compBarycenter > maxRange");
-  width_ = std::min(255,(int)cluster.size());//cluster.size();
+  width_ = cluster.size();
   avgCharge_ = (cluster.charge() + cluster.size()/2)/ cluster.size();
   filter_ = false;
   isSaturated_ = false;
