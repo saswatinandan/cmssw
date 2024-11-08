@@ -10,14 +10,10 @@ parser.add_argument("-c", action='store_true', dest="cluster", default=False, he
 options = parser.parse_args()
 
 input_for_raw = options.input_raw
-'''output_for_raw = f'flatntuple_{input_for_raw}'
-cmd = f'cmsRun sep19_2_2_dump_raw.py inputFiles={input_for_raw} outputFile={output_for_raw} n={options.n} c={options.cluster}'
-print(cmd)
-os.system(cmd)
-'''
+
 input_for_rawp = options.input_rawp
 output_for_rawp = f'flatntuple_{input_for_rawp}'
-cmd = f'cmsRun sep19_2_1_dump_rawprime.py inputFiles={input_for_rawp} outputFile={output_for_rawp} n={options.n} c={options.cluster}'
+cmd = f'cmsRun sep19_2_1_dump_rawprime.py inputFiles={input_for_rawp} outputFile={output_for_rawp} n={options.n} c={options.cluster} &> flatNtuple.log'
 print(cmd)
 os.system(cmd)
 

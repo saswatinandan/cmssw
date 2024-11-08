@@ -53,7 +53,7 @@ cmd_hlt = f'hltGetConfiguration /users/vmuralee/PREmenu/V9 --globaltag 410X_data
 #replace_line('prehlt.py', ["'keep FEDRawDataCollection_rawPrimeDataRepacker_*_*',", "outputPhysicsHIPhysicsRawPrime0.root"],
 #              ["'keep *_*siStripClusters*_*_*',\n'keep *_*generalTracks*_*_*',\n'keep FEDRawDataCollection_raw*_*_HLTX',\n", f"outputPhysicsHIPhysicsRawPrime0_{bit}.root"])
 
-run_cmd = 'cmsRun prehlt.py'
+run_cmd = 'cmsRun prehlt.py &> prehlt.log'
 print(run_cmd)
 os.system(run_cmd)
 output_prehlt = f'outputPhysicsHIPhysicsRawPrime0_barycenter_{barycenter_bit}_width_{width_bit}.root'
@@ -74,7 +74,7 @@ replace_line('step_reco_RAW2DIGI_L1Reco_RECO.py',
                ("process = cms.Process('reRECO',Run3_pp_on_PbPb_approxSiStripClusters)", "process = cms.Process('reRECO',Run3_pp_on_PbPb_approxSiStripClusters_2024)"),
                ('outputCommands = process.RECOEventContent.outputCommands', "outputCommands = cms.untracked.vstring( 'drop *',\n'keep *_*siStripClusters*_*_*',\n'keep *_*generalTracks*_*_*',\n'keep *_hltSiStripClusters2ApproxClusters_*_*',\n'keep *_ak4PFJets_*_*',\n'keep *_*pfMet*_*_*')\n")
             ])
-run_cmd = 'cmsRun step_reco_RAW2DIGI_L1Reco_RECO.py'
+run_cmd = 'cmsRun step_reco_RAW2DIGI_L1Reco_RECO.py &> step_reco_RAW2DIGI_L1Reco_RECO.log'
 print(run_cmd)
 os.system(run_cmd)
 
