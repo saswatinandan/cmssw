@@ -61,7 +61,7 @@ output_prehlt = f'outputPhysicsHIPhysicsRawPrime0_barycenter_{barycenter_bit}_wi
 os.system(f'mv outputPhysicsHIPhysicsRawPrime0.root {output_prehlt}')
 
 
-cmd_reco_step = f'cmsDriver.py step_reco --conditions 140X_dataRun3_Prompt_v3 -s RAW2DIGI,L1Reco,RECO --datatier RECO --eventcontent RECO --data --process reRECO --scenario pp -n {number} --repacked --era Run3_pp_on_PbPb_approxSiStripClusters --filein file:{output_prehlt} --no_exec --nThreads {threads}'
+cmd_reco_step = f'cmsDriver.py step_reco --conditions 140X_dataRun3_Prompt_v3 -s RAW2DIGI,L1Reco,RECO --datatier RECO --eventcontent RECO --data --process reRECO --scenario pp -n {number} --repacked --era Run3_pp_on_PbPb_approxSiStripClusters --filein file:{output_prehlt} --no_exec --nThreads {threads} &>cmd_reco_step.log'
 print(cmd_reco_step)
 os.system(cmd_reco_step)
 
