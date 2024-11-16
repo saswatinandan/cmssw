@@ -7,12 +7,12 @@
 #include "TLatex.h"
 #include "TLine.h"
 
-TCanvas * create_canvas()
+TCanvas * create_canvas(bool setOptStat=0)
 {
  TCanvas* canv = new TCanvas("", "", 700, 600);
  gStyle->SetOptTitle(0);
  //gROOT->SetBatch( 1 );
- gStyle->SetOptStat(0);
+ gStyle->SetOptStat(setOptStat);
  //gErrorIgnoreLevel = kWarning;
  return canv;
 }

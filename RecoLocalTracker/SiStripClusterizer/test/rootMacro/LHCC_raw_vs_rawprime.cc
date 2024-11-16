@@ -192,8 +192,10 @@ struct Track{
 void event_loop( map< int, map< int, map<int, bool> > >& evtMatchedMap,
                    const TreeReader& treereader,
                    EvthistManager& evthist,
-                   map<int, vector<Track> >& r_goodtrk,
-                   map<int, vector<Jet> >& r_goodjet){
+                   map<int, vector<Track> >& r_good_lowpt_trk,
+		   map<int, vector<Track> >& r_good_highpt_trk,
+                   map<int, vector<Jet> >& r_goodjet
+		  ){
        
 	std::cout << "analyzing " << std::endl;
 
@@ -214,11 +216,8 @@ void event_loop( map< int, map< int, map<int, bool> > >& evtMatchedMap,
                   evthist.fill("trk_pterrDpt", std::abs(treereader.trkPtError[trkIdx]/treereader.trkPt[trkIdx]));
 
                   evthist.fill("trk_cutflow", trk_cuts::nocut);
-                  evthist.fill("trk_cutflow", trk_cuts::dzSig);
-
-                  /*if(treereader.trkChi2[trkIdx]/((int) treereader.trkNdof[trkIdx])
-                         /((int) treereader.trkNlayer[trkIdx]) >= cut_chi2) continue;*/
-                  if(treereader.trkChi2[trkIdx] > cut_chi2) continue;
+ 
+		  if(treereader.trkChi2[trkIdx] > cut_chi2) continue;
                   evthist.fill("trk_cutflow", trk_cuts::chi2);
 
                   if(std::abs(treereader.trkPtError[trkIdx]/treereader.trkPt[trkIdx]) >= cut_ptRes) continue;
@@ -233,7 +232,16 @@ void event_loop( map< int, map< int, map<int, bool> > >& evtMatchedMap,
                   
                   evthist.fill("trk_eta_phi", treereader.trkEta[trkIdx], treereader.trkPhi[trkIdx]);
 
-                  r_goodtrk[treereader.event].emplace_back(trkIdx, treereader.trkPt[trkIdx],
+		  if (treereader.trkPt[trkIdx] < 0.75)
+                     r_good_lowpt_trk[treereader.event].emplace_back(trkIdx, treereader.trkPt[trkIdx],
+                       treereader.trkEta[trkIdx], treereader.trkPhi[trkIdx],
+                       treereader.trkDxy1[trkIdx], treereader.trkDxyError1[trkIdx],
+                       treereader.trkDz1[trkIdx], treereader.trkDzError1[trkIdx],
+                       treereader.trkAlgo[trkIdx], treereader.trkNHit[trkIdx],
+                       treereader.trkNdof[trkIdx], treereader.trkNlayer[trkIdx],
+                       treereader.trkChi2[trkIdx], treereader.trkPtError[trkIdx]);
+		  else
+	             r_good_highpt_trk[treereader.event].emplace_back(trkIdx, treereader.trkPt[trkIdx],
                        treereader.trkEta[trkIdx], treereader.trkPhi[trkIdx],
                        treereader.trkDxy1[trkIdx], treereader.trkDxyError1[trkIdx],
                        treereader.trkDz1[trkIdx], treereader.trkDzError1[trkIdx],
@@ -273,7 +281,8 @@ class match_obj_histManager
        histManagerBase(obj)
        ,drcut(in_drcut)	{
 
-	 
+	  bool lowpt = string(base_name).find("lowpt") != std::string::npos;
+
 	  for (const auto match_type: {"matched", "unmatched"})
 	  {
             for (const auto var_type: {"pt"})
@@ -282,7 +291,7 @@ class match_obj_histManager
               {
 	        auto key = Form("%s_%s_%s", match_type, var_type, raw_type);
                 if (obj == "tracks")
-                   hists[key] = createhist(Form("%s_%s", base_name.c_str(), key), Form("%s;pt;yield", key), numBins, customBins);
+                   hists[key] = createhist(Form("%s_%s", base_name.c_str(), key), Form("%s;pt;yield", key), numBins, (lowpt) ? customBins_lowpt : customBins_highpt);
                else
                   hists[key] = createhist(Form("%s_%s", base_name.c_str(), key), Form("%s;pt;yield", key), numBins_jets, customBins_jets);
 	      } 
@@ -442,57 +451,68 @@ int main(int argc, char const *argv[]) { //LHCC_raw_vs_rawprime() {
 	cout << "creating hists for raw " << endl;
 
 	EvthistManager evthist_r("raw");
-	match_obj_histManager trk_hists("tracks", 0.05), jet_hists("jets", 0.4);
         
 	//// raw ///
 
-	map<int, vector<Track> > r_goodtrk;
+	map<int, vector<Track> > r_good_lowpt_trk, r_good_highpt_trk;
         map<int, vector<Jet> > r_goodjet;
 
 	cout << "calling eventloop for raw" << endl;
 
 	event_loop(evtMatchedMap, treereader_r, evthist_r,
-		      r_goodtrk, r_goodjet
-		     );	      
+		   r_good_lowpt_trk, r_good_highpt_trk, r_goodjet
+		  );
 	
 	/////// rawprime ////
 
 	cout << "creating hists for rawp" << endl;
 
 	EvthistManager evthist_rp("rawp");
-	map<int, vector<Track> > rp_goodtrk;
+	map<int, vector<Track> > rp_good_lowpt_trk, rp_good_highpt_trk;
        	map<int, vector<Jet> > rp_goodjet;	
 
 	cout << "calling eventloop for rawp" << endl;
 
 	event_loop(evtMatchedMap, treereader_rp, evthist_rp,
-                      rp_goodtrk, rp_goodjet
-                     );	
+                   rp_good_lowpt_trk, rp_good_highpt_trk, rp_goodjet
+                  );	
 	
-	cout << "calling matching" << endl;
-
-	do_matching(r_goodtrk, rp_goodtrk,
-	            trk_hists		
-        );
-
-	do_matching(r_goodjet, rp_goodjet,
-                      jet_hists
-        );
-
-	cout << "matching done" << endl;
-
 	f->cd();
 
 	evthist_r.write();
 	evthist_rp.write();
 	evthist_r.compareDist(evthist_rp);
 
-        trk_hists.write();
-        trk_hists.compareMatching();
+	cout << "calling matching" << endl;
 
-	jet_hists.write();
-	jet_hists.compareMatching();
+        {
+           match_obj_histManager trk_lowpt_hists("tracks_lowpt", 0.05);
+           do_matching(r_good_lowpt_trk, rp_good_lowpt_trk,
+                    trk_lowpt_hists
+           );
+           trk_lowpt_hists.write();
+           trk_lowpt_hists.compareMatching();
+        }
 
+	{
+           match_obj_histManager trk_highpt_hists("tracks_highpt", 0.05);
+           do_matching(r_good_highpt_trk, rp_good_highpt_trk,
+                    trk_highpt_hists
+           );
+           trk_highpt_hists.write();
+           trk_highpt_hists.compareMatching();
+        }
+
+       {
+           match_obj_histManager jet_hists("jets", 0.4);
+           do_matching(r_goodjet, rp_goodjet,
+                    jet_hists
+           );
+           jet_hists.write();
+           jet_hists.compareMatching();
+        }
+
+        cout << "matching done" << endl;
         f->Close();	
 
 	return 0;

@@ -10,6 +10,8 @@ using namespace std;
 
 const int numBins = 7;
 Double_t customBins[numBins + 1] = {0.1, 0.5, 1.0, 2.0, 6.0, 9.0, 30.0, 100.0};
+Double_t customBins_lowpt[numBins + 1] = {0, 0.5, 0.2, 0.3, 0.4, 0.5, 0.6, 0.75};
+Double_t customBins_highpt[numBins + 1] = {0.75, 1.0, 2.0, 6.0, 9.0, 30.0, 50.0, 100.0};
 
 const int numBins_jets = 8;
 Double_t customBins_jets[numBins_jets + 1] = {20, 25, 30, 35, 40, 50, 60, 100.0, 200.0};
@@ -52,7 +54,7 @@ public:
      auto hist = hists[histname.c_str()];
      hist->Scale(1/hist->Integral());
 
-     TCanvas* canv = create_canvas();
+     TCanvas* canv = create_canvas(1);
      canv->SetMargin(0.18, 0.20, 0.12, 0.07);
      canv->SetLogy(true);
 
