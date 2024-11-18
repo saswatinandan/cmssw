@@ -28,7 +28,9 @@ with open('makefile', 'w') as f:
          if options.cms_command:
             f.write(f'\tbash build_env.sh {bb}bit {wb}bit {options.number} {options.threads} {options.remove} {output}\n')
          else:
-            f.write(f'\tcd {output} && ../rootMacro/LHCC_rawprime_clusters.o flatntuple_step3_RAW2DIGI_L1Reco_RECO_{bit}bit.root ~/backup/flatntuple_step5_RAW2DIGI_L1Reco_RECO.root > cluster.log && ../rootMacro/LHCC_raw_vs_rawprime.o flatntuple_step3_RAW2DIGI_L1Reco_RECO_{bit}bit.root ~/backup/flatntuple_step5_RAW2DIGI_L1Reco_RECO.root > object.log\n')
+            outputdir = os.path.join(f'/scratch/{os.getlogin()}', output)
+            pwd       = os.getcwd()
+            f.write(f'\tcd {outputdir} && {pwd}/rootMacro/LHCC_rawprime_clusters.o flatntuple_step_reco_RAW2DIGI_L1Reco_RECO_barycenter_{bb}bit_width_{wb}bit.root ~/backup/flatntuple_step5_RAW2DIGI_L1Reco_RECO_wchargecut.root > cluster.log && {pwd}/rootMacro/LHCC_raw_vs_rawprime.o flatntuple_step_reco_RAW2DIGI_L1Reco_RECO_barycenter_{bb}bit_width_{wb}bit.root ~/backup/flatntuple_step5_RAW2DIGI_L1Reco_RECO_wchargecut.root > object.log\n')
     f.write(f'\nplot: {allbit}\n')
     barycenter_bits = ' '.join([b for b in barycenter_bits])
     width_bits      = ' '.join([w for w in width_bits])

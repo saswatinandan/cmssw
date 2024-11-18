@@ -232,7 +232,7 @@ void event_loop( map< int, map< int, map<int, bool> > >& evtMatchedMap,
                   
                   evthist.fill("trk_eta_phi", treereader.trkEta[trkIdx], treereader.trkPhi[trkIdx]);
 
-		  if (treereader.trkPt[trkIdx] < 0.75)
+		  if (treereader.trkPt[trkIdx] < 1.0)
                      r_good_lowpt_trk[treereader.event].emplace_back(trkIdx, treereader.trkPt[trkIdx],
                        treereader.trkEta[trkIdx], treereader.trkPhi[trkIdx],
                        treereader.trkDxy1[trkIdx], treereader.trkDxyError1[trkIdx],
@@ -290,7 +290,7 @@ class match_obj_histManager
               for (const auto raw_type: {"r", "rp"})
               {
 	        auto key = Form("%s_%s_%s", match_type, var_type, raw_type);
-                if (obj == "tracks")
+                if (std::string(obj).find("tracks") != std::string::npos)
                    hists[key] = createhist(Form("%s_%s", base_name.c_str(), key), Form("%s;pt;yield", key), numBins, (lowpt) ? customBins_lowpt : customBins_highpt);
                else
                   hists[key] = createhist(Form("%s_%s", base_name.c_str(), key), Form("%s;pt;yield", key), numBins_jets, customBins_jets);
