@@ -20,7 +20,7 @@ for hist in options.vars:#['cluster_width', 'cluster_charge', 'cluster_avgcharge
     h3.Scale(1/h3.Integral())
     h4.Scale(1/h4.Integral())
     h1.SetLineColor(2)
-    h1.GetYaxis().SetRangeUser(0,1.2*max(h1.GetMaximum(), h2.GetMaximum(), h3.GetMaximum(), h4.GetMaximum()))
+    h1.GetYaxis().SetRangeUser(0.0001,1.2*max(h1.GetMaximum(), h2.GetMaximum(), h3.GetMaximum(), h4.GetMaximum()))
     h1.Draw('hist')
     
     c.Update()
@@ -61,11 +61,5 @@ for hist in options.vars:#['cluster_width', 'cluster_charge', 'cluster_avgcharge
     stat4.SetY1NDC(0.4);
     stat4.SetY2NDC(0.6);
     stat4.SetTextColor(4);
-    
-    '''leg = r.TLegend(.62, .6, .87, .8);
-    leg.AddEntry(h1, 'matched_cluster', "f");
-    leg.AddEntry(h2, 'unmatched_cluster', "f");
-    leg.AddEntry(h3, 'low_pt', "f");
-    leg.AddEntry(h4, 'high_pt', "f");
-    leg.Draw('same')'''
+    c.SetLogy(True)
     c.SaveAs(f'{hist}.png')
