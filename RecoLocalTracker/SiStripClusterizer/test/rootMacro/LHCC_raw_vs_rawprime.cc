@@ -192,8 +192,10 @@ struct Track{
 void event_loop( map< int, map< int, map<int, bool> > >& evtMatchedMap,
                    const TreeReader& treereader,
                    EvthistManager& evthist,
-                   map<int, vector<Track> >& r_good_lowpt_trk,
-		   map<int, vector<Track> >& r_good_highpt_trk,
+                   map<int, vector<Track> >& r_good_lowpt_lowdz_trk,
+                   map<int, vector<Track> >& r_good_lowpt_highdz_trk,
+		   map<int, vector<Track> >& r_good_highpt_lowdz_trk,
+                   map<int, vector<Track> >& r_good_highpt_highdz_trk,
                    map<int, vector<Jet> >& r_goodjet
 		  ){
        
@@ -214,6 +216,8 @@ void event_loop( map< int, map< int, map<int, bool> > >& evtMatchedMap,
   	          evthist.fill("trk_chi2", treereader.trkChi2[trkIdx]);
                   evthist.fill("trk_nhits", treereader.trkNHit[trkIdx]);
                   evthist.fill("trk_pterrDpt", std::abs(treereader.trkPtError[trkIdx]/treereader.trkPt[trkIdx]));
+                  evthist.fill("trk_dz", treereader.trkDz1[trkIdx]);
+                  evthist.fill("trk_dxy", treereader.trkDxy1[trkIdx]);
 
                   evthist.fill("trk_cutflow", trk_cuts::nocut);
  
@@ -233,21 +237,55 @@ void event_loop( map< int, map< int, map<int, bool> > >& evtMatchedMap,
                   evthist.fill("trk_eta_phi", treereader.trkEta[trkIdx], treereader.trkPhi[trkIdx]);
 
 		  if (treereader.trkPt[trkIdx] < 1.0)
-                     r_good_lowpt_trk[treereader.event].emplace_back(trkIdx, treereader.trkPt[trkIdx],
-                       treereader.trkEta[trkIdx], treereader.trkPhi[trkIdx],
-                       treereader.trkDxy1[trkIdx], treereader.trkDxyError1[trkIdx],
-                       treereader.trkDz1[trkIdx], treereader.trkDzError1[trkIdx],
-                       treereader.trkAlgo[trkIdx], treereader.trkNHit[trkIdx],
-                       treereader.trkNdof[trkIdx], treereader.trkNlayer[trkIdx],
-                       treereader.trkChi2[trkIdx], treereader.trkPtError[trkIdx]);
-		  else
-	             r_good_highpt_trk[treereader.event].emplace_back(trkIdx, treereader.trkPt[trkIdx],
-                       treereader.trkEta[trkIdx], treereader.trkPhi[trkIdx],
-                       treereader.trkDxy1[trkIdx], treereader.trkDxyError1[trkIdx],
-                       treereader.trkDz1[trkIdx], treereader.trkDzError1[trkIdx],
-                       treereader.trkAlgo[trkIdx], treereader.trkNHit[trkIdx],
-                       treereader.trkNdof[trkIdx], treereader.trkNlayer[trkIdx],
-                       treereader.trkChi2[trkIdx], treereader.trkPtError[trkIdx]);
+                  {
+                     if (std::abs(treereader.trkDz1[trkIdx]/treereader.trkDzError1[trkIdx]) <3)
+                     {
+                         evthist.fill("trk_cutflow", trk_cuts::ptl_dzl);
+                         r_good_lowpt_lowdz_trk[treereader.event].emplace_back(trkIdx, treereader.trkPt[trkIdx],
+                             treereader.trkEta[trkIdx], treereader.trkPhi[trkIdx],
+                             treereader.trkDxy1[trkIdx], treereader.trkDxyError1[trkIdx],
+                             treereader.trkDz1[trkIdx], treereader.trkDzError1[trkIdx],
+                             treereader.trkAlgo[trkIdx], treereader.trkNHit[trkIdx],
+                             treereader.trkNdof[trkIdx], treereader.trkNlayer[trkIdx],
+                             treereader.trkChi2[trkIdx], treereader.trkPtError[trkIdx]);
+                      }
+                      else
+                      {
+                         evthist.fill("trk_cutflow", trk_cuts::ptl_dzh);
+                         r_good_lowpt_highdz_trk[treereader.event].emplace_back(trkIdx, treereader.trkPt[trkIdx],
+                             treereader.trkEta[trkIdx], treereader.trkPhi[trkIdx],
+                             treereader.trkDxy1[trkIdx], treereader.trkDxyError1[trkIdx],
+                             treereader.trkDz1[trkIdx], treereader.trkDzError1[trkIdx],
+                             treereader.trkAlgo[trkIdx], treereader.trkNHit[trkIdx],
+                             treereader.trkNdof[trkIdx], treereader.trkNlayer[trkIdx],
+                             treereader.trkChi2[trkIdx], treereader.trkPtError[trkIdx]);
+                       }
+                  }
+		  else 
+                  {
+                       if (std::abs(treereader.trkDz1[trkIdx]/treereader.trkDzError1[trkIdx]) <3)
+                       {   
+                         evthist.fill("trk_cutflow", trk_cuts::pth_dzl);
+                         r_good_highpt_lowdz_trk[treereader.event].emplace_back(trkIdx, treereader.trkPt[trkIdx],
+                             treereader.trkEta[trkIdx], treereader.trkPhi[trkIdx],
+                             treereader.trkDxy1[trkIdx], treereader.trkDxyError1[trkIdx],
+                             treereader.trkDz1[trkIdx], treereader.trkDzError1[trkIdx],
+                             treereader.trkAlgo[trkIdx], treereader.trkNHit[trkIdx],
+                             treereader.trkNdof[trkIdx], treereader.trkNlayer[trkIdx],
+                             treereader.trkChi2[trkIdx], treereader.trkPtError[trkIdx]);
+                       }
+                       else
+                       {
+                         evthist.fill("trk_cutflow", trk_cuts::pth_dzh);
+	                 r_good_highpt_highdz_trk[treereader.event].emplace_back(trkIdx, treereader.trkPt[trkIdx],
+                           treereader.trkEta[trkIdx], treereader.trkPhi[trkIdx],
+                           treereader.trkDxy1[trkIdx], treereader.trkDxyError1[trkIdx],
+                           treereader.trkDz1[trkIdx], treereader.trkDzError1[trkIdx],
+                           treereader.trkAlgo[trkIdx], treereader.trkNHit[trkIdx],
+                           treereader.trkNdof[trkIdx], treereader.trkNlayer[trkIdx],
+                           treereader.trkChi2[trkIdx], treereader.trkPtError[trkIdx]);
+                       }
+                  }
                 }
 
                      ///// jet ////
@@ -454,13 +492,15 @@ int main(int argc, char const *argv[]) { //LHCC_raw_vs_rawprime() {
         
 	//// raw ///
 
-	map<int, vector<Track> > r_good_lowpt_trk, r_good_highpt_trk;
+	map<int, vector<Track> > r_good_lowpt_lowdz_trk, r_good_lowpt_highdz_trk, r_good_highpt_lowdz_trk, r_good_highpt_highdz_trk;
         map<int, vector<Jet> > r_goodjet;
 
 	cout << "calling eventloop for raw" << endl;
 
 	event_loop(evtMatchedMap, treereader_r, evthist_r,
-		   r_good_lowpt_trk, r_good_highpt_trk, r_goodjet
+		   r_good_lowpt_lowdz_trk, r_good_lowpt_highdz_trk,
+                   r_good_highpt_lowdz_trk, r_good_highpt_highdz_trk, 
+                   r_goodjet
 		  );
 	
 	/////// rawprime ////
@@ -468,13 +508,15 @@ int main(int argc, char const *argv[]) { //LHCC_raw_vs_rawprime() {
 	cout << "creating hists for rawp" << endl;
 
 	EvthistManager evthist_rp("rawp");
-	map<int, vector<Track> > rp_good_lowpt_trk, rp_good_highpt_trk;
+	map<int, vector<Track> > rp_good_lowpt_lowdz_trk, rp_good_lowpt_highdz_trk, rp_good_highpt_lowdz_trk, rp_good_highpt_highdz_trk;
        	map<int, vector<Jet> > rp_goodjet;	
 
 	cout << "calling eventloop for rawp" << endl;
 
 	event_loop(evtMatchedMap, treereader_rp, evthist_rp,
-                   rp_good_lowpt_trk, rp_good_highpt_trk, rp_goodjet
+                   rp_good_lowpt_lowdz_trk, rp_good_lowpt_highdz_trk, 
+                   rp_good_highpt_lowdz_trk, rp_good_highpt_highdz_trk,
+                   rp_goodjet
                   );	
 	
 	f->cd();
@@ -486,17 +528,35 @@ int main(int argc, char const *argv[]) { //LHCC_raw_vs_rawprime() {
 	cout << "calling matching" << endl;
 
         {
-           match_obj_histManager trk_lowpt_hists("tracks_lowpt", 0.05);
-           do_matching(r_good_lowpt_trk, rp_good_lowpt_trk,
+           match_obj_histManager trk_lowpt_hists("tracks_lowpt_lowdzsig", 0.05);
+           do_matching(r_good_lowpt_lowdz_trk, rp_good_lowpt_lowdz_trk,
                     trk_lowpt_hists
            );
            trk_lowpt_hists.write();
            trk_lowpt_hists.compareMatching();
         }
 
+        {  
+           match_obj_histManager trk_lowpt_hists("tracks_lowpt_highdzsig", 0.05);
+           do_matching(r_good_lowpt_highdz_trk, rp_good_lowpt_highdz_trk,
+                    trk_lowpt_hists
+           );
+           trk_lowpt_hists.write();
+           trk_lowpt_hists.compareMatching();
+        }
+
+        {  
+           match_obj_histManager trk_highpt_hists("tracks_highpt_lowdzsig", 0.05);
+           do_matching(r_good_highpt_lowdz_trk, rp_good_highpt_lowdz_trk,
+                    trk_highpt_hists
+           );
+           trk_highpt_hists.write();
+           trk_highpt_hists.compareMatching();
+        }
+
 	{
-           match_obj_histManager trk_highpt_hists("tracks_highpt", 0.05);
-           do_matching(r_good_highpt_trk, rp_good_highpt_trk,
+           match_obj_histManager trk_highpt_hists("tracks_highpt_highdzsig", 0.05);
+           do_matching(r_good_highpt_highdz_trk, rp_good_highpt_highdz_trk,
                     trk_highpt_hists
            );
            trk_highpt_hists.write();
