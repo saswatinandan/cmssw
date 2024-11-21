@@ -12,7 +12,7 @@ SiStripApproximateCluster::SiStripApproximateCluster(const SiStripCluster& clust
   assert(cluster.barycenter() <= maxBarycenter_ && "Got a barycenter > maxBarycenter");
   assert(compBarycenter_ <= maxRange_ && "Filling compBarycenter > maxRange");
   width_ = cluster.size();
-  avgCharge_ = (cluster.charge() + cluster.size()/2)/ cluster.size();
+  avgCharge_ = (cluster.charge() + width_/2)/ width_;
   filter_ = false;
   isSaturated_ = false;
   peakFilter_ = peakFilter;
