@@ -4,6 +4,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("-b", dest="barycenter_bit", default='8bit', help="bit to be studied for barycenter")
 parser.add_argument("-w", dest="width_bit", default='8bit', help="bit to be studied for width")
+parser.add_argument("-a", dest="avgCharge_bit", default='8bit', help="bit to be studied for avgcharge")
 parser.add_argument("-n", dest="number", default='100', help="how many numbers of events")
 parser.add_argument("-t", dest="threads", default='20', help="how many threads")
 
@@ -12,6 +13,7 @@ barycenter_bit = options.barycenter_bit
 number = options.number
 threads = options.threads
 width_bit = options.width_bit
+avgCharge_bit = options.avgCharge_bit
 
 def replace_line(infile, replaces_to_vals):
 
@@ -39,6 +41,10 @@ replace_line('../../../DataFormats/SiStripCluster/interface/SiStripApproximateCl
 maxRange_ = (1<<int(width_bit.strip('bit'))) -1
 replace_line('../../../DataFormats/SiStripCluster/src/SiStripApproximateCluster.cc',
                [('width_ = ', 'width_ = ' + f'std::min({maxRange_},(int)cluster.size());//')])
+
+maxRange_ = (1<<int(avgCharge_bit.strip('bit'))) -1
+replace_line('../../../DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h',
+               [('maxavgChargeRange_ = ', f'maxavgChargeRange_ = {maxRange_}; //')])
 
 run_cmd = 'scram b -j 8'
 print(run_cmd)
