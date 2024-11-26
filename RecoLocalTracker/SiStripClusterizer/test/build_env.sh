@@ -1,11 +1,12 @@
 
 export barycenter_bit=$1
 export width_bit=$2
-export evn=$3
-export thread=$4
-export remove=$5
-export output=/scratch/$(whoami)/$6
-export tmp=/home/users/$(whoami)/tmp/$6
+export avgCharge_bit=$3
+export evn=$4
+export thread=$5
+export remove=$6
+export output=/scratch/$(whoami)/$7
+export tmp=/home/users/$(whoami)/tmp/$7
 
 echo $tmp
 echo $output
@@ -35,7 +36,7 @@ eval "cd RecoLocalTracker/SiStripClusterizer/test"
 export current_dir=$(pwd)
 echo 'curent dir: ', $current_dir
 
-python3 run_cmsDriver.py -b $barycenter_bit -w $width_bit -n $evn -t $thread
+python3 run_cmsDriver.py -b $barycenter_bit -w $width_bit -a $avgCharge_bit -n $evn -t $thread
 
 eval "cd ${output}"
 eval "cp $current_dir/*png ."
