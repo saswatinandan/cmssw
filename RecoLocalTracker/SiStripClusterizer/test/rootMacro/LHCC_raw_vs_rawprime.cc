@@ -189,10 +189,44 @@ void event_loop( map< int, map< int, map<int, bool> > >& evtMatchedMap,
 
                    r_goodjet[treereader.event].emplace_back(jetIdx,
                       treereader.jetPt[jetIdx], treereader.jetEta[jetIdx],
-                      treereader.jetPhi[jetIdx], treereader.jetMass[jetIdx]);
+                      treereader.jetPhi[jetIdx], treereader.jetMass[jetIdx], -1); // to make similar to track dummy -1 is introduced as algo
                  }
            }
 }
+
+struct match_property{
+
+float drmin;
+float r_pt;
+float rp_pt;
+int   r_algo;
+int   rp_algo;
+int   r_idx;
+int   rp_idx;
+
+  match_property():
+          drmin(-1)
+          ,r_pt(-1)
+          ,rp_pt(-1)
+          ,r_algo(-1)
+          ,rp_algo(-1)
+          ,r_idx(-1)
+          ,rp_idx(-1)
+          {};
+
+  match_property(float in_drmin, float in_r_pt, float in_rp_pt,
+                 int in_r_algo, int in_rp_algo,
+                 int in_r_idx,  int in_rp_idx
+                ):
+                drmin(in_drmin)
+               ,r_pt(in_r_pt)
+               ,rp_pt(in_rp_pt)
+               ,r_algo(in_r_algo)
+               ,rp_algo(in_rp_algo)
+               ,r_idx(in_r_idx)
+               ,rp_idx(in_rp_idx)
+               {};
+};
 
 template<class T, class M>
 
@@ -213,58 +247,69 @@ void do_matching(const map<int, vector<T> > & r_objs, const map<int, vector<T> >
 
 	  for(auto const & [e_r, objs_r]: r_objs)
 	  {
-             map<int, vector<T>> matched_objs;
+             map<int, match_property> matched_objs; // key:index of obj_rp, value: pt values of matched objs, drmin, idx of objs
+             map<int, match_property> unmatched_objs_r;
 	     for(auto const & obj_r: objs_r)
              {
                ++total_obj_r;
-	       int matched_trk_p_idx(-1);
                float drmin = 9999;
-	       float matched_pt_rp(-1);
+               match_property tmp = match_property();
 
                auto objs_rp = rp_objs.at(e_r);
 	       for(auto const & obj_rp: objs_rp)
 	       {
-		  if(matched_trk_p.find(e_r) != matched_trk_p.end()) {
-		      if(std::find(matched_trk_p[e_r].begin(), matched_trk_p[e_r].end(), obj_rp.idx) != matched_trk_p[e_r].end()) continue; // obj_rp already matched with obj_r
-		   }
 	           auto dr = deltaR(obj_r.eta, obj_rp.eta, obj_r.phi, obj_rp.phi);
 		   if (dr < obj_hists.get_drcut() && dr < drmin) {
                       drmin = dr;
-		      matched_trk_p_idx = obj_rp.idx;
-		      matched_pt_rp = obj_rp.pt;
+		      tmp = match_property(drmin, obj_r.pt, obj_rp.pt, obj_r.algo, obj_rp.algo, obj_r.idx, obj_rp.idx);
 		   }
-	        } // end of obj_rp loop
-             obj_hists.fill_deltar(obj_r, drmin);
-	    
-	     if(matched_trk_p_idx != -1) {
-	         if (matched_trk_p.find(e_r) == matched_trk_p.end())
-	              matched_trk_p[e_r] = {};
-		 obj_hists.fill("matched_pt_r", obj_r.pt);
-                 obj_hists.fill("matched_pt_rp", matched_pt_rp);
-                 obj_hists.fill("ratio", obj_r.pt/matched_pt_rp);
-	         matched_trk_p[e_r].push_back(matched_trk_p_idx);
-	     }
-	     else {
-	        obj_hists.fill("unmatched_pt_r", obj_r.pt);
-	        not_matched_obj_r += 1;
-	     }
-	   } // end of obj_r loop
-	  }  // end of e_r loop
-        
-	  for(auto const & [e_rp, objs_rp]: rp_objs)
-          {
-	     for( auto const & obj_rp: objs_rp)
-             {
-                ++total_obj_rp;
+	       } // end of objs_rp loop
+               if (tmp.rp_idx != -1)
+               {
+                   if(matched_objs.count(tmp.rp_idx) != 0)
+                   {
+                     if (drmin < matched_objs[tmp.rp_idx].drmin)
+                     {
+                        unmatched_objs_r[matched_objs[tmp.rp_idx].r_idx] = match_property(matched_objs[tmp.rp_idx].drmin, -1,-1,-1,-1, -1, -1);
+                        matched_objs[tmp.rp_idx] = tmp;
+                     }
+                   }
+                   else
+                      matched_objs[tmp.rp_idx] = tmp;
+               }
+               else
+                  unmatched_objs_r[obj_r.idx] = match_property(-1,-1,-1,-1,-1,-1,-1);
+             } // end of objs_r loop
 
-                if (matched_trk_p.find(e_rp) != matched_trk_p.end()) {
-                    if(std::find(matched_trk_p[e_rp].begin(), matched_trk_p[e_rp].end(), obj_rp.idx) != matched_trk_p[e_rp].end()) continue; // obj_rp is already matched with other obj_r
-	        }
-	       obj_hists.fill("unmatched_pt_rp", obj_rp.pt);
-               not_matched_obj_rp += 1;
-            } // end of obj_rp loop
-	  } // end of e_rp loop
-        
+             for(auto const & obj_r: objs_r)
+             {
+               if(unmatched_objs_r.count(obj_r.idx))
+               {
+                  not_matched_obj_r++;
+                  obj_hists.fill("unmatched_pt_r", obj_r.pt);
+               }
+             }
+
+             for(auto const & obj_rp: rp_objs.at(e_r))
+             {
+               total_obj_rp++;
+               if(matched_objs.count(obj_rp.idx) == 0)
+               {
+                  not_matched_obj_rp++;
+                  obj_hists.fill("unmatched_pt_rp", obj_rp.pt);
+               }
+             }
+
+             for(auto const& [matched_idx, matched_obj]: matched_objs)
+             {
+               obj_hists.fill_deltar(matched_obj.drmin, matched_obj.r_algo, matched_obj.rp_algo);
+               obj_hists.fill("matched_pt_r", matched_obj.r_pt);
+               obj_hists.fill("matched_pt_r", matched_obj.rp_pt);
+               obj_hists.fill("ratio", matched_obj.r_pt/matched_obj.rp_pt);
+             }
+
+          } // end of r_objs loop
+
 	  cout << setprecision(2);
           cout << Form("total %s in raw: ", obj_hists.get_base_name().c_str()) << total_obj_r << endl;
           cout << Form("total %s in rawp: ", obj_hists.get_base_name().c_str()) << total_obj_rp << endl;

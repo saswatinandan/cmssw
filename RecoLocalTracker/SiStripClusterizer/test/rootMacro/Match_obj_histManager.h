@@ -77,9 +77,10 @@ class match_trackobj_histManager
 
           };
 
-          void fill_deltar(const Track& track, float& val) 
+          void fill_deltar(const float& val, const int& r_algo, const int& rp_algo) 
           {
-            fill("deltar_"+ to_string(track.trkAlgo), val);
+            //if(r_algo != rp_algo) cout << r_algo << "\t" << rp_algo << endl;
+            fill("deltar_"+ to_string(r_algo), val);
           };
 };
 
@@ -114,9 +115,10 @@ class match_jetobj_histManager
            match_obj_histManager::compareMatching();
        };
 
-       void fill_deltar(const Jet& jet, float& val)
+       void fill_deltar(const float& val, const int& r_algo, const int& rp_algo)
        {
-         fill("deltar", val);
+            //if(r_algo != rp_algo) cout << r_algo << "\t" << rp_algo << endl;
+            fill("deltar", val);
        };
 };
 
