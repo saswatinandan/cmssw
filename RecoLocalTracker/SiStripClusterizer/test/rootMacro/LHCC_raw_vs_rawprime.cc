@@ -18,6 +18,8 @@
 #include "TStopwatch.h"
 
 #include "EvthistManager.h"
+#include "Match_obj_histManager.h"
+#include "object.h"
 
 using namespace std;
 
@@ -108,87 +110,6 @@ struct TreeReader{
 
 };
 
-struct Jet{
-
-        int   idx;
-        float pt;
-        float eta;
-        float phi;
-        float mass;
-
-        Jet(): idx(0),
-        pt(0), eta(0), phi(0), mass(0) {};
-
-        Jet(const int& in_idx,
-            const float& in_pt,
-            const float& in_eta,
-            const float& in_phi,
-            const float& in_mass
-           ):
-           idx(in_idx),
-           pt(in_pt),
-           eta(in_eta),
-           phi(in_phi),
-           mass(in_mass)
-        {};
-};
-
-struct Track{
-
-        int idx;
-        float pt;
-        float eta;
-        float phi;
-        float Dxy1;
-        float DxyError1;
-        float Dz1;
-        float DzError1;
-
-        Int_t trkAlgo;
-        Int_t    trkNHit;
-        Int_t    trkNdof;
-        Int_t    trkNlayer;
-        float    trkChi2;
-        float    trkPtError;
-
-        Track(): idx(0),
-        pt(0), eta(0), phi(0), Dxy1(0), DxyError1(0),
-        Dz1(0), DzError1(0) {};
-
-        Track(int& in_idx,
-            const float& in_pt,
-            const float& in_eta,
-            const float& in_phi,
-            const float& in_Dxy1,
-            const float& in_DxyError1,
-            const float& in_Dz1,
-            const float& in_DzError1,
-            const Int_t& in_trkAlgo,
-            const Int_t&  in_trkNHit,
-            const Int_t&  in_trkNdof,
-            const Int_t&  in_trkNlayer,
-            const float&  in_trkChi2,
-            const float&  in_trkPtError
-           ):
-           idx(in_idx),
-           pt(in_pt),
-           eta(in_eta),
-           phi(in_phi),
-           Dxy1(in_Dxy1),
-           DxyError1(in_DxyError1),
-           Dz1(in_Dz1),
-           DzError1(in_DzError1),
-           trkAlgo(in_trkAlgo),
-           trkNHit(in_trkNHit),
-           trkNdof(in_trkNdof),
-           trkNlayer(in_trkNlayer),
-           trkChi2(in_trkChi2),
-           trkPtError(in_trkPtError)
-
-        {};
-
-};
-
 void event_loop( map< int, map< int, map<int, bool> > >& evtMatchedMap,
                    const TreeReader& treereader,
                    EvthistManager& evthist,
@@ -215,16 +136,16 @@ void event_loop( map< int, map< int, map<int, bool> > >& evtMatchedMap,
                   evthist.fill("trk_nhits", treereader.trkNHit[trkIdx]);
                   evthist.fill("trk_pterrDpt", std::abs(treereader.trkPtError[trkIdx]/treereader.trkPt[trkIdx]));
 
-                  evthist.fill("trk_cutflow", trk_cuts::nocut);
+                  evthist.fill("trk_cutflow_"+to_string(treereader.trkAlgo[trkIdx]), trk_cuts::nocut);
  
 		  if(treereader.trkChi2[trkIdx] > cut_chi2) continue;
-                  evthist.fill("trk_cutflow", trk_cuts::chi2);
+                  evthist.fill("trk_cutflow_"+to_string(treereader.trkAlgo[trkIdx]), trk_cuts::chi2);
 
                   if(std::abs(treereader.trkPtError[trkIdx]/treereader.trkPt[trkIdx]) >= cut_ptRes) continue;
-                  evthist.fill("trk_cutflow", trk_cuts::ptRes);
+                  evthist.fill("trk_cutflow_"+to_string(treereader.trkAlgo[trkIdx]), trk_cuts::ptRes);
 
                   if((int) treereader.trkNHit[trkIdx] < cut_nhits) continue;
-                  evthist.fill("trk_cutflow", trk_cuts::nhits);
+                  evthist.fill("trk_cutflow_"+to_string(treereader.trkAlgo[trkIdx]), trk_cuts::nhits);
 
                   evthist.fill("trk_pt", treereader.trkPt[trkIdx]);
 		  evthist.fill("trk_eta", treereader.trkEta[trkIdx]);
@@ -250,7 +171,7 @@ void event_loop( map< int, map< int, map<int, bool> > >& evtMatchedMap,
                        treereader.trkChi2[trkIdx], treereader.trkPtError[trkIdx]);
                 }
 
-                     ///// jet ////
+                 ///// jet ////
 
                  for (int jetIdx = 0; jetIdx < treereader.nJet; ++jetIdx)
                  {
@@ -273,76 +194,16 @@ void event_loop( map< int, map< int, map<int, bool> > >& evtMatchedMap,
            }
 }
 
-class match_obj_histManager
-   : public histManagerBase
-{
-     public:
-       match_obj_histManager(const string& obj, const float& in_drcut):
-       histManagerBase(obj)
-       ,drcut(in_drcut)	{
-
-	  bool lowpt = string(base_name).find("lowpt") != std::string::npos;
-
-	  for (const auto match_type: {"matched", "unmatched"})
-	  {
-            for (const auto var_type: {"pt"})
-            {
-              for (const auto raw_type: {"r", "rp"})
-              {
-	        auto key = Form("%s_%s_%s", match_type, var_type, raw_type);
-                if (std::string(obj).find("tracks") != std::string::npos)
-                   hists[key] = createhist(Form("%s_%s", base_name.c_str(), key), Form("%s;pt;yield", key), numBins, (lowpt) ? customBins_lowpt : customBins_highpt);
-               else
-                  hists[key] = createhist(Form("%s_%s", base_name.c_str(), key), Form("%s;pt;yield", key), numBins_jets, customBins_jets);
-	      } 
-	     }
-	  }
-
-         hists["deltar"] = createhist(Form("%s_delta_r", base_name.c_str()), "delta_r;delta_r;yield", 50, 0., drcut);
-         hists["ratio"] = createhist(Form("%s_ratio", base_name.c_str()), ";Raw_pt/Raw'_pt;yield", 50, 0.95, 1.05);
-
-       };
-
-       void compareMatching()
-       {
-	
-	 map<string, TH1F*> hists_1 = { {"matched_pt", hists["matched_pt_r"]},
-                                       {"unmatched_pt", hists["unmatched_pt_r"]} 
-      	 };
-
-	 map<string, TH1F*> hists_2 = { {"matched_pt", hists["matched_pt_rp"]},
-                                       {"unmatched_pt", hists["unmatched_pt_rp"]}
-         };
-	 
-	 compareDist(hists_1, "raw",
-	             hists_2, "rawp",
-	             get_base_name()+"_");
-	 
-	 Plot_single({"deltar", "ratio"});
-
-       };
-
-       const float get_drcut() const
-       {
-         return drcut;
-       }; 
-
-     private:
-       float drcut;
-};
-
-
-template<class T>
+template<class T, class M>
 
 void do_matching(const map<int, vector<T> > & r_objs, const map<int, vector<T> >& rp_objs,
-	        match_obj_histManager & obj_hists
+	        M & obj_hists
 		) 
         {
 
 	  cout << "doing matching " << endl;
-	
+
 	  std::map<int, std::vector<int> >matched_trk_p;
-	  std::map<int, std::vector<int> >matched_trk;
 
 	  int not_matched_obj_r = 0;
 	  int not_matched_obj_rp = 0;
@@ -352,6 +213,7 @@ void do_matching(const map<int, vector<T> > & r_objs, const map<int, vector<T> >
 
 	  for(auto const & [e_r, objs_r]: r_objs)
 	  {
+             map<int, vector<T>> matched_objs;
 	     for(auto const & obj_r: objs_r)
              {
                ++total_obj_r;
@@ -359,24 +221,20 @@ void do_matching(const map<int, vector<T> > & r_objs, const map<int, vector<T> >
                float drmin = 9999;
 	       float matched_pt_rp(-1);
 
-	       for(auto const & [e_rp, objs_rp]: rp_objs)
-               {
-	          if(e_r != e_rp) continue;
-	          for(auto const & obj_rp: objs_rp)
-	          {
-		      if(matched_trk_p.find(e_rp) != matched_trk_p.end()) {
-		         if(std::find(matched_trk_p[e_rp].begin(), matched_trk_p[e_rp].end(), obj_rp.idx) != matched_trk_p[e_rp].end()) continue; // obj_rp already matched with obj_r
-		      }
-	             auto dr = deltaR(obj_r.eta, obj_rp.eta, obj_r.phi, obj_rp.phi);
-		     if (dr < obj_hists.get_drcut() && dr < drmin) {
-                        drmin = dr;
-		        matched_trk_p_idx = obj_rp.idx;
-		        matched_pt_rp = obj_rp.pt;
-		     }
-	         } // end of obj_rp loop
-	       } // end of e_rp loop
-
-	     obj_hists.fill("deltar", drmin);
+               auto objs_rp = rp_objs.at(e_r);
+	       for(auto const & obj_rp: objs_rp)
+	       {
+		  if(matched_trk_p.find(e_r) != matched_trk_p.end()) {
+		      if(std::find(matched_trk_p[e_r].begin(), matched_trk_p[e_r].end(), obj_rp.idx) != matched_trk_p[e_r].end()) continue; // obj_rp already matched with obj_r
+		   }
+	           auto dr = deltaR(obj_r.eta, obj_rp.eta, obj_r.phi, obj_rp.phi);
+		   if (dr < obj_hists.get_drcut() && dr < drmin) {
+                      drmin = dr;
+		      matched_trk_p_idx = obj_rp.idx;
+		      matched_pt_rp = obj_rp.pt;
+		   }
+	        } // end of obj_rp loop
+             obj_hists.fill_deltar(obj_r, drmin);
 	    
 	     if(matched_trk_p_idx != -1) {
 	         if (matched_trk_p.find(e_r) == matched_trk_p.end())
@@ -486,7 +344,7 @@ int main(int argc, char const *argv[]) { //LHCC_raw_vs_rawprime() {
 	cout << "calling matching" << endl;
 
         {
-           match_obj_histManager trk_lowpt_hists("tracks_lowpt", 0.05);
+           match_trackobj_histManager trk_lowpt_hists("tracks_lowpt", 0.05);
            do_matching(r_good_lowpt_trk, rp_good_lowpt_trk,
                     trk_lowpt_hists
            );
@@ -495,16 +353,16 @@ int main(int argc, char const *argv[]) { //LHCC_raw_vs_rawprime() {
         }
 
 	{
-           match_obj_histManager trk_highpt_hists("tracks_highpt", 0.05);
+           match_trackobj_histManager trk_highpt_hists("tracks_highpt", 0.05);
            do_matching(r_good_highpt_trk, rp_good_highpt_trk,
                     trk_highpt_hists
            );
            trk_highpt_hists.write();
            trk_highpt_hists.compareMatching();
         }
-
-       {
-           match_obj_histManager jet_hists("jets", 0.4);
+       
+        {
+           match_jetobj_histManager jet_hists("jets", 0.4);
            do_matching(r_goodjet, rp_goodjet,
                     jet_hists
            );

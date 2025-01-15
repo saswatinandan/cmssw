@@ -2,12 +2,13 @@
 #define EVTHIST_MANAGER_H
 
 #include "histManagerBase.h"
+#include "TrackAlgo.h"
 #include "TMath.h"
 
 namespace trk_cuts {
-enum  {nocut=1, dzSig, chi2, ptRes, nhits};
+enum  {nocut=1, chi2, ptRes, nhits};
 }
-map<int, std::string> trk_cutToname = { {trk_cuts::nocut, "nocut"}, {trk_cuts::dzSig, "dzSig"}, {trk_cuts::chi2, "normalizedchi2<2"}, {trk_cuts::ptRes, "abs(pTErr/pT)<0.10"}, {trk_cuts::nhits, "nhits>=11"}};
+map<int, std::string> trk_cutToname = { {trk_cuts::nocut, "nocut"}, {trk_cuts::chi2, "normalizedchi2<2"}, {trk_cuts::ptRes, "abs(pTErr/pT)<0.10"}, {trk_cuts::nhits, "nhits>=11"}};
 
 namespace jet_cuts{
 enum jet_cuts {nocut=1, pt, eta};
@@ -29,11 +30,13 @@ class EvthistManager
          hists["trk_chi2"] = createhist(Form("%s_track_chi2", base_name.c_str()), "track_chi2;track_chi2;yield", 100, 0,20);
          hists["trk_nhits"] = createhist(Form("%s_track_nhits", base_name.c_str()), "track_nhits;track_nhits;yield", 100, -0.5, 99.5);
          hists["trk_pterrDpt"] = createhist(Form("%s_track_pterrDpt", base_name.c_str()), "track_pterrDpt;track_pTErr/pt;yield", 50, 0, 1);
-         hists["trk_cutflow"] = createhist(Form("%s_track_cutflow", base_name.c_str()), "cutflow;cutflow;yield", trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
-        hists["trk_cutflow"]->GetXaxis()->SetLabelSize(0.025);
-        for(int ibin=trk_cuts::nocut; ibin<=trk_cuts::nhits; ibin++)
-	   hists["trk_cutflow"]->GetXaxis()->SetBinLabel(ibin, trk_cutToname[ibin].c_str());
- 
+         for (int i=TrackAlgorithm::undefAlgorithm; i<=TrackAlgorithm::displacedRegionalStep; i++) {
+           std::string name = "trk_cutflow_"+to_string(i);
+           hists[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;cutflow;yield", algoNames[i].c_str()), trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
+           hists[name]->GetXaxis()->SetLabelSize(0.025);
+           for(int ibin=trk_cuts::nocut; ibin<=trk_cuts::nhits; ibin++)
+	     hists[name]->GetXaxis()->SetBinLabel(ibin, trk_cutToname[ibin].c_str());
+        }
 	hists_2d["trk_eta_phi"] = createhist(Form("%s_track_eta_phi", base_name.c_str()), "track_eta_phi;#eta; #phi;yield", 16, -2.4, 2.4, 30, -TMath::Pi(), TMath::Pi());
 
        ///// jet ////

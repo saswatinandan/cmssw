@@ -9,10 +9,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-b", type=int, dest="bits", nargs='+', default=[], help="bit to be studied for barycenter")
 parser.add_argument("-w", type=int, dest="widths", nargs='+', default=[], help="bit to be studied for width")
 parser.add_argument("-a", type=int, dest="avgCharges", nargs='+', default=[], help="bit to be studied for avgCharge")
+parser.add_argument("-o", dest="output", default='output', help="directory name where inputs are")
+
 options = parser.parse_args()
 bits = options.bits
 widths = options.widths
 avgCharges = options.avgCharges
+output = options.output
 
 x = np.array(bits)
 x = np.sort(x)
@@ -20,6 +23,7 @@ widths = np.sort(np.array(widths))
 avgCharge = np.sort(np.array(avgCharges))
 
 colors = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w']
+algonames = []
 
 def draw_plot(x, x_title, y_title,
               title, filename,
@@ -39,7 +43,7 @@ def draw_plot(x, x_title, y_title,
 
    plt.title(title, fontsize=20)
    plt.xlabel(x_title, fontsize=20)
-   plt.ylabel(y_title, fontsize=20)
+   plt.ylabel(y_title, fontsize=16)
    plt.legend()
    plt.savefig(filename)
    plt.close('all')
@@ -55,18 +59,23 @@ def build_array(dirname, width, obj):
           input = f'/scratch/nandan/{dirname}_barycenter_{bit}bit_width_{width}bit_avgCharge_{avgCharge}bit'
           cutflow_file = TFile(os.path.join(input, 'object_study.root'), 'r')
 
-          if obj in ['tracks_lowpt', 'tracks_highpt', 'jet']:
+          if obj in ['tracks_lowpt', 'jet']:
 
              for raw_type in ['raw', 'rawp']:
 
-                cutflow = cutflow_file.Get(f'{raw_type}_{obj}_cutflow' if 'track' not in obj
-                                           else f'{raw_type}_track_cutflow'
+                for trk_algo in range(0,26):
+
+                   cutflow = cutflow_file.Get(f'{raw_type}_{obj}_cutflow' if 'track' not in obj
+                                           else f'{raw_type}_trk_cutflow_{trk_algo}'
                                           )
-                if f'{raw_type}_before_cut' not in ret[avgCharge_key].keys():
-                   ret[avgCharge_key][f'{raw_type}_before_cut'] = []
-                   ret[avgCharge_key][f'{raw_type}_after_cut'] = []
-                ret[avgCharge_key][f'{raw_type}_before_cut'].append(cutflow.GetBinContent(1))
-                ret[avgCharge_key][f'{raw_type}_after_cut'].append(cutflow.GetBinContent(cutflow.GetNbinsX()))
+                   if len(algonames) < 27:
+                       algonames.append(cutflow.GetTitle())
+                   print(algonames)
+                   if f'{raw_type}_before_cut_{trk_algo}' not in ret[avgCharge_key].keys():
+                        ret[avgCharge_key][f'{raw_type}_before_cut_{trk_algo}'] = []
+                        ret[avgCharge_key][f'{raw_type}_after_cut_{trk_algo}'] = []
+                   ret[avgCharge_key][f'{raw_type}_before_cut_{trk_algo}'].append(cutflow.GetBinContent(1))
+                   ret[avgCharge_key][f'{raw_type}_after_cut_{trk_algo}'].append(cutflow.GetBinContent(cutflow.GetNbinsX()))
 
           if obj == 'size':
              input_file = os.path.join(input, 'size.log')
@@ -97,9 +106,9 @@ def build_array(dirname, width, obj):
     return ret  
 
 for width in widths:   
-  for obj in ['size', 'cluster', 'tracks_lowpt', 'tracks_highpt', 'jet']:
+  for obj in ['size', 'tracks_lowpt']:#, 'tracks_highpt']:#, 'jet']:
 
-    ret1 = build_array('output', width, obj)
+    ret1 = build_array(output, width, obj)
 
     if obj == 'size':
       y_title = 'Average Compressed Size (Bytes/Event) for hltSiStripClusters2ApproxClusters'
@@ -111,13 +120,15 @@ for width in widths:
              ret1, 'y')
     if obj != 'size':
         if obj != 'cluster':
-            draw_plot(x,'barycenter bit', f'total # of {obj}',
-              f'total # of {obj} before selection', f'width_{width}bit_size_before_cut_{obj}.png',
-              ret1, 'before_cut')
-        if obj == 'cluster':
+            for cutalgo in range(0,26):
+               print(algonames[cutalgo])
+               draw_plot(x,'barycenter bit', f'total # of {obj} after selection',
+                 f'{algonames[cutalgo]}', f'width_{width}bit_size_before_cut_{obj}_{algonames[cutalgo]}.png',
+                 ret1, f'after_cut_{cutalgo}')
+        '''if obj == 'cluster':
            title = f'total # of {obj}'
         else:
             title = f'total # of {obj} after selection'
         draw_plot(x,'barycenter bit', f'total # of {obj}',
-              f'total # of {obj} after selection', f'width_{width}bit_size_after_cut_{obj}.png',
-              ret1, 'after_cut')
+              f'total # of {obj} after selection: {algonames[cutalgo]}', f'width_{width}bit_size_after_cut_{obj}_{algonames[cutalgo]}.png',
+              ret1, 'after_cut')'''
