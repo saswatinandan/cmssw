@@ -56,7 +56,7 @@ def build_array(dirname, width, obj):
     for avgCharge in avgCharges:
        avgCharge_key = f'avgCharge_{str(avgCharge)}'
        ret[avgCharge_key] = {}
-       for bit in x:
+       for indx, bit in enumerate(x):
           input = f'/scratch/nandan/{dirname}_barycenter_{bit}bit_width_{width}bit_avgCharge_{avgCharge}bit'
           cutflow_file = TFile(os.path.join(input, 'object_study.root'), 'r')
 
@@ -74,8 +74,12 @@ def build_array(dirname, width, obj):
                    if f'{raw_type}_before_cut_{trk_algo}' not in ret[avgCharge_key].keys():
                         ret[avgCharge_key][f'{raw_type}_before_cut_{trk_algo}'] = []
                         ret[avgCharge_key][f'{raw_type}_after_cut_{trk_algo}'] = []
+                        ret[avgCharge_key][f'{raw_type}_fraction_after_cut_{trk_algo}'] = []
                    ret[avgCharge_key][f'{raw_type}_before_cut_{trk_algo}'].append(cutflow.GetBinContent(1))
                    ret[avgCharge_key][f'{raw_type}_after_cut_{trk_algo}'].append(cutflow.GetBinContent(cutflow.GetNbinsX()))
+                   fraction = 1
+                   if(ret[avgCharge_key][f'raw_after_cut_{trk_algo}'][indx] != 0): fraction = ret[avgCharge_key][f'{raw_type}_after_cut_{trk_algo}'][indx]/ret[avgCharge_key][f'raw_after_cut_{trk_algo}'][indx]
+                   ret[avgCharge_key][f'{raw_type}_fraction_after_cut_{trk_algo}'].append(fraction)
 
           if obj == 'size':
              input_file = os.path.join(input, 'size.log')
@@ -125,7 +129,10 @@ for width in widths:
                print(algonames[cutalgo])
                draw_plot(x,'barycenter bit', f'total # of tracks after selection',
                  f'{algonames[cutalgo]}', f'width_{width}bit_size_before_cut_{obj}_{algonames[cutalgo]}.png',
-                 ret1, f'before_cut_{cutalgo}')
+                 ret1, f'after_cut_{cutalgo}')
+               draw_plot(x,'n. of bits for barycenter', f'fraction of tracks w.r.t raw tracks, after selection',
+                 f'{algonames[cutalgo]}', f'width_{width}bit_size_fraction_after_cut_{obj}_{algonames[cutalgo]}.png',
+                 ret1, f'fraction_after_cut_{cutalgo}')
         '''if obj == 'cluster':
            title = f'total # of {obj}'
         else:
