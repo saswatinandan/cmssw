@@ -7,6 +7,7 @@ export thread=$5
 export remove=$6
 export output=/scratch/$(whoami)/$7
 export tmp=/home/users/$(whoami)/tmp/$7
+export cluster=$8
 
 echo $tmp
 echo $output
@@ -36,7 +37,7 @@ eval "cd RecoLocalTracker/SiStripClusterizer/test"
 export current_dir=$(pwd)
 echo 'curent dir: ', $current_dir
 
-python3 run_cmsDriver.py -b $barycenter_bit -w $width_bit -a $avgCharge_bit -n $evn -t $thread
+python3 run_cmsDriver.py -b $barycenter_bit -w $width_bit -a $avgCharge_bit -n $evn -t $thread -c $cluster
 
 eval "cd ${output}"
 eval "cp $current_dir/*png ."

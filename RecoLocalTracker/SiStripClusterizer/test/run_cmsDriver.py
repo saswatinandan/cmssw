@@ -7,6 +7,7 @@ parser.add_argument("-w", dest="width_bit", default='8bit', help="bit to be stud
 parser.add_argument("-a", dest="avgCharge_bit", default='8bit', help="bit to be studied for avgcharge")
 parser.add_argument("-n", dest="number", default='100', help="how many numbers of events")
 parser.add_argument("-t", dest="threads", default='20', help="how many threads")
+parser.add_argument("-c", action='store_false', dest="cluster", default=1, help="want flatntuple for cluster")
 
 options = parser.parse_args()
 barycenter_bit = options.barycenter_bit
@@ -86,7 +87,7 @@ os.system(run_cmd)
 
 #### object comparison ####
 
-run_cmd = f'python3 run_flatNtuplizer.py -rp {output_step_reco} -c -n {number}'
+run_cmd = f'python3 run_flatNtuplizer.py -rp {output_step_reco} -c {options.cluster} -n {number}'
 print(run_cmd)
 os.system(run_cmd)
 
