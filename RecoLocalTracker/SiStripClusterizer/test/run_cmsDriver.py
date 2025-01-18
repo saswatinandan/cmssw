@@ -87,7 +87,8 @@ os.system(run_cmd)
 
 #### object comparison ####
 
-run_cmd = f'python3 run_flatNtuplizer.py -rp {output_step_reco} -c {options.cluster} -n {number}'
+run_cmd = f'python3 run_flatNtuplizer.py -rp {output_step_reco} -c -n {number}' if options.cluster\
+         else f'python3 run_flatNtuplizer.py -rp {output_step_reco} -n {number}'
 print(run_cmd)
 os.system(run_cmd)
 
