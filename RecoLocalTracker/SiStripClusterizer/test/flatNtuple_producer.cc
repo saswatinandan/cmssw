@@ -71,6 +71,9 @@ private:
   int trkNHit[nMax];
   int trkNdof[nMax];
   int trkNlayer[nMax];
+  float inner_x[nMax];
+  float inner_y[nMax];
+  float inner_z[nMax];
 
   float trkChi2[nMax];
   float trkPtError[nMax];
@@ -112,6 +115,9 @@ flatNtuple_producer::flatNtuple_producer(const edm::ParameterSet& iConfig){
   trackTree->Branch("trkNHit",trkNHit,"trkNHit[nTracks]/I");
   trackTree->Branch("trkNdof",trkNdof,"trkNdof[nTracks]/I");
   trackTree->Branch("trkNlayer",trkNlayer,"trkNlayer[nTracks]/I");
+  trackTree->Branch("inner_x",  inner_x, "inner_x[nTracks]/F");
+  trackTree->Branch("inner_y",  inner_y, "inner_y[nTracks]/F");
+  trackTree->Branch("inner_z",  inner_z, "inner_z[nTracks]/F");
 
   trackTree->Branch("nJets",  &nJets, "nJets/I");
 
@@ -147,9 +153,8 @@ void flatNtuple_producer::analyze(const edm::Event& iEvent, const edm::EventSetu
   const reco::PFJetCollection& jets = *jetsHandle;
 
   nTracks =  tracks.size();
- 
   for(unsigned int i=0; i<nTracks; i++)
- {
+  {
     trkPt[i]        = tracks.at(i).pt();
     trkEta[i]       = tracks.at(i).eta();
     trkPhi[i]       = tracks.at(i).phi();
@@ -163,6 +168,10 @@ void flatNtuple_producer::analyze(const edm::Event& iEvent, const edm::EventSetu
     trkAlgo[i]      = tracks.at(i).algo();
     trkNHit[i]      = tracks.at(i).numberOfValidHits();
     trkNlayer[i]    = tracks.at(i).hitPattern().trackerLayersWithMeasurement();
+    const math::XYZPoint& xyz = tracks.at(i).innerPosition();
+    inner_x[i]      = xyz.x();
+    inner_y[i]      = xyz.y();
+    inner_z[i]      = xyz.z();
   }
   
   nJets = jets.size();

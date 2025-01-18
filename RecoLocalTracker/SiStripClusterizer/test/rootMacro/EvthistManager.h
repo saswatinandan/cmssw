@@ -30,6 +30,9 @@ class EvthistManager
          hists["trk_chi2"] = createhist(Form("%s_track_chi2", base_name.c_str()), "track_chi2;track_chi2;yield", 100, 0,20);
          hists["trk_nhits"] = createhist(Form("%s_track_nhits", base_name.c_str()), "track_nhits;track_nhits;yield", 100, -0.5, 99.5);
          hists["trk_pterrDpt"] = createhist(Form("%s_track_pterrDpt", base_name.c_str()), "track_pterrDpt;track_pTErr/pt;yield", 50, 0, 1);
+         hists["trk_inner_x"] = createhist(Form("%s_track_inner_x", base_name.c_str()), ";inner_x;yield", 50, -10, 10);
+         hists["trk_inner_y"] = createhist(Form("%s_track_inner_y", base_name.c_str()), ";inner_y;yield", 50, -10, 10);
+         hists["trk_inner_z"] = createhist(Form("%s_track_inner_z", base_name.c_str()), ";inner_z;yield", 240, -60, 60);
          for (int i=TrackAlgorithm::undefAlgorithm; i<=TrackAlgorithm::displacedRegionalStep; i++) {
            std::string name = "trk_cutflow_"+to_string(i);
            hists[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;cutflow;yield", algoNames[i].c_str()), trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
@@ -37,6 +40,9 @@ class EvthistManager
            for(int ibin=trk_cuts::nocut; ibin<=trk_cuts::nhits; ibin++)
 	     hists[name]->GetXaxis()->SetBinLabel(ibin, trk_cutToname[ibin].c_str());
         }
+        hists_2d["cutflow_x"] = createhist(Form("%s_cutflow_x", base_name.c_str()), Form(";x coordinate of innerhit;cutflow"), 50, -10, 10, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
+        hists_2d["cutflow_y"] = createhist(Form("%s_cutflow_y", base_name.c_str()), Form(";y coordinate of innerhit;cutflow"), 50, -10, 10, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
+        hists_2d["cutflow_z"] = createhist(Form("%s_cutflow_z", base_name.c_str()), Form(";z coorodinate of innerhit;cutflow"), 240, -60, 60, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
 	hists_2d["trk_eta_phi"] = createhist(Form("%s_track_eta_phi", base_name.c_str()), "track_eta_phi;#eta; #phi;yield", 16, -2.4, 2.4, 30, -TMath::Pi(), TMath::Pi());
 
        ///// jet ////
