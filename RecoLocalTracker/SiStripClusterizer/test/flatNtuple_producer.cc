@@ -15,6 +15,8 @@
 #include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 
+#include "DataFormats/VertexReco/interface/Vertex.h"
+
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 //#include "TH1.h"
@@ -47,6 +49,7 @@ private:
   // ----------member data ---------------------------
   edm::EDGetTokenT<reco::TrackCollection> tracksToken_;  //used to select what tracks to read from configuration file
   edm::EDGetTokenT<reco::PFJetCollection> jetsToken_;
+  edm::EDGetTokenT<reco::VertexCollection> vertexToken_;
   
   TTree* trackTree;
   edm::Service<TFileService> fs;
@@ -71,8 +74,7 @@ private:
   int trkNHit[nMax];
   int trkNdof[nMax];
   int trkNlayer[nMax];
-  float inner_x[nMax];
-  float inner_y[nMax];
+  float inner_xy[nMax];
   float inner_z[nMax];
 
   float trkChi2[nMax];
@@ -90,6 +92,7 @@ flatNtuple_producer::flatNtuple_producer(const edm::ParameterSet& iConfig){
   
   tracksToken_ = consumes<reco::TrackCollection>(iConfig.getParameter<edm::InputTag>("tracks"));
   jetsToken_ = consumes<reco::PFJetCollection>(iConfig.getParameter<edm::InputTag>("jets"));
+  vertexToken_ = consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertex"));
     
   usesResource("TFileService");
 
@@ -115,8 +118,7 @@ flatNtuple_producer::flatNtuple_producer(const edm::ParameterSet& iConfig){
   trackTree->Branch("trkNHit",trkNHit,"trkNHit[nTracks]/I");
   trackTree->Branch("trkNdof",trkNdof,"trkNdof[nTracks]/I");
   trackTree->Branch("trkNlayer",trkNlayer,"trkNlayer[nTracks]/I");
-  trackTree->Branch("inner_x",  inner_x, "inner_x[nTracks]/F");
-  trackTree->Branch("inner_y",  inner_y, "inner_y[nTracks]/F");
+  trackTree->Branch("inner_xy",  inner_xy, "inner_xy[nTracks]/F");
   trackTree->Branch("inner_z",  inner_z, "inner_z[nTracks]/F");
 
   trackTree->Branch("nJets",  &nJets, "nJets/I");
@@ -137,6 +139,7 @@ void flatNtuple_producer::analyze(const edm::Event& iEvent, const edm::EventSetu
   lumi = iEvent.id().luminosityBlock();
   const auto& tracksHandle = iEvent.getHandle(tracksToken_);
   const auto& jetsHandle = iEvent.getHandle(jetsToken_);
+  const auto& vertexHandle = iEvent.getHandle(vertexToken_);
 
   
   if (!tracksHandle.isValid()) {
@@ -147,31 +150,37 @@ void flatNtuple_producer::analyze(const edm::Event& iEvent, const edm::EventSetu
     edm::LogError("flatNtuple_producer") << "No valid jet collection found";
     return;
   }
+  if (!vertexHandle.isValid()) {
+    edm::LogError("flatNtuple_producer") << "No valid vertex collection found";
+    return;
+  }
   
   // Retrieve the actual product from the handle
   const reco::TrackCollection& tracks = *tracksHandle;
   const reco::PFJetCollection& jets = *jetsHandle;
+  const reco::VertexCollection vertices = *vertexHandle;
 
   nTracks =  tracks.size();
   for(unsigned int i=0; i<nTracks; i++)
   {
-    trkPt[i]        = tracks.at(i).pt();
-    trkEta[i]       = tracks.at(i).eta();
-    trkPhi[i]       = tracks.at(i).phi();
-    trkDxy1[i]      = tracks.at(i).dxy();
-    trkDz1[i]       = tracks.at(i).dz();
-    trkDxyError1[i] = tracks.at(i).dxyError();
-    trkDzError1[i]  = tracks.at(i).dzError();
-    trkPtError[i]   = tracks.at(i).ptError();
-    trkChi2[i]      = tracks.at(i).normalizedChi2();
-    trkNdof[i]      = tracks.at(i).ndof();
-    trkAlgo[i]      = tracks.at(i).algo();
-    trkNHit[i]      = tracks.at(i).numberOfValidHits();
-    trkNlayer[i]    = tracks.at(i).hitPattern().trackerLayersWithMeasurement();
-    const math::XYZPoint& xyz = tracks.at(i).innerPosition();
-    inner_x[i]      = xyz.x();
-    inner_y[i]      = xyz.y();
-    inner_z[i]      = xyz.z();
+    auto track      = tracks.at(i);
+    trkPt[i]        = track.pt();
+    trkEta[i]       = track.eta();
+    trkPhi[i]       = track.phi();
+    trkDxy1[i]      = track.dxy();
+    trkDz1[i]       = track.dz();
+    trkDxyError1[i] = track.dxyError();
+    trkDzError1[i]  = track.dzError();
+    trkPtError[i]   = track.ptError();
+    trkChi2[i]      = track.normalizedChi2();
+    trkNdof[i]      = track.ndof();
+    trkAlgo[i]      = track.algo();
+    trkNHit[i]      = track.numberOfValidHits();
+    trkNlayer[i]    = track.hitPattern().trackerLayersWithMeasurement();
+    //const math::XYZPoint& xyz = tracks.at(i).innerPosition();
+    inner_xy[i]      = track.dxy(track.vertex());
+    inner_z[i]      = track.dz(track.vertex());
+   // std::cout << "z " << inner_z[i] << "\t" << tracks.at(i).dz() << std::endl;
   }
   
   nJets = jets.size();
@@ -181,6 +190,15 @@ void flatNtuple_producer::analyze(const edm::Event& iEvent, const edm::EventSetu
      jetEta[i]  = jets.at(i).eta();
      jetPhi[i]  = jets.at(i).phi();
      jetMass[i] = jets.at(i).mass();
+  }
+
+  int nvertices = vertices.size();
+  float sumpt2 = 0;
+  for(int i=0; i<nvertices; i++)
+  {
+   auto vertex = vertices.at(i);
+   for (reco::Vertex::trackRef_iterator it = vertex.tracks_begin(); it != vertex.tracks_end(); it++) sumpt2 += (**it).pt()*(**it).pt();
+   std::cout << sumpt2 << std::endl;
   }
 
   trackTree->Fill();

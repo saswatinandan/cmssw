@@ -106,6 +106,7 @@ process.deadstrip_step = cms.Path(process.sep19_3_dump_deadStrips)
 process.flatNtuple = cms.EDAnalyzer('flatNtuple_producer',
               tracks = cms.InputTag('generalTracks',"", 'reRECO'),
               jets   = cms.InputTag("ak4PFJets","","reRECO"),
+              vertex = cms.InputTag("offlinePrimaryVertices","","reRECO")
 )
 process.flatNtuple_path = cms.Path(process.flatNtuple)
 
