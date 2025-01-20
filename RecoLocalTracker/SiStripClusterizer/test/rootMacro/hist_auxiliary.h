@@ -33,6 +33,12 @@ auto createhist(const std::string& name, const std::string& title, const int& nb
          return h;
 }
 
+template<typename std::size_t S>
+auto createhist(const std::string& name, const std::string& title, const double (&arry)[S], const int& nybins,const float ylow, const float& yhigh) {
+         TH2F* h = new TH2F(name.c_str(), title.c_str(), sizeof(arry)/sizeof(arry[0])-1, arry, nybins, ylow, yhigh);
+         set_properties(h);
+         return h;
+}
 void Divide_w_sameDsets(TH1F* num, TH1F* denom, TH1F* ratio)
 {
         for (int _x = 1; _x < num->GetNbinsX()+1; ++_x)
@@ -88,7 +94,7 @@ int fillWithOverFlow(TH2 * histogram,
   const double binContent = histogram->GetBinContent(binx, biny);
   const double binError   = histogram->GetBinError(binx, biny);
   histogram->SetBinContent(binx, biny, binContent + evtWeight);
-//  histogram->SetBinError(bin, std::sqrt(pow(binError,2) + 1));
+  histogram->SetBinError(binx, biny, std::sqrt(pow(binError,2) + 1));
   return 0;//((bin == xAxis->GetNbins()) || (binx == 1)) ? 1 : 0;
 }
 
