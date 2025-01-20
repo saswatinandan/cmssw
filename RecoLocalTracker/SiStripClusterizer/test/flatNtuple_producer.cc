@@ -178,8 +178,8 @@ void flatNtuple_producer::analyze(const edm::Event& iEvent, const edm::EventSetu
     trkNHit[i]      = track.numberOfValidHits();
     trkNlayer[i]    = track.hitPattern().trackerLayersWithMeasurement();
     //const math::XYZPoint& xyz = tracks.at(i).innerPosition();
-    inner_xy[i]      = track.dxy(track.vertex());
-    inner_z[i]      = track.dz(track.vertex());
+    inner_xy[i]     = track.dxy(vertices.at(0).position());
+    inner_z[i]      = track.dz(vertices.at(0).position());
    // std::cout << "z " << inner_z[i] << "\t" << tracks.at(i).dz() << std::endl;
   }
   
@@ -191,7 +191,7 @@ void flatNtuple_producer::analyze(const edm::Event& iEvent, const edm::EventSetu
      jetPhi[i]  = jets.at(i).phi();
      jetMass[i] = jets.at(i).mass();
   }
-
+  /*
   int nvertices = vertices.size();
   float sumpt2 = 0;
   for(int i=0; i<nvertices; i++)
@@ -199,7 +199,7 @@ void flatNtuple_producer::analyze(const edm::Event& iEvent, const edm::EventSetu
    auto vertex = vertices.at(i);
    for (reco::Vertex::trackRef_iterator it = vertex.tracks_begin(); it != vertex.tracks_end(); it++) sumpt2 += (**it).pt()*(**it).pt();
    std::cout << sumpt2 << std::endl;
-  }
+  }*/
 
   trackTree->Fill();
 }
