@@ -15,6 +15,9 @@ enum jet_cuts {nocut=1, pt, eta};
 }
 map<int, std::string> jet_cutToname = { {jet_cuts::nocut, "nocut"}, {jet_cuts::pt, "pt>20"}, {jet_cuts::eta, "|eta|<2.4"}};
 
+Double_t array_z[] = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 140, 170, 200};
+Double_t array_xy[] = {0, 2,4, 6,8, 10, 12, 14,16, 18, 20, 25, 30, 35, 40, 45, 50, 60, 70};
+
 class EvthistManager
    : public histManagerBase
 {
@@ -30,19 +33,22 @@ class EvthistManager
          hists["trk_chi2"] = createhist(Form("%s_track_chi2", base_name.c_str()), "track_chi2;track_chi2;yield", 100, 0,20);
          hists["trk_nhits"] = createhist(Form("%s_track_nhits", base_name.c_str()), "track_nhits;track_nhits;yield", 100, -0.5, 99.5);
          hists["trk_pterrDpt"] = createhist(Form("%s_track_pterrDpt", base_name.c_str()), "track_pterrDpt;track_pTErr/pt;yield", 50, 0, 1);
-         hists["trk_inner_x"] = createhist(Form("%s_track_inner_x", base_name.c_str()), ";inner_x;yield", 50, -10, 10);
-         hists["trk_inner_y"] = createhist(Form("%s_track_inner_y", base_name.c_str()), ";inner_y;yield", 50, -10, 10);
+         hists["trk_inner_xy"] = createhist(Form("%s_track_inner_xy", base_name.c_str()), ";inner_xy;yield", 50, -10, 10);
          hists["trk_inner_z"] = createhist(Form("%s_track_inner_z", base_name.c_str()), ";inner_z;yield", 240, -60, 60);
          for (int i=TrackAlgorithm::undefAlgorithm; i<=TrackAlgorithm::displacedRegionalStep; i++) {
-           std::string name = "trk_cutflow_"+to_string(i);
-           hists[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;cutflow;yield", algoNames[i].c_str()), trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
-           hists[name]->GetXaxis()->SetLabelSize(0.025);
+           std::string name = "trk_cutflow_z"+to_string(i);
+           hists_2d[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;abs(z) coordinate;cutflow", algoNames[i].c_str()), array_z, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
+           hists_2d[name]->GetYaxis()->SetLabelSize(0.025);
            for(int ibin=trk_cuts::nocut; ibin<=trk_cuts::nhits; ibin++)
-	     hists[name]->GetXaxis()->SetBinLabel(ibin, trk_cutToname[ibin].c_str());
+	     hists_2d[name]->GetYaxis()->SetBinLabel(ibin, trk_cutToname[ibin].c_str());
+
+           name = "trk_cutflow_xy"+to_string(i);
+           hists_2d[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;abs(xy) coordinate;cutflow", algoNames[i].c_str()), array_xy, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
+           hists_2d[name]->GetYaxis()->SetLabelSize(0.025);
+           for(int ibin=trk_cuts::nocut; ibin<=trk_cuts::nhits; ibin++)
+             hists_2d[name]->GetYaxis()->SetBinLabel(ibin, trk_cutToname[ibin].c_str());
+
         }
-        hists_2d["cutflow_x"] = createhist(Form("%s_cutflow_x", base_name.c_str()), Form(";x coordinate of innerhit;cutflow"), 50, -10, 10, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
-        hists_2d["cutflow_y"] = createhist(Form("%s_cutflow_y", base_name.c_str()), Form(";y coordinate of innerhit;cutflow"), 50, -10, 10, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
-        hists_2d["cutflow_z"] = createhist(Form("%s_cutflow_z", base_name.c_str()), Form(";z coorodinate of innerhit;cutflow"), 240, -60, 60, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
 	hists_2d["trk_eta_phi"] = createhist(Form("%s_track_eta_phi", base_name.c_str()), "track_eta_phi;#eta; #phi;yield", 16, -2.4, 2.4, 30, -TMath::Pi(), TMath::Pi());
 
        ///// jet ////
