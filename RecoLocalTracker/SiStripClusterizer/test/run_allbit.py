@@ -9,7 +9,7 @@ parser.add_argument("-a", dest="avgCharge_bits", nargs='+', default=[], help="bi
 parser.add_argument("-t", dest="threads", default=20, help="# of threads")
 parser.add_argument("-r", type=int, dest="remove", default=0, help="want to delete directory")
 parser.add_argument("-C", action='store_false', dest="cms_command", default=1, help="either want to run cmsDriver commands or only the .cc file")
-parser.add_argument("-c", action='store_false', dest="cluster", default=1, help="want flatntuple for cluster")
+parser.add_argument("-c", type=int, dest="cluster", default=1, help="want flatntuple for cluster")
 parser.add_argument("-o", dest="output", default='output', help="output directory name")
 parser.add_argument("-p", type=int, dest="parallel", default=5, help="how many runs you want at the same time ")
 
