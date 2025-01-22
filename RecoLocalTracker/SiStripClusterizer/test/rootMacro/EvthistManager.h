@@ -15,8 +15,11 @@ enum jet_cuts {nocut=1, pt, eta};
 }
 map<int, std::string> jet_cutToname = { {jet_cuts::nocut, "nocut"}, {jet_cuts::pt, "pt>20"}, {jet_cuts::eta, "|eta|<2.4"}};
 
-Double_t array_z[] = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 140, 170, 200};
-Double_t array_xy[] = {0, 2,4, 6,8, 10, 12, 14,16, 18, 20, 25, 30, 35, 40, 45, 50, 60, 70};
+constexpr Double_t array_displaced_xy[] = {0,0.5, 1, 1.5,2,3,4,5, 10,20};
+constexpr Double_t array_displaced_z[] = {0,1.0,1.5,2,3,4,5,6,7,8,9,10, 15, 20, 30, 40, 50, 70};
+constexpr Double_t array_xy[] = {0,0.,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,1,1.2,1.4,2};
+constexpr Double_t array_z[] = {0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,1,1.2, 1.4,1.6,1.8,2,2.5,3,3.5,4.5,5,6,10};
+constexpr Int_t displaced_trk_algo[] = {8, 9, 10, 26};
 
 class EvthistManager
    : public histManagerBase
@@ -33,17 +36,24 @@ class EvthistManager
          hists["trk_chi2"] = createhist(Form("%s_track_chi2", base_name.c_str()), "track_chi2;track_chi2;yield", 100, 0,20);
          hists["trk_nhits"] = createhist(Form("%s_track_nhits", base_name.c_str()), "track_nhits;track_nhits;yield", 100, -0.5, 99.5);
          hists["trk_pterrDpt"] = createhist(Form("%s_track_pterrDpt", base_name.c_str()), "track_pterrDpt;track_pTErr/pt;yield", 50, 0, 1);
-         hists["trk_inner_xy"] = createhist(Form("%s_track_inner_xy", base_name.c_str()), ";inner_xy;yield", 50, -10, 10);
-         hists["trk_inner_z"] = createhist(Form("%s_track_inner_z", base_name.c_str()), ";inner_z;yield", 240, -60, 60);
+         hists["trk_inner_xy"] = createhist(Form("%s_track_inner_xy", base_name.c_str()), ";inner_xy;yield", 200, -10., 10.);
+         hists["trk_inner_z"] = createhist(Form("%s_track_inner_z", base_name.c_str()), ";inner_z;yield", 400, -50, 50);
          for (int i=TrackAlgorithm::undefAlgorithm; i<=TrackAlgorithm::displacedRegionalStep; i++) {
+           bool displaced_region = std::find(std::begin(displaced_trk_algo), std::end(displaced_trk_algo), i) != std::end(displaced_trk_algo);
            std::string name = "trk_cutflow_z"+to_string(i);
-           hists_2d[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;abs(z) coordinate;cutflow", algoNames[i].c_str()), array_z, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
+           if (displaced_region)
+              hists_2d[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;abs(z) coordinate;cutflow", algoNames[i].c_str()), array_displaced_z, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
+           else
+              hists_2d[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;abs(z) coordinate;cutflow", algoNames[i].c_str()), array_z, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
            hists_2d[name]->GetYaxis()->SetLabelSize(0.025);
            for(int ibin=trk_cuts::nocut; ibin<=trk_cuts::nhits; ibin++)
 	     hists_2d[name]->GetYaxis()->SetBinLabel(ibin, trk_cutToname[ibin].c_str());
 
            name = "trk_cutflow_xy"+to_string(i);
-           hists_2d[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;abs(xy) coordinate;cutflow", algoNames[i].c_str()), array_xy, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
+           if (displaced_region)
+              hists_2d[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;abs(xy) coordinate;cutflow", algoNames[i].c_str()), array_displaced_xy, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
+           else
+              hists_2d[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;abs(xy) coordinate;cutflow", algoNames[i].c_str()), array_xy, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
            hists_2d[name]->GetYaxis()->SetLabelSize(0.025);
            for(int ibin=trk_cuts::nocut; ibin<=trk_cuts::nhits; ibin++)
              hists_2d[name]->GetYaxis()->SetBinLabel(ibin, trk_cutToname[ibin].c_str());
