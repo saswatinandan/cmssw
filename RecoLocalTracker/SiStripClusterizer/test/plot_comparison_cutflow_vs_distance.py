@@ -20,51 +20,45 @@ x = np.array(bits)
 x = np.sort(x)
 widths = np.array(widths)
 avgCharge = np.array(avgCharges)
-no_track_algo = 27
 
-colors = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w']
+general_trk_algos = {'pixel_strip_seeded':[8,9,10,26], 'pixel_seeded_1': [4,11,13,14], 'pixel_seeded_2':[23,22,5,24,7,6]}
 
-def readfile(input_file):
-
-  with open(input_file, 'r') as f:
-     lines = f.readlines()
-  return lines
-
-def draw(x_vals, y_vals, yerrs, axis, algo):
+def draw(x_vals, y_vals, yerrs, axis, title):
 
   fig = plt.figure()
   for key, x_val in x_vals.items():
     plt.errorbar(x_val, y_vals[key], yerr=yerrs[key], label=key)
   plt.xlabel(f'abs({axis}) -coordinate', fontsize=10)
   plt.ylabel('#rawp/raw tracks after selection', fontsize=10)
-  plt.title(algo, fontsize=10)
+  plt.title((title[0],title[1],title[2]), fontsize=10)
   plt.legend()
-  plt.savefig(f'singleplot_cutflow_vs_{axis}_barycenter_{key[0]}bit_{algo}.png')
+  plt.savefig(f'singleplot_cutflow_vs_{axis}_barycenter_{title[0]}bit_avgcharge_{title[1]}bit_{title[2]}.png')
   plt.close('all')
 
 def build_array():
 
-  for trk_algo in range(0,no_track_algo):
-    for axis in ['xy', 'z']:
-      for bit in x:
-         xvals = {}
-         yvals = {}
-         yerrs = {}
-         c = TCanvas('','',800,800)
-         for avgCharge in avgCharges:
-            xvals[(bit,avgCharge)] = []
-            yvals[(bit,avgCharge)] = []
-            yerrs[(bit,avgCharge)] = []
-            input = f'/scratch/nandan/{output}_barycenter_{bit}bit_width_8bit_avgCharge_{avgCharge}bit'
-            input_file = TFile(os.path.join(input, 'object_study.root'), 'r')
-            cutflow_r = input_file.Get(f'raw_trk_cutflow_{axis}{trk_algo}')
-            cutflow_rp = input_file.Get(f'rawp_trk_cutflow_{axis}{trk_algo}')
-            ybin = cutflow_r.GetNbinsY()
-            cutflow_rp.Divide(cutflow_r)
-            for xbin in range(1,cutflow_r.GetNbinsX()+1):
-                xvals[(bit,avgCharge)].append(cutflow_r.GetXaxis().GetBinCenter(xbin))
-                yvals[(bit,avgCharge)].append(cutflow_rp.GetBinContent(xbin,ybin))
-                yerrs[(bit,avgCharge)].append(cutflow_rp.GetBinError(xbin,ybin))
-         draw(xvals, yvals, yerrs, axis, cutflow_rp.GetTitle())
+  for avgCharge in avgCharges:
+    for bit in x:
+       for axis in ['xy', 'z']:
+         for algo_name,algo_indices  in general_trk_algos.items():
+            xvals = {}
+            yvals = {}
+            yerrs = {}
+            for algo_index in algo_indices:
+               input = f'/scratch/nandan/{output}_barycenter_{bit}bit_width_8bit_avgCharge_{avgCharge}bit'
+               input_file = TFile(os.path.join(input, 'object_study.root'), 'r')
+               cutflow_r = input_file.Get(f'raw_trk_cutflow_{axis}{algo_index}')
+               cutflow_rp = input_file.Get(f'rawp_trk_cutflow_{axis}{algo_index}')
+               c = TCanvas('','',800,800)
+               xvals[cutflow_rp.GetTitle()] = []
+               yvals[cutflow_rp.GetTitle()] = []
+               yerrs[cutflow_rp.GetTitle()] = []
+               ybin = cutflow_r.GetNbinsY()
+               cutflow_rp.Divide(cutflow_r)
+               for xbin in range(1,cutflow_r.GetNbinsX()+1):
+                  xvals[cutflow_rp.GetTitle()].append(cutflow_r.GetXaxis().GetBinCenter(xbin))
+                  yvals[cutflow_rp.GetTitle()].append(cutflow_rp.GetBinContent(xbin,ybin))
+                  yerrs[cutflow_rp.GetTitle()].append(cutflow_rp.GetBinError(xbin,ybin))
+            draw(xvals, yvals, yerrs, axis, (bit, avgCharge,algo_name))
 
 build_array()

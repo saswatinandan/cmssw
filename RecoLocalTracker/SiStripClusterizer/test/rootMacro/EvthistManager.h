@@ -41,19 +41,19 @@ class EvthistManager
          for (int i=TrackAlgorithm::undefAlgorithm; i<=TrackAlgorithm::displacedRegionalStep; i++) {
            bool displaced_region = std::find(std::begin(displaced_trk_algo), std::end(displaced_trk_algo), i) != std::end(displaced_trk_algo);
            std::string name = "trk_cutflow_z"+to_string(i);
-           if (displaced_region)
-              hists_2d[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;abs(z) coordinate;cutflow", algoNames[i].c_str()), array_displaced_z, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
-           else
-              hists_2d[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;abs(z) coordinate;cutflow", algoNames[i].c_str()), array_z, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
+           //if (displaced_region)
+           hists_2d[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;abs(z) coordinate;cutflow", algoNames[i].c_str()), 30,0.,60., trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
+           //else
+              //hists_2d[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;abs(z) coordinate;cutflow", algoNames[i].c_str()), 30,0,60.,trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
            hists_2d[name]->GetYaxis()->SetLabelSize(0.025);
            for(int ibin=trk_cuts::nocut; ibin<=trk_cuts::nhits; ibin++)
 	     hists_2d[name]->GetYaxis()->SetBinLabel(ibin, trk_cutToname[ibin].c_str());
 
            name = "trk_cutflow_xy"+to_string(i);
-           if (displaced_region)
-              hists_2d[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;abs(xy) coordinate;cutflow", algoNames[i].c_str()), array_displaced_xy, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
-           else
-              hists_2d[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;abs(xy) coordinate;cutflow", algoNames[i].c_str()), array_xy, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
+           //if (displaced_region)
+           hists_2d[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;abs(xy) coordinate;cutflow", algoNames[i].c_str()), 5,0,10, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
+           //else
+               //hists_2d[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;abs(xy) coordinate;cutflow", algoNames[i].c_str()), 5,0,10, trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
            hists_2d[name]->GetYaxis()->SetLabelSize(0.025);
            for(int ibin=trk_cuts::nocut; ibin<=trk_cuts::nhits; ibin++)
              hists_2d[name]->GetYaxis()->SetBinLabel(ibin, trk_cutToname[ibin].c_str());
