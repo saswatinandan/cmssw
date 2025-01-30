@@ -255,12 +255,17 @@ void do_matching(const map<int, vector<T> > & r_objs, const map<int, vector<T> >
 	  {
              map<int, match_property> matched_objs; // key:index of obj_rp, value: pt values of matched objs, drmin, idx of objs
              map<int, match_property> unmatched_objs_r;
+             bool rawp_event_present(true);
 	     for(auto const & obj_r: objs_r)
              {
                ++total_obj_r;
                float drmin = 9999;
                match_property tmp = match_property();
-
+               if (rp_objs.find(e_r) == rp_objs.end()) {
+                   cout << "no object found in rawp event with event # " << e_r << endl;
+                   rawp_event_present = false;
+                   break;
+               }
                auto objs_rp = rp_objs.at(e_r);
 	       for(auto const & obj_rp: objs_rp)
 	       {
@@ -295,7 +300,7 @@ void do_matching(const map<int, vector<T> > & r_objs, const map<int, vector<T> >
                   obj_hists.fill("unmatched_pt_r", obj_r.pt);
                }
              }
-
+             if (!rawp_event_present) continue;
              for(auto const & obj_rp: rp_objs.at(e_r))
              {
                total_obj_rp++;
