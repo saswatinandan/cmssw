@@ -93,8 +93,9 @@ private:
   float       barycenter;
   uint16_t    size;
   int         charge;
-  bool low_pt_trk_cluster;
-  bool high_pt_trk_cluster;
+  bool        low_pt_trk_cluster;
+  bool        high_pt_trk_cluster;
+  int         trk_algo;
 
   const static int nMax = 8000000;
   float       hitX[nMax];
@@ -142,6 +143,7 @@ sep19_2_1_dump_rawprime::sep19_2_1_dump_rawprime(const edm::ParameterSet& conf) 
   onlineClusterTree->Branch("charge", &charge, "charge/I");
   onlineClusterTree->Branch("low_pt_trk_cluster", &low_pt_trk_cluster, "low_pt_trk_cluster/b");
   onlineClusterTree->Branch("high_pt_trk_cluster", &high_pt_trk_cluster, "high_pt_trk_cluster/b");
+  onlineClusterTree->Branch("trk_algo", &trk_algo, "trk_algo/I");
 
   onlineClusterTree->Branch("x", hitX, "x[size]/F");
   onlineClusterTree->Branch("y", hitY, "y[size]/F");
@@ -204,11 +206,12 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
               }
            }
            if(strip) {
-               bool low_pt_trk = trk.pt() < 0.75;
+               bool low_pt_trk = trk.pt() < 1.;
                matched_cluster[detId].emplace_back(
                       low_pt_trk, !low_pt_trk, strip->barycenter(),
                       strip->size(), strip->firstStrip(), strip->endStrip(),
-                      strip->charge() 
+                      strip->charge(),
+                      trk.algo()
                );
          }
         }
@@ -222,8 +225,9 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
     runN   = (int) event.id().run();
     lumi   = (int) event.id().luminosityBlock();
     detId  = detApproxClusters.id();
-
-
+    //if (event.id().event() != 8180236 ||  event.id().run() != 382216 || event.id().luminosityBlock() !=99) continue;
+    //std::cout << eventN << "\t" <<  runN << "\t" << lumi << std::endl; 
+    //std::cout << "detId " << detId << std::endl;
     for (const auto& approxCluster : detApproxClusters) {
 
       ///// 1. converting approxCluster to stripCluster: for the estimation of firstStrip, endStrip, adc info
@@ -255,6 +259,7 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
 
       low_pt_trk_cluster = false;
       high_pt_trk_cluster = false;
+      trk_algo            = -1;
 
       if(matched_cluster.find(detId) != matched_cluster.end())
       {
@@ -268,7 +273,8 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
                       && (charge == trk_cluster_property.charge)
                );
                low_pt_trk_cluster = trk_cluster_property.low_pt_trk_cluster;
-               high_pt_trk_cluster = trk_cluster_property.high_pt_trk_cluster; 
+               high_pt_trk_cluster = trk_cluster_property.high_pt_trk_cluster;
+               trk_algo           = trk_cluster_property.trk_algo;
            }
         }
       }

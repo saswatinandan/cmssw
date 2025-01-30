@@ -89,6 +89,7 @@ private:
   int         charge;
   bool low_pt_trk_cluster;
   bool high_pt_trk_cluster;
+  int  trk_algo;
 
   const static int nMax = 800000;
   float       hitX[nMax];
@@ -118,7 +119,8 @@ sep19_2_2_dump_raw::sep19_2_2_dump_raw(const edm::ParameterSet& conf) {
   offlineClusterTree->Branch("size", &size, "size/s");
   offlineClusterTree->Branch("charge", &charge, "charge/I");
   offlineClusterTree->Branch("low_pt_trk_cluster", &low_pt_trk_cluster, "low_pt_trk_cluster/b");
-  offlineClusterTree->Branch("high_pt_trk_cluster", &high_pt_trk_cluster, "high_pt_trk_cluster/b"); 
+  offlineClusterTree->Branch("high_pt_trk_cluster", &high_pt_trk_cluster, "high_pt_trk_cluster/b");
+  offlineClusterTree->Branch("trk_algo", &trk_algo, "trk_algo/I"); 
 
   offlineClusterTree->Branch("x", hitX, "x[size]/F");
   offlineClusterTree->Branch("y", hitY, "y[size]/F");
@@ -171,7 +173,8 @@ void sep19_2_2_dump_raw::analyze(const edm::Event& event, const edm::EventSetup&
             matched_cluster[detId].emplace_back(
                  low_pt_trk, !low_pt_trk, strip->barycenter(),
                  strip->size(), strip->firstStrip(), strip->endStrip(),
-                 strip->charge()
+                 strip->charge(),
+                 trk.algo()
             );
          }
      }
@@ -192,7 +195,6 @@ void sep19_2_2_dump_raw::analyze(const edm::Event& event, const edm::EventSetup&
       barycenter  = stripCluster.barycenter();
       size        = stripCluster.size();
       charge      = stripCluster.charge();
-
       const auto& _detId = detId; // for the capture clause in the lambda function
       auto det = std::find_if(tkDets.begin(), tkDets.end(), [_detId](auto& elem) -> bool {
         return (elem->geographicalId().rawId() == _detId);
@@ -210,6 +212,7 @@ void sep19_2_2_dump_raw::analyze(const edm::Event& event, const edm::EventSetup&
       
       low_pt_trk_cluster = false;
       high_pt_trk_cluster = false;
+      trk_algo            = -1;
 
       if(matched_cluster.find(detId) != matched_cluster.end())
       { 
@@ -224,6 +227,7 @@ void sep19_2_2_dump_raw::analyze(const edm::Event& event, const edm::EventSetup&
                );
                low_pt_trk_cluster = trk_cluster_property.low_pt_trk_cluster;
                high_pt_trk_cluster = trk_cluster_property.high_pt_trk_cluster;
+               trk_algo           = trk_cluster_property.trk_algo;
            }
         }
       }
@@ -231,7 +235,6 @@ void sep19_2_2_dump_raw::analyze(const edm::Event& event, const edm::EventSetup&
       offlineClusterTree->Fill();
     }
   }
-
 }
 
 void sep19_2_2_dump_raw::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {

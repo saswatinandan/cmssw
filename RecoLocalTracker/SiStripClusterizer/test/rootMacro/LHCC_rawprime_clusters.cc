@@ -26,6 +26,7 @@
 #include "TError.h"
 
 #include "hist_auxiliary.h"
+#include "TrackAlgo.h"
 
 #define DEBUG 0
 
@@ -140,6 +141,7 @@ int main(int argc, char const *argv[])
 	int         rp_charge;
         UChar_t        rp_low_pt_trk_cluster;
         UChar_t        rp_high_pt_trk_cluster;
+        int         rp_trk_algo;
 
 	float       rp_hitX[nMax];
 	float       rp_hitY[nMax];
@@ -181,6 +183,7 @@ int main(int argc, char const *argv[])
 	int         r_charge;
         UChar_t        r_low_pt_trk_cluster;
         UChar_t        r_high_pt_trk_cluster;
+        int         r_trk_algo;
 
 	float       r_hitX[nMax];
 	float       r_hitY[nMax];
@@ -207,6 +210,7 @@ int main(int argc, char const *argv[])
 	onlineClusterTree->SetBranchAddress("charge", &rp_charge);
         onlineClusterTree->SetBranchAddress("low_pt_trk_cluster", &rp_low_pt_trk_cluster);
         onlineClusterTree->SetBranchAddress("high_pt_trk_cluster", &rp_high_pt_trk_cluster);
+        onlineClusterTree->SetBranchAddress("trk_algo", &rp_trk_algo);
 
 	onlineClusterTree->SetBranchAddress("x", rp_hitX);
 	onlineClusterTree->SetBranchAddress("y", rp_hitY);
@@ -243,6 +247,7 @@ int main(int argc, char const *argv[])
 	offlineClusterTree->SetBranchAddress("charge", &r_charge);
         offlineClusterTree->SetBranchAddress("low_pt_trk_cluster", &r_low_pt_trk_cluster);
         offlineClusterTree->SetBranchAddress("high_pt_trk_cluster", &r_high_pt_trk_cluster);
+        offlineClusterTree->SetBranchAddress("trk_algo", &r_trk_algo);
 
 	offlineClusterTree->SetBranchAddress("x", r_hitX);
 	offlineClusterTree->SetBranchAddress("y", r_hitY);
@@ -255,7 +260,6 @@ int main(int argc, char const *argv[])
 	offlineDeadStripTree->SetBranchAddress("detId", &r_d_detId);
 	offlineDeadStripTree->SetBranchAddress("size", &r_d_size);
 	offlineDeadStripTree->SetBranchAddress("channel", r_d_channel);
-
 
 	map< int, map< int, map<int, cluster> > > r_dict; 	// event, detId, idx
 	map< int, map< int, map<int, cluster> > > rp_dict; 	// event, detId, idx
@@ -288,7 +292,8 @@ int main(int argc, char const *argv[])
 
 
         std::map<string, TH1F* >hists;
-        gStyle->SetOptStat(1); 
+        gStyle->SetOptStat(1);
+        std::vector<int> trk_algo {8,9,10,26,4,11,13,14,23,22,5,24,7,6};
         for(auto& raw: {"raw", "rawp"})
         {
             for(const auto& pt: {"all", "low_pt", "high_pt", "unmatched"})
@@ -304,6 +309,11 @@ int main(int argc, char const *argv[])
                          hists[key] = new TH1F(key, Form(";cluster_%s;yield", var), 100,0,1000);
                }
             }
+            for(const auto& algo: trk_algo)
+            {
+              auto key = Form("%s_trk_algo_%d_charge", raw, algo);
+              hists[key] = new TH1F(key, Form("%s;cluster_charge;yield", algoNames[algo].c_str()), 100,0,1000);
+            }
         }
         gStyle->SetOptStat(0);
 	const Int_t r_nEntries = offlineClusterTree->GetEntries();
@@ -311,10 +321,16 @@ int main(int argc, char const *argv[])
 	{
 		if(sc_idx%1000000 == 0) std::cout << "Scanning raw clusters: " << sc_idx << "/" << r_nEntries << std::endl;
 		offlineClusterTree->GetEntry(sc_idx);
+                //if(r_event != 8180236 ||  r_run != 382216 || r_lumi !=99) continue;
+                //cout << "event " << r_event << "\t" << r_run << "\t" << r_lumi << endl;
                 fillWithOverFlow(hists["raw_all_cluster_width"], r_size);
                 fillWithOverFlow(hists["raw_all_cluster_charge"], r_charge);
                 fillWithOverFlow(hists["raw_all_cluster_avg_charge"], r_charge/r_size);
                 fillWithOverFlow(hists["raw_all_cluster_detId"], (r_detId >> 25)&0x7);
+                if (std::find(trk_algo.begin(), trk_algo.end(), r_trk_algo) !=trk_algo.end()) {
+                  auto key = Form("raw_trk_algo_%d_charge", r_trk_algo);
+                   fillWithOverFlow(hists[key], r_charge);
+                }
                 if(int(r_low_pt_trk_cluster))
                 {
                    fillWithOverFlow(hists["raw_low_pt_cluster_width"], r_size);
@@ -349,6 +365,10 @@ int main(int argc, char const *argv[])
                 fillWithOverFlow(hists["rawp_all_cluster_charge"], rp_charge);
                 fillWithOverFlow(hists["rawp_all_cluster_avg_charge"], rp_charge/rp_size);
                 fillWithOverFlow(hists["rawp_all_cluster_detId"], (rp_detId >> 25)&0x7);
+                if (std::find(trk_algo.begin(), trk_algo.end(), rp_trk_algo) !=trk_algo.end()) {
+                  auto key = Form("rawp_trk_algo_%d_charge", rp_trk_algo);
+                   fillWithOverFlow(hists[key], rp_charge);
+                }
                 if(rp_low_pt_trk_cluster)
                 {
                    fillWithOverFlow(hists["rawp_low_pt_cluster_width"], rp_size);
@@ -589,6 +609,9 @@ int main(int argc, char const *argv[])
 							unmatched_acs.push_back(prev_ac);
 							matched_sc2ac[ closet_sc.idx ] = ac.idx;
 						}
+                                                else {
+                                                   unmatched_acs.push_back(ac);
+                                                }
 					}
 				}
 				else 
@@ -598,8 +621,7 @@ int main(int argc, char const *argv[])
 			}
 		}
 	}
-
-
+        assert((unmatched_acs.size()+matched_sc2ac.size()) == rp_nEntries);
 	for(auto& _scs_perEvt: r_dict) 
 	{
 		for (auto& _scs_perEvt_perDetId: _scs_perEvt.second) 
