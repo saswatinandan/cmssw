@@ -67,6 +67,13 @@ output_prehlt = f'outputPhysicsHIPhysicsRawPrime0_barycenter_{barycenter_bit}_wi
 
 os.system(f'mv outputPhysicsHIPhysicsRawPrime0.root {output_prehlt}')
 
+#### object comparison ####
+
+run_cmd = f"edmEventSize -v {output_prehlt} > size.log"
+print(run_cmd)
+os.system(run_cmd)
+
+### reco step ####
 
 cmd_reco_step = f'cmsDriver.py step_reco --conditions 140X_dataRun3_Prompt_v3 -s RAW2DIGI,L1Reco,RECO --datatier RECO --eventcontent RECO --data --process reRECO --scenario pp -n {number} --repacked --era Run3_pp_on_PbPb_approxSiStripClusters --filein file:{output_prehlt} --no_exec --nThreads {threads} &>cmd_reco_step.log'
 print(cmd_reco_step)
@@ -85,13 +92,9 @@ run_cmd = 'cmsRun step_reco_RAW2DIGI_L1Reco_RECO.py &> step_reco_RAW2DIGI_L1Reco
 print(run_cmd)
 os.system(run_cmd)
 
-#### object comparison ####
+#### flat ntuple ####
 
 run_cmd = f'python3 run_flatNtuplizer.py -rp {output_step_reco} -c -n {number}' if options.cluster\
          else f'python3 run_flatNtuplizer.py -rp {output_step_reco} -n {number}'
-print(run_cmd)
-os.system(run_cmd)
-
-run_cmd = f"edmEventSize -v {output_step_reco} > size.log"
 print(run_cmd)
 os.system(run_cmd)
