@@ -63,23 +63,20 @@ struct Jet{
         float eta;
         float phi;
         float mass;
-        int   algo;
         
         Jet(): idx(0),
-        pt(0), eta(0), phi(0), mass(0), algo(0) {};
+        pt(0), eta(0), phi(0), mass(0) {};
         
         Jet(const int& in_idx,
             const float& in_pt,
             const float& in_eta,
             const float& in_phi,
-            const float& in_mass,
-            const float& in_algo
+            const float& in_mass
            ):
            idx(in_idx),
            pt(in_pt),
            eta(in_eta),
            phi(in_phi),
-           mass(in_mass),
-           algo(in_algo)
+           mass(in_mass)
         {};
 };

@@ -9,7 +9,11 @@ class match_obj_histManager
      public:
        match_obj_histManager(const string& obj, const float& in_drcut):
        histManagerBase(obj)
-       ,drcut(in_drcut) {}
+       ,drcut(in_drcut) {
+
+        hists["deltar"] = createhist(Form("%s_delta_r", base_name.c_str()), "delta_r;delta_r;yield", 50, 0., drcut);
+        hists["ratio"] = createhist(Form("%s_ratio", base_name.c_str()), ";Raw_pt/Raw'_pt;yield", 50, 0.95, 1.05);
+       }
 
 
      const float get_drcut() const
@@ -31,6 +35,7 @@ class match_obj_histManager
         compareDist(hists_1, "raw",
                      hists_2, "rawp",
                      get_base_name()+"_");
+        Plot_single({"deltar", "ratio"});
      };
 
      protected:
@@ -57,31 +62,7 @@ class match_trackobj_histManager
                   }
                 }
               }
-
-              for (int i=TrackAlgorithm::undefAlgorithm; i<=TrackAlgorithm::displacedRegionalStep;i++) {
-                 std::string name = "deltar_" + to_string(i);
-                 hists[name] = createhist(Form("%s_%s", base_name.c_str(), name.c_str()), Form("%s;delta_r;yield", algoNames[i].c_str()), 50, 0., drcut);
-              }
-              hists["ratio"] = createhist(Form("%s_ratio", base_name.c_str()), ";Raw_pt/Raw'_pt;yield", 50, 0.95, 1.05);
-
-        };
-
-          void compareMatching()
-          {
-             vector<string> plots;
-            for (int i=TrackAlgorithm::undefAlgorithm; i<=TrackAlgorithm::displacedRegionalStep;i++)
-              plots.push_back("deltar_"+to_string(i));
-            plots.push_back("ratio");
-            Plot_single(plots);
-            match_obj_histManager::compareMatching();
-
-          };
-
-          void fill_deltar(const float& val, const int& r_algo, const int& rp_algo) 
-          {
-            //if(r_algo != rp_algo) cout << r_algo << "\t" << rp_algo << endl;
-            fill("deltar_"+ to_string(r_algo), val);
-          };
+           };
 };
 
 class match_jetobj_histManager
@@ -103,22 +84,7 @@ class match_jetobj_histManager
                   }
                 } 
               }
+          };
 
-              hists["deltar"] = createhist(Form("%s_delta_r", base_name.c_str()), "delta_r;delta_r;yield", 50, 0., drcut);
-              hists["ratio"] = createhist(Form("%s_ratio", base_name.c_str()), ";Raw_pt/Raw'_pt;yield", 50, 0.95, 1.05);
-         
-        };
-
-        void compareMatching()
-        {
-           Plot_single({"deltar", "ratio"});
-           match_obj_histManager::compareMatching();
-       };
-
-       void fill_deltar(const float& val, const int& r_algo, const int& rp_algo)
-       {
-            //if(r_algo != rp_algo) cout << r_algo << "\t" << rp_algo << endl;
-            fill("deltar", val);
-       };
 };
 

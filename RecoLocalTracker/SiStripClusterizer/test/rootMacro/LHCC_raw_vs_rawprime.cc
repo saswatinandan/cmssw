@@ -195,7 +195,7 @@ void event_loop( map< int, map< int, map<int, bool> > >& evtMatchedMap,
 
                    r_goodjet[treereader.event].emplace_back(jetIdx,
                       treereader.jetPt[jetIdx], treereader.jetEta[jetIdx],
-                      treereader.jetPhi[jetIdx], treereader.jetMass[jetIdx], -1); // to make similar to track dummy -1 is introduced as algo
+                      treereader.jetPhi[jetIdx], treereader.jetMass[jetIdx]);
                  }
            }
 }
@@ -205,8 +205,6 @@ struct match_property{
 float drmin;
 float r_pt;
 float rp_pt;
-int   r_algo;
-int   rp_algo;
 int   r_idx;
 int   rp_idx;
 
@@ -214,21 +212,16 @@ int   rp_idx;
           drmin(-1)
           ,r_pt(-1)
           ,rp_pt(-1)
-          ,r_algo(-1)
-          ,rp_algo(-1)
           ,r_idx(-1)
           ,rp_idx(-1)
           {};
 
   match_property(float in_drmin, float in_r_pt, float in_rp_pt,
-                 int in_r_algo, int in_rp_algo,
                  int in_r_idx,  int in_rp_idx
                 ):
                 drmin(in_drmin)
                ,r_pt(in_r_pt)
                ,rp_pt(in_rp_pt)
-               ,r_algo(in_r_algo)
-               ,rp_algo(in_rp_algo)
                ,r_idx(in_r_idx)
                ,rp_idx(in_rp_idx)
                {};
@@ -272,7 +265,7 @@ void do_matching(const map<int, vector<T> > & r_objs, const map<int, vector<T> >
 	           auto dr = deltaR(obj_r.eta, obj_rp.eta, obj_r.phi, obj_rp.phi);
 		   if (dr < obj_hists.get_drcut() && dr < drmin) {
                       drmin = dr;
-		      tmp = match_property(drmin, obj_r.pt, obj_rp.pt, obj_r.algo, obj_rp.algo, obj_r.idx, obj_rp.idx);
+		      tmp = match_property(drmin, obj_r.pt, obj_rp.pt, obj_r.idx, obj_rp.idx);
 		   }
 	       } // end of objs_rp loop
                if (tmp.rp_idx != -1)
@@ -281,7 +274,7 @@ void do_matching(const map<int, vector<T> > & r_objs, const map<int, vector<T> >
                    {
                      if (drmin < matched_objs[tmp.rp_idx].drmin)
                      {
-                        unmatched_objs_r[matched_objs[tmp.rp_idx].r_idx] = match_property(matched_objs[tmp.rp_idx].drmin, -1,-1,-1,-1, -1, -1);
+                        unmatched_objs_r[matched_objs[tmp.rp_idx].r_idx] = match_property(matched_objs[tmp.rp_idx].drmin,-1,-1, -1, -1);
                         matched_objs[tmp.rp_idx] = tmp;
                      }
                    }
@@ -289,7 +282,7 @@ void do_matching(const map<int, vector<T> > & r_objs, const map<int, vector<T> >
                       matched_objs[tmp.rp_idx] = tmp;
                }
                else
-                  unmatched_objs_r[obj_r.idx] = match_property(-1,-1,-1,-1,-1,-1,-1);
+                  unmatched_objs_r[obj_r.idx] = match_property();
              } // end of objs_r loop
 
              for(auto const & obj_r: objs_r)
@@ -313,7 +306,7 @@ void do_matching(const map<int, vector<T> > & r_objs, const map<int, vector<T> >
 
              for(auto const& [matched_idx, matched_obj]: matched_objs)
              {
-               obj_hists.fill_deltar(matched_obj.drmin, matched_obj.r_algo, matched_obj.rp_algo);
+               obj_hists.fill("deltar", matched_obj.drmin);
                obj_hists.fill("matched_pt_r", matched_obj.r_pt);
                obj_hists.fill("matched_pt_r", matched_obj.rp_pt);
                obj_hists.fill("ratio", matched_obj.r_pt/matched_obj.rp_pt);
