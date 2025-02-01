@@ -58,28 +58,6 @@ def build_array(dirname, width, obj):
        ret[avgCharge_key] = {}
        for indx, bit in enumerate(x):
           input = f'/scratch/nandan/{dirname}_barycenter_{bit}bit_width_{width}bit_avgCharge_{avgCharge}bit'
-          cutflow_file = TFile(os.path.join(input, 'object_study.root'), 'r')
-
-          if obj in ['tracks_lowpt', 'jet']:
-
-             for raw_type in ['raw', 'rawp']:
-
-                for trk_algo in range(0,no_track_algo):
-
-                   cutflow = cutflow_file.Get(f'{raw_type}_{obj}_cutflow' if 'track' not in obj
-                                           else f'{raw_type}_trk_cutflow_{trk_algo}'
-                                          )
-                   if len(algonames) < no_track_algo:
-                       algonames.append(cutflow.GetTitle())
-                   if f'{raw_type}_before_cut_{trk_algo}' not in ret[avgCharge_key].keys():
-                        ret[avgCharge_key][f'{raw_type}_before_cut_{trk_algo}'] = []
-                        ret[avgCharge_key][f'{raw_type}_after_cut_{trk_algo}'] = []
-                        ret[avgCharge_key][f'{raw_type}_fraction_after_cut_{trk_algo}'] = []
-                   ret[avgCharge_key][f'{raw_type}_before_cut_{trk_algo}'].append(cutflow.GetBinContent(1))
-                   ret[avgCharge_key][f'{raw_type}_after_cut_{trk_algo}'].append(cutflow.GetBinContent(cutflow.GetNbinsX()))
-                   fraction = 1
-                   if(ret[avgCharge_key][f'raw_after_cut_{trk_algo}'][indx] != 0): fraction = ret[avgCharge_key][f'{raw_type}_after_cut_{trk_algo}'][indx]/ret[avgCharge_key][f'raw_after_cut_{trk_algo}'][indx]
-                   ret[avgCharge_key][f'{raw_type}_fraction_after_cut_{trk_algo}'].append(fraction)
 
           if obj == 'size':
              input_file = os.path.join(input, 'size.log')
@@ -110,7 +88,7 @@ def build_array(dirname, width, obj):
     return ret  
 
 for width in widths:   
-  for obj in ['size', 'tracks_lowpt']:#, 'tracks_highpt']:#, 'jet']:
+  for obj in ['size', 'tracks_lowpt', 'tracks_highpt', 'jet']:
 
     ret1 = build_array(output, width, obj)
 
@@ -122,21 +100,3 @@ for width in widths:
     draw_plot(x,'barycenter bit', y_title,
              obj, f'width_{width}bit_{obj}.png',
              ret1, 'y')
-    if obj != 'size':
-        if obj != 'cluster':
-            print(algonames)
-            for cutalgo in range(0,no_track_algo):
-               print(algonames[cutalgo])
-               draw_plot(x,'barycenter bit', f'total # of tracks after selection',
-                 f'{algonames[cutalgo]}', f'width_{width}bit_size_before_cut_{obj}_{algonames[cutalgo]}.png',
-                 ret1, f'after_cut_{cutalgo}')
-               draw_plot(x,'n. of bits for barycenter', f'fraction of tracks w.r.t raw tracks, after selection',
-                 f'{algonames[cutalgo]}', f'width_{width}bit_size_fraction_after_cut_{obj}_{algonames[cutalgo]}.png',
-                 ret1, f'fraction_after_cut_{cutalgo}')
-        '''if obj == 'cluster':
-           title = f'total # of {obj}'
-        else:
-            title = f'total # of {obj} after selection'
-        draw_plot(x,'barycenter bit', f'total # of {obj}',
-              f'total # of {obj} after selection: {algonames[cutalgo]}', f'width_{width}bit_size_after_cut_{obj}_{algonames[cutalgo]}.png',
-              ret1, 'after_cut')'''
