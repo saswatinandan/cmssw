@@ -7,11 +7,17 @@
 SiStripApproximateCluster::SiStripApproximateCluster(const SiStripCluster& cluster,
                                                      unsigned int maxNSat,
                                                      float hitPredPos,
+                                                     float& previous_cluster,
                                                      bool peakFilter) {
-  compBarycenter_ = std::round(cluster.barycenter() * maxRange_/maxBarycenter_);
+  if (previous_cluster == -999.)
+   compBarycenter_ = std::round(cluster.barycenter() * maxRange_/maxBarycenter_);
+  else
+   compBarycenter_ = std::round((cluster.barycenter()-previous_cluster) * maxRange_/maxBarycenter_);
+
+  previous_cluster = cluster.barycenter();
   assert(cluster.barycenter() <= maxBarycenter_ && "Got a barycenter > maxBarycenter");
   assert(compBarycenter_ <= maxRange_ && "Filling compBarycenter > maxRange");
-  width_ = std::min(255,(int)cluster.size());
+  width_ = std::min(255,(int)cluster.size());//std::min(255,(int)cluster.size());//std::min(255,(int)cluster.size());
   double avgCharge_ = (cluster.charge() + width_/2)/ width_;
   assert(avgCharge_ <= maxavgCharge_ && "Got a avgCharge > maxavgCharge");
   compavgCharge_ = std::round(avgCharge_ * maxavgChargeRange_/maxavgCharge_);

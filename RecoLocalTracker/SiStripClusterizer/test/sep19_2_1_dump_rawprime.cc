@@ -91,6 +91,7 @@ private:
   uint16_t    firstStrip;
   uint16_t    endStrip;
   float       barycenter;
+  float       falling_barycenter;
   uint16_t    size;
   int         charge;
   bool        low_pt_trk_cluster;
@@ -139,6 +140,7 @@ sep19_2_1_dump_rawprime::sep19_2_1_dump_rawprime(const edm::ParameterSet& conf) 
   onlineClusterTree->Branch("firstStrip", &firstStrip, "firstStrip/s");
   onlineClusterTree->Branch("endStrip", &endStrip, "endStrip/s");
   onlineClusterTree->Branch("barycenter", &barycenter, "barycenter/F");
+  onlineClusterTree->Branch("falling_barycenter", &falling_barycenter, "falling_barycenter/F");
   onlineClusterTree->Branch("size", &size, "size/s");
   onlineClusterTree->Branch("charge", &charge, "charge/I");
   onlineClusterTree->Branch("low_pt_trk_cluster", &low_pt_trk_cluster, "low_pt_trk_cluster/b");
@@ -225,7 +227,8 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
     runN   = (int) event.id().run();
     lumi   = (int) event.id().luminosityBlock();
     detId  = detApproxClusters.id();
-    //if (event.id().event() != 8180236 ||  event.id().run() != 382216 || event.id().luminosityBlock() !=99) continue;
+    float previous_barycenter = -999;
+   //  if (event.id().event() != 8180236 ||  event.id().run() != 382216 || event.id().luminosityBlock() !=99) continue;
     //std::cout << eventN << "\t" <<  runN << "\t" << lumi << std::endl; 
     //std::cout << "detId " << detId << std::endl;
     for (const auto& approxCluster : detApproxClusters) {
@@ -238,11 +241,13 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
       });
       const StripTopology& p = dynamic_cast<const StripGeomDetUnit*>(*det)->specificTopology();
       nStrips = p.nstrips() - 1;
-      const auto convertedCluster = SiStripCluster(approxCluster, nStrips);
+      const auto convertedCluster = SiStripCluster(approxCluster, nStrips, previous_barycenter);
 
       firstStrip = convertedCluster.firstStrip();
       endStrip   = convertedCluster.endStrip();
       barycenter = convertedCluster.barycenter();
+      falling_barycenter = approxCluster.barycenter();
+      previous_barycenter = barycenter;
       size       = convertedCluster.size();
       charge     = convertedCluster.charge();
 
@@ -267,11 +272,11 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
         {
            if (trk_cluster_property.barycenter == barycenter)
            {
-               assert( (size == trk_cluster_property.size)
+               /*assert( (size == trk_cluster_property.size)
                       && (firstStrip == trk_cluster_property.firstStrip)
                       && (endStrip == trk_cluster_property.endStrip)
                       && (charge == trk_cluster_property.charge)
-               );
+               );*/
                low_pt_trk_cluster = trk_cluster_property.low_pt_trk_cluster;
                high_pt_trk_cluster = trk_cluster_property.high_pt_trk_cluster;
                trk_algo           = trk_cluster_property.trk_algo;

@@ -105,8 +105,10 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
 
   for (const auto& detClusters : clusterCollection) {
     auto ff = result->beginDet(detClusters.id());
-
+    float previous_cluster = -999.;
+    //std::cout << event.id().event() << "\t" <<  event.id().run() << "\t" << event.id().luminosityBlock() << std::endl;
     unsigned int detId = detClusters.id();
+    //std::cout << detId << std::endl;
     const GeomDet* det = tkGeom->idToDet(detId);
     double nApvs = detInfo_.getNumberOfApvsAndStripLength(detId).first;
     double stripLength = detInfo_.getNumberOfApvsAndStripLength(detId).second;
@@ -130,9 +132,8 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
       bool usable = theFilter->getSizes(detId, cluster, lp, ldir, hitStrips, hitPredPos);
       // (almost) same logic as in StripSubClusterShapeTrajectoryFilter
       bool isTrivial = (std::abs(hitPredPos) < 2.f && hitStrips <= 2);
-
       if (!usable || isTrivial) {
-        ff.push_back(SiStripApproximateCluster(cluster, maxNSat, hitPredPos, true));
+        ff.push_back(SiStripApproximateCluster(cluster, maxNSat, hitPredPos, previous_cluster, true));
       } else {
         bool peakFilter = false;
         SlidingPeakFinder pf(std::max<int>(2, std::ceil(std::abs(hitPredPos) + subclusterWindow_)));
@@ -147,7 +148,7 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
                             subclusterCutSN_);
         peakFilter = pf.apply(cluster.amplitudes(), test);
 
-        ff.push_back(SiStripApproximateCluster(cluster, maxNSat, hitPredPos, peakFilter));
+        ff.push_back(SiStripApproximateCluster(cluster, maxNSat, hitPredPos, previous_cluster, peakFilter));
       }
     }
   }
