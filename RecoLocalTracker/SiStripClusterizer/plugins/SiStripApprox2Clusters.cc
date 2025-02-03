@@ -53,8 +53,11 @@ void SiStripApprox2Clusters::produce(edm::StreamID id, edm::Event& event, const 
     const StripTopology& p = dynamic_cast<const StripGeomDetUnit*>(*det)->specificTopology();
     nStrips = p.nstrips() - 1;
 
+    float previous_barycenter = -999;
     for (const auto& cluster : detClusters) {
-      ff.push_back(SiStripCluster(cluster, nStrips));
+      const auto convertedCluster = SiStripCluster(cluster, nStrips, previous_barycenter);
+      ff.push_back(convertedCluster);
+      previous_barycenter = convertedCluster.barycenter(); 
     }
   }
 
