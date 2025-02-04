@@ -8,11 +8,18 @@ SiStripApproximateCluster::SiStripApproximateCluster(const SiStripCluster& clust
                                                      unsigned int maxNSat,
                                                      float hitPredPos,
                                                      float& previous_cluster,
-                                                     bool peakFilter) {
-  if (previous_cluster == -999.)
+                                                     bool peakFilter,
+                                                     bool first_cluster) {
+  if (previous_cluster == -999.) {
    compBarycenter_ = std::round(cluster.barycenter() * maxRange_/maxBarycenter_);
-  else
+   first_cluster_ = first_cluster;
+   assert(first_cluster_);
+  }
+  else {
+   first_cluster_ = first_cluster;
+   assert(!first_cluster_);
    compBarycenter_ = std::round((cluster.barycenter()-previous_cluster) * maxRange_/maxBarycenter_);
+  }
 
   previous_cluster = cluster.barycenter();
   assert(cluster.barycenter() <= maxBarycenter_ && "Got a barycenter > maxBarycenter");
