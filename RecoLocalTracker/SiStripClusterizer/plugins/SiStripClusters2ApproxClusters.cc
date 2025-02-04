@@ -133,7 +133,6 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
       bool usable = theFilter->getSizes(detId, cluster, lp, ldir, hitStrips, hitPredPos);
       // (almost) same logic as in StripSubClusterShapeTrajectoryFilter
       bool isTrivial = (std::abs(hitPredPos) < 2.f && hitStrips <= 2);
-      bool first = (previous_cluster==-999.) ? 1 : 0;
       if (!usable || isTrivial) {
         ff.push_back(SiStripApproximateCluster(cluster, maxNSat, hitPredPos, previous_cluster, true, ((previous_cluster==-999) ? 1:0)));
       } else {
