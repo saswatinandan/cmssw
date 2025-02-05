@@ -27,6 +27,7 @@ public:
                                      unsigned int maxNSat,
                                      float hitPredPos,
                                      float& previous_cluster,
+                                     uint16_t& module_length,
                                      bool peakFilter);
 
   float barycenter() const { 
@@ -43,13 +44,13 @@ public:
   bool peakFilter() const { return peakFilter_; }
 
 private:
-  cms_uint16_t compBarycenter_ = 0;
+  int compBarycenter_ = 0;
   cms_uint8_t width_ = 0;
   cms_uint8_t compavgCharge_ = 0;
   bool filter_ = false;
   bool isSaturated_ = false;
   bool peakFilter_ = false;
-  static constexpr double maxRange_ = 65535; //65535; //65535;
+  static constexpr double maxRange_ = 4294967295; //65535; //65535;
   static constexpr double maxBarycenter_ = 768.;
   static constexpr double maxavgChargeRange_ = 255; //255; //255;
   static constexpr double maxavgCharge_ = 255.;
