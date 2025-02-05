@@ -107,6 +107,8 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
   uint16_t module_length = 0;
   const auto tkDets = tkGeom->dets();
 
+  std::set<uint16_t> s_strip;
+  std::vector<uint16_t> v_strip;
   for (const auto& detClusters : clusterCollection) {
     auto ff = result->beginDet(detClusters.id());
     //float previous_cluster = -999.;
@@ -129,6 +131,8 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
     const StripTopology& p = dynamic_cast<const StripGeomDetUnit*>(*_det)->specificTopology();
     nStrips = p.nstrips() - 1;
 
+    s_strip.insert(nStrips);
+    v_strip.push_back(nStrips);
     for (const auto& cluster : detClusters) {
       const LocalPoint& lp = LocalPoint(((cluster.barycenter() * 10 / (sistrip::STRIPS_PER_APV * nApvs)) -
                                          ((stripDet->surface().bounds().width()) * 0.5f)),
@@ -165,7 +169,8 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
     }
     module_length += nStrips;
   }
-
+  std::cout << "new event " << std::endl;
+  for(auto const & v : s_strip) std::cout << "nStrips " << v << " is in " << std::count(v_strip.begin(), v_strip.end(), v) << " detIds " << std::endl;
   event.put(std::move(result));
 }
 
