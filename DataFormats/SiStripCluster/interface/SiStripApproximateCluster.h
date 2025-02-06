@@ -44,14 +44,14 @@ public:
   bool peakFilter() const { return peakFilter_; }
 
 private:
-  int compBarycenter_ = 0;
+  unsigned int compBarycenter_ = 0;
   cms_uint8_t width_ = 0;
   cms_uint8_t compavgCharge_ = 0;
   bool filter_ = false;
   bool isSaturated_ = false;
   bool peakFilter_ = false;
-  static constexpr double maxRange_ = 4294967295; //65535; //65535;
-  static constexpr double maxBarycenter_ = 768.;
+  static constexpr double maxRange_ = 4294967295; //65535;
+  static constexpr double maxBarycenter_ = 45436982;
   static constexpr double maxavgChargeRange_ = 255; //255; //255;
   static constexpr double maxavgCharge_ = 255.;
   static constexpr double trimMaxADC_ = 30.;

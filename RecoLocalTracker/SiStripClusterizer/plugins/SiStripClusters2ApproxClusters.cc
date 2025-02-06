@@ -29,10 +29,10 @@
 #include "RecoTracker/PixelLowPtUtilities/interface/ClusterShapeHitFilter.h"
 #include "RecoTracker/PixelLowPtUtilities/interface/SlidingPeakFinder.h"
 #include "RecoTracker/Record/interface/CkfComponentsRecord.h"
-
+#include <nlohmann/json.hpp>
 #include <vector>
 #include <memory>
-
+#include <fstream>
 class SiStripClusters2ApproxClusters : public edm::stream::EDProducer<> {
 public:
   explicit SiStripClusters2ApproxClusters(const edm::ParameterSet& conf);
@@ -105,10 +105,12 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
 
   float previous_cluster = -999.;
   uint16_t module_length = 0;
+  uint16_t module_length_add = 0;
   const auto tkDets = tkGeom->dets();
 
   std::set<uint16_t> s_strip;
   std::vector<uint16_t> v_strip;
+  nlohmann::json data;
   for (const auto& detClusters : clusterCollection) {
     auto ff = result->beginDet(detClusters.id());
     //float previous_cluster = -999.;
@@ -133,6 +135,9 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
 
     s_strip.insert(nStrips);
     v_strip.push_back(nStrips);
+    data[std::to_string(detId)+"_"+std::to_string(event.id().event())] = nStrips;
+    assert(detClusters.size());
+    //std::cout << "detId " << detId << " has " << nStrips << " and # of clusters " << detClusters.size() << std::endl;
     for (const auto& cluster : detClusters) {
       const LocalPoint& lp = LocalPoint(((cluster.barycenter() * 10 / (sistrip::STRIPS_PER_APV * nApvs)) -
                                          ((stripDet->surface().bounds().width()) * 0.5f)),
@@ -149,7 +154,7 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
       // (almost) same logic as in StripSubClusterShapeTrajectoryFilter
       bool isTrivial = (std::abs(hitPredPos) < 2.f && hitStrips <= 2);
       if (!usable || isTrivial) {
-        ff.push_back(SiStripApproximateCluster(cluster, maxNSat, hitPredPos, previous_cluster, module_length, true));
+        ff.push_back(SiStripApproximateCluster(cluster, maxNSat, hitPredPos, previous_cluster, module_length_add, true));
       } else {
         bool peakFilter = false;
         SlidingPeakFinder pf(std::max<int>(2, std::ceil(std::abs(hitPredPos) + subclusterWindow_)));
@@ -164,11 +169,21 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
                             subclusterCutSN_);
         peakFilter = pf.apply(cluster.amplitudes(), test);
 
-        ff.push_back(SiStripApproximateCluster(cluster, maxNSat, hitPredPos, previous_cluster, module_length, peakFilter));
+        ff.push_back(SiStripApproximateCluster(cluster, maxNSat, hitPredPos, previous_cluster, module_length_add, peakFilter));
       }
+     module_length_add = 0;
     }
     module_length += nStrips;
+    module_length_add = module_length;
   }
+
+    std::ofstream output_file("settings_example_output.json");
+    if (!output_file.is_open())  {
+        std::cout << "\n Failed to open output file";
+    } else {
+        output_file << data;
+        output_file.close();
+    }
   std::cout << "new event " << std::endl;
   for(auto const & v : s_strip) std::cout << "nStrips " << v << " is in " << std::count(v_strip.begin(), v_strip.end(), v) << " detIds " << std::endl;
   event.put(std::move(result));
