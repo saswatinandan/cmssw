@@ -105,7 +105,7 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
 
   float previous_cluster = -999.;
   uint16_t module_length = 0;
-  uint16_t module_length_add = 0;
+  uint16_t previous_module_length = 0;
   const auto tkDets = tkGeom->dets();
 
   std::set<uint16_t> s_strip;
@@ -133,6 +133,9 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
     const StripTopology& p = dynamic_cast<const StripGeomDetUnit*>(*_det)->specificTopology();
     nStrips = p.nstrips() - 1;
 
+    previous_module_length = module_length;
+    module_length += (previous_cluster == -999) ? module_length : nStrips;
+
     s_strip.insert(nStrips);
     v_strip.push_back(nStrips);
     data[std::to_string(detId)+"_"+std::to_string(event.id().event())] = nStrips;
@@ -154,7 +157,7 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
       // (almost) same logic as in StripSubClusterShapeTrajectoryFilter
       bool isTrivial = (std::abs(hitPredPos) < 2.f && hitStrips <= 2);
       if (!usable || isTrivial) {
-        ff.push_back(SiStripApproximateCluster(cluster, maxNSat, hitPredPos, previous_cluster, module_length_add, true));
+        ff.push_back(SiStripApproximateCluster(cluster, maxNSat, hitPredPos, previous_cluster, module_length, previous_module_length, true));
       } else {
         bool peakFilter = false;
         SlidingPeakFinder pf(std::max<int>(2, std::ceil(std::abs(hitPredPos) + subclusterWindow_)));
@@ -169,12 +172,9 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
                             subclusterCutSN_);
         peakFilter = pf.apply(cluster.amplitudes(), test);
 
-        ff.push_back(SiStripApproximateCluster(cluster, maxNSat, hitPredPos, previous_cluster, module_length_add, peakFilter));
+        ff.push_back(SiStripApproximateCluster(cluster, maxNSat, hitPredPos, previous_cluster, module_length, previous_module_length, peakFilter));
       }
-     module_length_add = 0;
     }
-    module_length += nStrips;
-    module_length_add = module_length;
   }
 
     std::ofstream output_file("settings_example_output.json");

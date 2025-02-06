@@ -28,6 +28,7 @@ public:
                                      float hitPredPos,
                                      float& previous_cluster,
                                      uint16_t& module_length,
+                                     uint16_t& previous_module_length,
                                      bool peakFilter);
 
   float barycenter() const { 
