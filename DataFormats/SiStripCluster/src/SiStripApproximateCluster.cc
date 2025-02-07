@@ -16,7 +16,6 @@ SiStripApproximateCluster::SiStripApproximateCluster(const SiStripCluster& clust
   else
    compBarycenter_ = std::round(((cluster.barycenter()+module_length)-(previous_cluster+previous_module_length))* maxRange_/maxBarycenter_);// + module_length;
   //std::cout << "compBarycenter_= " << compBarycenter_ << ", barycenter= " << cluster.barycenter() << ", previous barycenter= " << previous_cluster << ", module length= " << module_length  << ", previous_module_length= " << previous_module_length << std::endl;
-  //assert(compBarycenter_ <= 65535);
   previous_cluster = cluster.barycenter();
   assert(cluster.barycenter() <= maxBarycenter_ && "Got a barycenter > maxBarycenter");
   assert(compBarycenter_ <= maxRange_ && "Filling compBarycenter > maxRange");
