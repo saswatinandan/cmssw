@@ -104,8 +104,8 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
   const auto& theNoise_ = &iSetup.getData(stripNoiseToken_);
 
   float previous_cluster = -999.;
-  uint16_t module_length = 0;
-  uint16_t previous_module_length = 0;
+  unsigned int module_length = 0;
+  unsigned int previous_module_length = 0;
   const auto tkDets = tkGeom->dets();
 
   std::set<uint16_t> s_strip;
@@ -132,12 +132,13 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
       });
     const StripTopology& p = dynamic_cast<const StripGeomDetUnit*>(*_det)->specificTopology();
     nStrips = p.nstrips() - 1;
-
-    previous_module_length = module_length;
-    module_length += (previous_cluster == -999) ? module_length : nStrips;
-
     s_strip.insert(nStrips);
     v_strip.push_back(nStrips);
+
+    previous_module_length += (v_strip.size() <3) ? 0 : v_strip[v_strip.size()-3];
+  //  std::cout << "before " << module_length << "\t" << nStrips << "\t" << previous_cluster << std::endl;
+    module_length += (v_strip.size() <2) ? 0 : v_strip[v_strip.size()-2];
+    //std::cout << "module_length " << module_length << std::endl;    
     data[std::to_string(detId)+"_"+std::to_string(event.id().event())] = nStrips;
     assert(detClusters.size());
     //std::cout << "detId " << detId << " has " << nStrips << " and # of clusters " << detClusters.size() << std::endl;
