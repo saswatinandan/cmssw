@@ -130,7 +130,7 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
         return (elem->geographicalId().rawId() == _detId);
       });
     const StripTopology& p = dynamic_cast<const StripGeomDetUnit*>(*_det)->specificTopology();
-    nStrips = p.nstrips() - 1;
+    nStrips = p.nstrips();
     s_strip.insert(nStrips);
     v_strip.push_back(nStrips);
 
@@ -155,6 +155,7 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
       bool usable = theFilter->getSizes(detId, cluster, lp, ldir, hitStrips, hitPredPos);
       // (almost) same logic as in StripSubClusterShapeTrajectoryFilter
       bool isTrivial = (std::abs(hitPredPos) < 2.f && hitStrips <= 2);
+      std::cout << "previous_cluster " << previous_cluster << std::endl;
       if (!usable || isTrivial) {
         ff.push_back(SiStripApproximateCluster(cluster, maxNSat, hitPredPos, previous_cluster, module_length, first_cluster ? previous_module_length : module_length, true));
       } else {

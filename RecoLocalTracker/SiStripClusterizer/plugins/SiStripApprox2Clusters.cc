@@ -59,7 +59,7 @@ void SiStripApprox2Clusters::produce(edm::StreamID id, edm::Event& event, const 
     });
     const StripTopology& p = dynamic_cast<const StripGeomDetUnit*>(*det)->specificTopology();
     nStrips = p.nstrips() - 1;
-    v_strip.push_back(nStrips);
+    v_strip.push_back(nStrips+1);
     previous_module_length += (v_strip.size() <3) ? 0 : v_strip[v_strip.size()-3];
     module_length += (v_strip.size() <2) ? 0 : v_strip[v_strip.size()-2];
     bool first_cluster = true;
@@ -67,7 +67,7 @@ void SiStripApprox2Clusters::produce(edm::StreamID id, edm::Event& event, const 
     std::cout << "changing detId " << detId << std::endl;
     for (const auto& cluster : detClusters) {
       const auto convertedCluster = SiStripCluster(cluster, nStrips, previous_barycenter, module_length, first_cluster ? previous_module_length : module_length);
-      if ( (convertedCluster.barycenter()) >= nStrips) {
+      if ( (convertedCluster.barycenter()) >= nStrips+1) {
          break;
       }
       previous_barycenter = convertedCluster.barycenter();
