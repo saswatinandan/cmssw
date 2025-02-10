@@ -139,6 +139,7 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
     data[std::to_string(detId)+"_"+std::to_string(event.id().event())] = nStrips;
     assert(detClusters.size());
     bool first_cluster = true;
+    std::cout << "changing detId " << detId << std::endl;
     for (const auto& cluster : detClusters) {
       const LocalPoint& lp = LocalPoint(((cluster.barycenter() * 10 / (sistrip::STRIPS_PER_APV * nApvs)) -
                                          ((stripDet->surface().bounds().width()) * 0.5f)),

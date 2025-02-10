@@ -64,6 +64,7 @@ void SiStripApprox2Clusters::produce(edm::StreamID id, edm::Event& event, const 
     module_length += (v_strip.size() <2) ? 0 : v_strip[v_strip.size()-2];
     bool first_cluster = true;
     detClusters.move(clusBegin);
+    std::cout << "changing detId " << detId << std::endl;
     for (const auto& cluster : detClusters) {
       const auto convertedCluster = SiStripCluster(cluster, nStrips, previous_barycenter, module_length, first_cluster ? previous_module_length : module_length);
       if ( (convertedCluster.barycenter()) >= nStrips) {
