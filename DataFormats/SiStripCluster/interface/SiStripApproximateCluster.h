@@ -30,6 +30,7 @@ public:
 
   float barycenter() const { 
     float _barycenter = compBarycenter_ * maxBarycenter_/maxRange_ ;
+    std::cout << "compBarycenter_= " << compBarycenter_ << ", barycenter= " << _barycenter << std::endl;
     assert(_barycenter <= maxBarycenter_ && "Returning barycenter > maxBarycenter");
     return _barycenter; }
   cms_uint8_t width() const {return width_; }

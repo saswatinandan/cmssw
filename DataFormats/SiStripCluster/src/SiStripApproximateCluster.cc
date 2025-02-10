@@ -9,6 +9,7 @@ SiStripApproximateCluster::SiStripApproximateCluster(const SiStripCluster& clust
                                                      float hitPredPos,
                                                      bool peakFilter) {
   compBarycenter_ = std::round(cluster.barycenter() * maxRange_/maxBarycenter_);
+  std::cout << "compBarycenter_= " << compBarycenter_ << ", barycenter= " << cluster.barycenter() << std::endl;
   assert(cluster.barycenter() <= maxBarycenter_ && "Got a barycenter > maxBarycenter");
   assert(compBarycenter_ <= maxRange_ && "Filling compBarycenter > maxRange");
   width_ = std::min(255,(int)cluster.size());

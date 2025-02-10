@@ -42,6 +42,7 @@ void SiStripApprox2Clusters::produce(edm::StreamID id, edm::Event& event, const 
   const auto& tkGeom = &iSetup.getData(tkGeomToken_);
   const auto& tkDets = tkGeom->dets();
 
+  std::cout << "event " << event.id().event() << "\t" <<  event.id().run() << "\t" << event.id().luminosityBlock() << std::endl;
   for (const auto& detClusters : clusterCollection) {
     edmNew::DetSetVector<SiStripCluster>::FastFiller ff{*result, detClusters.id()};
     unsigned int detId = detClusters.id();
@@ -52,7 +53,7 @@ void SiStripApprox2Clusters::produce(edm::StreamID id, edm::Event& event, const 
     });
     const StripTopology& p = dynamic_cast<const StripGeomDetUnit*>(*det)->specificTopology();
     nStrips = p.nstrips() - 1;
-
+    std::cout << "changing detId " << detId << std::endl;
     for (const auto& cluster : detClusters) {
       ff.push_back(SiStripCluster(cluster, nStrips));
     }
