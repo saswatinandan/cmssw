@@ -1,6 +1,6 @@
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h"
-#include "DataFormats/SiStripCluster/interface/SiStripApproximateClusterCollection.h"
+#include "DataFormats/SiStripCluster/interface/SiStripApproximateClusterCollection_v1.h"
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -25,7 +25,7 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 private:
-  edm::EDGetTokenT<SiStripApproximateClusterCollection> clusterToken_;
+  edm::EDGetTokenT<v1::SiStripApproximateClusterCollection> clusterToken_;
   edm::ESGetToken<TrackerGeometry, TrackerDigiGeometryRecord> tkGeomToken_;
 };
 
@@ -42,6 +42,13 @@ void SiStripApprox2Clusters::produce(edm::StreamID id, edm::Event& event, const 
   const auto& tkGeom = &iSetup.getData(tkGeomToken_);
   const auto& tkDets = tkGeom->dets();
 
+  std::vector<uint16_t> v_strip;
+  float previous_barycenter = -999.;
+  unsigned int module_length = 0;
+  unsigned int previous_module_length = 0;
+
+  std::cout << "event " << event.id().event() << "\t" <<  event.id().run() << "\t" << event.id().luminosityBlock() << std::endl;
+  unsigned int clusBegin = 0;
   for (const auto& detClusters : clusterCollection) {
     edmNew::DetSetVector<SiStripCluster>::FastFiller ff{*result, detClusters.id()};
     unsigned int detId = detClusters.id();
@@ -52,12 +59,20 @@ void SiStripApprox2Clusters::produce(edm::StreamID id, edm::Event& event, const 
     });
     const StripTopology& p = dynamic_cast<const StripGeomDetUnit*>(*det)->specificTopology();
     nStrips = p.nstrips() - 1;
-
-    float previous_barycenter = -999;
+    v_strip.push_back(nStrips);
+    previous_module_length += (v_strip.size() <3) ? 0 : v_strip[v_strip.size()-3];
+    module_length += (v_strip.size() <2) ? 0 : v_strip[v_strip.size()-2];
+    bool first_cluster = true;
+    detClusters.move(clusBegin);
     for (const auto& cluster : detClusters) {
-      const auto convertedCluster = SiStripCluster(cluster, nStrips, previous_barycenter);
+      const auto convertedCluster = SiStripCluster(cluster, nStrips, previous_barycenter, module_length, first_cluster ? previous_module_length : module_length);
+      if ( (convertedCluster.barycenter()) >= nStrips) {
+         break;
+      }
+      previous_barycenter = convertedCluster.barycenter();
+      ++clusBegin;
       ff.push_back(convertedCluster);
-      previous_barycenter = convertedCluster.barycenter(); 
+      first_cluster = false; 
     }
   }
 

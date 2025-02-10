@@ -9,7 +9,7 @@
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 #include "DataFormats/GeometryVector/interface/LocalPoint.h"
 #include "DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h"
-#include "DataFormats/SiStripCluster/interface/SiStripApproximateClusterCollection.h"
+#include "DataFormats/SiStripCluster/interface/SiStripApproximateClusterCollection_v1.h"
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
 #include "DataFormats/SiStripCommon/interface/ConstantsForHardwareSystems.h"
 #include "DataFormats/TrackReco/interface/Track.h"
@@ -84,12 +84,12 @@ SiStripClusters2ApproxClusters::SiStripClusters2ApproxClusters(const edm::Parame
   csfToken_ = esConsumes(edm::ESInputTag("", csfLabel_));
 
   stripNoiseToken_ = esConsumes();
-  produces<SiStripApproximateClusterCollection>();
+  produces<v1::SiStripApproximateClusterCollection>();
 }
 
 void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup const& iSetup) {
   const auto& clusterCollection = event.get(clusterToken);
-  auto result = std::make_unique<SiStripApproximateClusterCollection>();
+  auto result = std::make_unique<v1::SiStripApproximateClusterCollection>();
   result->reserve(clusterCollection.size(), clusterCollection.dataSize());
 
   auto const beamSpotHandle = event.getHandle(beamSpotToken_);
@@ -108,15 +108,14 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
   unsigned int previous_module_length = 0;
   const auto tkDets = tkGeom->dets();
 
+  std::cout << "event " << event.id().event() << "\t" <<  event.id().run() << "\t" << event.id().luminosityBlock() << std::endl;
   std::set<uint16_t> s_strip;
   std::vector<uint16_t> v_strip;
   nlohmann::json data;
   for (const auto& detClusters : clusterCollection) {
     auto ff = result->beginDet(detClusters.id());
     //float previous_cluster = -999.;
-    //std::cout << event.id().event() << "\t" <<  event.id().run() << "\t" << event.id().luminosityBlock() << std::endl;
     unsigned int detId = detClusters.id();
-    //std::cout << detId << std::endl;
     const GeomDet* det = tkGeom->idToDet(detId);
     double nApvs = detInfo_.getNumberOfApvsAndStripLength(detId).first;
     double stripLength = detInfo_.getNumberOfApvsAndStripLength(detId).second;
@@ -136,12 +135,9 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
     v_strip.push_back(nStrips);
 
     previous_module_length += (v_strip.size() <3) ? 0 : v_strip[v_strip.size()-3];
-  //  std::cout << "before " << module_length << "\t" << nStrips << "\t" << previous_cluster << std::endl;
     module_length += (v_strip.size() <2) ? 0 : v_strip[v_strip.size()-2];
-    //std::cout << "module_length " << module_length << std::endl;    
     data[std::to_string(detId)+"_"+std::to_string(event.id().event())] = nStrips;
     assert(detClusters.size());
-    //std::cout << "detId " << detId << " has " << nStrips << " and # of clusters " << detClusters.size() << std::endl;
     bool first_cluster = true;
     for (const auto& cluster : detClusters) {
       const LocalPoint& lp = LocalPoint(((cluster.barycenter() * 10 / (sistrip::STRIPS_PER_APV * nApvs)) -
@@ -187,8 +183,8 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
         output_file << data;
         output_file.close();
     }
-  std::cout << "new event " << std::endl;
-  for(auto const & v : s_strip) std::cout << "nStrips " << v << " is in " << std::count(v_strip.begin(), v_strip.end(), v) << " detIds " << std::endl;
+  //std::cout << "new event " << std::endl;
+  //for(auto const & v : s_strip) std::cout << "nStrips " << v << " is in " << std::count(v_strip.begin(), v_strip.end(), v) << " detIds " << std::endl;
   event.put(std::move(result));
 }
 

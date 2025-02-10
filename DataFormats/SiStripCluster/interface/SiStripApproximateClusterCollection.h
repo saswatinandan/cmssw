@@ -33,7 +33,7 @@ public:
 
     unsigned int id() const { return coll_->detIds_[detIndex_]; }
 
-    const_iterator begin() const { return coll_->clusters_.begin() + clusBegin_; }
+    const_iterator begin() const { std::cout << " clusters_.begin() " << clusBegin_ << std::endl; return coll_->clusters_.begin() + clusBegin_; }
     const_iterator cbegin() const { return begin(); }
     const_iterator end() const { return coll_->clusters_.begin() + clusEnd_; }
     const_iterator cend() const { return end(); }
