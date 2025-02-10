@@ -103,6 +103,7 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
   const auto& theFilter = &iSetup.getData(csfToken_);
   const auto& theNoise_ = &iSetup.getData(stripNoiseToken_);
 
+   std::cout << "event " << event.id().event() << "\t" <<  event.id().run() << "\t" << event.id().luminosityBlock() << std::endl;
   for (const auto& detClusters : clusterCollection) {
     if ( detClusters.size() == 0 ) continue;
     auto ff = result->beginDet(detClusters.id());
@@ -118,6 +119,7 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
     const StripGeomDetUnit* stripDet = dynamic_cast<const StripGeomDetUnit*>(det);
     float mip = 3.9 / (sistrip::MeVperADCStrip / stripDet->surface().bounds().thickness());
 
+    std::cout << "changing detId " << detId << std::endl;
     for (const auto& cluster : detClusters) {
       const LocalPoint& lp = LocalPoint(((cluster.barycenter() * 10 / (sistrip::STRIPS_PER_APV * nApvs)) -
                                          ((stripDet->surface().bounds().width()) * 0.5f)),

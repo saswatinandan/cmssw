@@ -27,6 +27,7 @@ SiStripCluster::SiStripCluster(const SiStripApproximateCluster cluster, const ui
    barycenter_ = cluster.barycenter();
   else
     barycenter_ = cluster.barycenter() + p_bc;
+  std::cout << "compBarycenter_= " << cluster.barycenter() << ", barycenter= " << barycenter_ << ", previous barycenter= " << p_bc << std::endl; 
   charge_ = cluster.width() * cluster.avgCharge();
   amplitudes_.resize(cluster.width(), cluster.avgCharge());
   filter_ = cluster.filter();
