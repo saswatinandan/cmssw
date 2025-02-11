@@ -32,7 +32,7 @@ SiStripCluster::SiStripCluster(const SiStripApproximateCluster cluster, const ui
 
   //initialize firstStrip_
   firstStrip_ = std::max(barycenter_ - halfwidth_, 0.f);
-
+  //std::cout << "firstStrip_ " << firstStrip_ << "\t" << barycenter_ << "\t" << halfwidth_ << "\t" << int(cluster.width()) << "\t" << maxStrips << std::endl;
   if UNLIKELY (firstStrip_ + cluster.width() > maxStrips) {
     firstStrip_ = maxStrips - cluster.width();
   }

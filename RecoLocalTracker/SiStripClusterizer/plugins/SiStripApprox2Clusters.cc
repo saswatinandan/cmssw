@@ -47,27 +47,28 @@ void SiStripApprox2Clusters::produce(edm::StreamID id, edm::Event& event, const 
   unsigned int module_length = 0;
   unsigned int previous_module_length = 0;
 
-  std::cout << "event " << event.id().event() << "\t" <<  event.id().run() << "\t" << event.id().luminosityBlock() << std::endl;
+  //std::cout << "event " << event.id().event() << "\t" <<  event.id().run() << "\t" << event.id().luminosityBlock() << std::endl;
   unsigned int clusBegin = 0;
   for (const auto& detClusters : clusterCollection) {
+    //if (event.id().event() != 8168080) continue;
     edmNew::DetSetVector<SiStripCluster>::FastFiller ff{*result, detClusters.id()};
     unsigned int detId = detClusters.id();
-
+    //std::cout << "detId " << detId << std::endl;
     uint16_t nStrips{0};
     auto det = std::find_if(tkDets.begin(), tkDets.end(), [detId](auto& elem) -> bool {
       return (elem->geographicalId().rawId() == detId);
     });
     const StripTopology& p = dynamic_cast<const StripGeomDetUnit*>(*det)->specificTopology();
-    nStrips = p.nstrips() - 1;
-    v_strip.push_back(nStrips+1);
+    nStrips = p.nstrips();
+    v_strip.push_back(nStrips);
     previous_module_length += (v_strip.size() <3) ? 0 : v_strip[v_strip.size()-3];
     module_length += (v_strip.size() <2) ? 0 : v_strip[v_strip.size()-2];
     bool first_cluster = true;
     detClusters.move(clusBegin);
-    std::cout << "changing detId " << detId << std::endl;
+    //std::cout << "detId " << detId << std::endl;
     for (const auto& cluster : detClusters) {
-      const auto convertedCluster = SiStripCluster(cluster, nStrips, previous_barycenter, module_length, first_cluster ? previous_module_length : module_length);
-      if ( (convertedCluster.barycenter()) >= nStrips+1) {
+      const auto convertedCluster = SiStripCluster(cluster, nStrips-1, previous_barycenter, module_length, first_cluster ? previous_module_length : module_length);
+      if ( (convertedCluster.barycenter()) >= nStrips) {
          break;
       }
       previous_barycenter = convertedCluster.barycenter();

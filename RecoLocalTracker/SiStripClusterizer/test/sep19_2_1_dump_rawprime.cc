@@ -16,7 +16,7 @@
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h"
-#include "DataFormats/SiStripCluster/interface/SiStripApproximateClusterCollection.h"
+#include "DataFormats/SiStripCluster/interface/SiStripApproximateClusterCollection_v1.h"
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -73,7 +73,7 @@ private:
   edm::EDGetTokenT<reco::TrackCollection> tracksToken_; 
 
   // Event Data
-  edm::EDGetTokenT<SiStripApproximateClusterCollection> approxClusterToken;
+  edm::EDGetTokenT<v1::SiStripApproximateClusterCollection> approxClusterToken;
   edm::EDGetTokenT<edmNew::DetSetVector<SiStripCluster>> clusterForRawPrimeToken;
 
   // Event Setup Data
@@ -120,7 +120,7 @@ private:
 
 sep19_2_1_dump_rawprime::sep19_2_1_dump_rawprime(const edm::ParameterSet& conf) {
   inputTagApproxClusters = conf.getParameter<edm::InputTag>("approxSiStripClustersTag");
-  approxClusterToken 	 = consumes<SiStripApproximateClusterCollection>(inputTagApproxClusters);
+  approxClusterToken 	 = consumes<v1::SiStripApproximateClusterCollection>(inputTagApproxClusters);
   tracksToken_           = consumes<reco::TrackCollection>(conf.getParameter<edm::InputTag>("tracks"));
   doDumpInputOfSiStripClusters2ApproxClusters = conf.getParameter<bool>("doDumpInputOfSiStripClusters2ApproxClusters");
   inputTagClustersForRawPrime = conf.getParameter<edm::InputTag>("hltSiStripClusterizerForRawPrimeTag");
@@ -170,7 +170,7 @@ sep19_2_1_dump_rawprime::sep19_2_1_dump_rawprime(const edm::ParameterSet& conf) 
 sep19_2_1_dump_rawprime::~sep19_2_1_dump_rawprime() = default;
 
 void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventSetup& es) {
-  edm::Handle<SiStripApproximateClusterCollection>  approxClusterCollection 	= event.getHandle(approxClusterToken);
+  edm::Handle<v1::SiStripApproximateClusterCollection>  approxClusterCollection 	= event.getHandle(approxClusterToken);
   edm::Handle<edmNew::DetSetVector<SiStripCluster>> clusterForRawPrimeCollection = event.getHandle(clusterForRawPrimeToken);
 
   const auto& tracksHandle = event.getHandle(tracksToken_);
@@ -222,32 +222,49 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
   const auto& tkGeom = &es.getData(tkGeomToken_);
   const auto tkDets = tkGeom->dets();
 
+  std::vector<uint16_t> v_strip;
+  float previous_barycenter = -999.;
+  unsigned int module_length = 0;
+  unsigned int previous_module_length = 0;
+  unsigned int clusBegin = 0;
   for (const auto& detApproxClusters : *approxClusterCollection) {
     eventN = event.id().event();
+    //if (eventN != 24061779) continue;
     runN   = (int) event.id().run();
     lumi   = (int) event.id().luminosityBlock();
     detId  = detApproxClusters.id();
-    float previous_barycenter = -999;
+    //std::cout << "detId " << detId << std::endl;
    //  if (event.id().event() != 8180236 ||  event.id().run() != 382216 || event.id().luminosityBlock() !=99) continue;
     //std::cout << eventN << "\t" <<  runN << "\t" << lumi << std::endl; 
     //std::cout << "detId " << detId << std::endl;
+    uint16_t nStrips{0};
+    const auto& _detId = detId; // for the capture clause in the lambda function
+    auto det = std::find_if(tkDets.begin(), tkDets.end(), [_detId](auto& elem) -> bool {
+        return (elem->geographicalId().rawId() == _detId);
+    });
+    const StripTopology& p = dynamic_cast<const StripGeomDetUnit*>(*det)->specificTopology();
+    nStrips = p.nstrips();
+    v_strip.push_back(nStrips);
+    previous_module_length += (v_strip.size() <3) ? 0 : v_strip[v_strip.size()-3];
+    module_length += (v_strip.size() <2) ? 0 : v_strip[v_strip.size()-2];
+    bool first_cluster = true;
+    detApproxClusters.move(clusBegin);
     for (const auto& approxCluster : detApproxClusters) {
 
       ///// 1. converting approxCluster to stripCluster: for the estimation of firstStrip, endStrip, adc info
-      uint16_t nStrips{0};
-      const auto& _detId = detId; // for the capture clause in the lambda function
-      auto det = std::find_if(tkDets.begin(), tkDets.end(), [_detId](auto& elem) -> bool {
-        return (elem->geographicalId().rawId() == _detId);
-      });
-      const StripTopology& p = dynamic_cast<const StripGeomDetUnit*>(*det)->specificTopology();
-      nStrips = p.nstrips() - 1;
-      const auto convertedCluster = SiStripCluster(approxCluster, nStrips, previous_barycenter);
+      const auto convertedCluster = SiStripCluster(approxCluster, nStrips-1, previous_barycenter, module_length, first_cluster ? previous_module_length : module_length);
 
+      //std::cout << "nStrips " << nStrips << std::endl;
+      if ( (convertedCluster.barycenter()) >= nStrips) {
+         break;
+      }
+      falling_barycenter = approxCluster.barycenter(previous_barycenter, module_length, first_cluster ? previous_module_length : module_length);
+      first_cluster = false;
+      ++clusBegin;
       firstStrip = convertedCluster.firstStrip();
       endStrip   = convertedCluster.endStrip();
       barycenter = convertedCluster.barycenter();
-      falling_barycenter = approxCluster.barycenter();
-      previous_barycenter = barycenter;
+      previous_barycenter = convertedCluster.barycenter();
       size       = convertedCluster.size();
       charge     = convertedCluster.charge();
 
