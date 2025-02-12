@@ -108,7 +108,7 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
   unsigned int previous_module_length = 0;
   const auto tkDets = tkGeom->dets();
 
-  std::cout << "event " << event.id().event() << "\t" <<  event.id().run() << "\t" << event.id().luminosityBlock() << std::endl;
+  //std::cout << "event " << event.id().event() << "\t" <<  event.id().run() << "\t" << event.id().luminosityBlock() << std::endl;
   std::set<uint16_t> s_strip;
   std::vector<uint16_t> v_strip;
   nlohmann::json data;
@@ -116,6 +116,7 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
     auto ff = result->beginDet(detClusters.id());
     //float previous_cluster = -999.;
     unsigned int detId = detClusters.id();
+    //std::cout << "detId " << detId << std::endl;
     const GeomDet* det = tkGeom->idToDet(detId);
     double nApvs = detInfo_.getNumberOfApvsAndStripLength(detId).first;
     double stripLength = detInfo_.getNumberOfApvsAndStripLength(detId).second;
@@ -130,7 +131,7 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
         return (elem->geographicalId().rawId() == _detId);
       });
     const StripTopology& p = dynamic_cast<const StripGeomDetUnit*>(*_det)->specificTopology();
-    nStrips = p.nstrips() - 1;
+    nStrips = p.nstrips();
     s_strip.insert(nStrips);
     v_strip.push_back(nStrips);
 
