@@ -37,9 +37,9 @@ public:
     if (  previous_barycenter == -999 )
       _barycenter = compBarycenter_ * maxBarycenter_/maxRange_;
     else {
-      _barycenter = (compBarycenter_ * maxBarycenter_/maxRange_) + (previous_barycenter+previous_module_length-module_length);
+      _barycenter = (compBarycenter_ * maxBarycenter_/maxRange_) - (module_length-previous_module_length) + previous_barycenter;
     }
-    std::cout << "compBarycenter_= " << compBarycenter_ << ", barycenter= " << _barycenter << ", module length= " << module_length  << ", previous barycenter= " << previous_barycenter << ", previous_module_length= " << previous_module_length << std::endl;
+    //std::cout << "compBarycenter_= " << compBarycenter_ << ", barycenter= " << _barycenter << ", module length= " << module_length  << ", previous barycenter= " << previous_barycenter << ", previous_module_length= " << previous_module_length << std::endl;
     assert(_barycenter <= maxBarycenter_ && "Returning barycenter > maxBarycenter");
     return _barycenter; }
   cms_uint8_t width() const {return width_; }

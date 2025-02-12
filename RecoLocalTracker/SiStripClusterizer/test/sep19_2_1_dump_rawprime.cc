@@ -222,32 +222,50 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
   const auto& tkGeom = &es.getData(tkGeomToken_);
   const auto tkDets = tkGeom->dets();
 
+  std::vector<uint16_t> v_strip;
+  float previous_barycenter = -999.;
+  unsigned int module_length = 0;
+  unsigned int previous_module_length = 0;
+  unsigned int clusBegin = 0;
+  
   for (const auto& detApproxClusters : *approxClusterCollection) {
     eventN = event.id().event();
     runN   = (int) event.id().run();
     lumi   = (int) event.id().luminosityBlock();
     detId  = detApproxClusters.id();
-    float previous_barycenter = -999;
    //  if (event.id().event() != 8180236 ||  event.id().run() != 382216 || event.id().luminosityBlock() !=99) continue;
     //std::cout << eventN << "\t" <<  runN << "\t" << lumi << std::endl; 
     //std::cout << "detId " << detId << std::endl;
+    uint16_t nStrips{0};
+    const auto& _detId = detId; // for the capture clause in the lambda function
+    auto det = std::find_if(tkDets.begin(), tkDets.end(), [_detId](auto& elem) -> bool {
+        return (elem->geographicalId().rawId() == _detId);
+    });
+    const StripTopology& p = dynamic_cast<const StripGeomDetUnit*>(*det)->specificTopology();
+    nStrips = p.nstrips();
+    v_strip.push_back(nStrips);
+    previous_module_length += (v_strip.size() <3) ? 0 : v_strip[v_strip.size()-3];
+    module_length += (v_strip.size() <2) ? 0 : v_strip[v_strip.size()-2];
+    bool first_cluster = true;
+    detApproxClusters.move(clusBegin);
+
     for (const auto& approxCluster : detApproxClusters) {
 
       ///// 1. converting approxCluster to stripCluster: for the estimation of firstStrip, endStrip, adc info
-      uint16_t nStrips{0};
-      const auto& _detId = detId; // for the capture clause in the lambda function
-      auto det = std::find_if(tkDets.begin(), tkDets.end(), [_detId](auto& elem) -> bool {
-        return (elem->geographicalId().rawId() == _detId);
-      });
-      const StripTopology& p = dynamic_cast<const StripGeomDetUnit*>(*det)->specificTopology();
-      nStrips = p.nstrips();
-      const auto convertedCluster = SiStripCluster(approxCluster, nStrips-1, previous_barycenter);
+      const auto convertedCluster = SiStripCluster(approxCluster, nStrips-1, previous_barycenter, module_length, first_cluster ? previous_module_length : module_length);
+ 
+      //std::cout << "nStrips " << nStrips << std::endl;
+      if ( (convertedCluster.barycenter()) >= nStrips) {
+         break;
+      }
+      falling_barycenter = approxCluster.barycenter(previous_barycenter, module_length, first_cluster ? previous_module_length : module_length);
+      first_cluster = false;
+      ++clusBegin;
 
       firstStrip = convertedCluster.firstStrip();
       endStrip   = convertedCluster.endStrip();
       barycenter = convertedCluster.barycenter();
-      falling_barycenter = approxCluster.barycenter();
-      previous_barycenter = barycenter;
+      previous_barycenter = convertedCluster.barycenter();
       size       = convertedCluster.size();
       charge     = convertedCluster.charge();
 
