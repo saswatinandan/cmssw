@@ -34,8 +34,8 @@ public:
     return first_cluster_;
   }
   float barycenter() const { 
-    float _barycenter = compBarycenter_ * maxBarycenter_/maxRange_ ;
-    assert(_barycenter <= maxBarycenter_ && "Returning barycenter > maxBarycenter");
+    float _barycenter = compBarycenter_ / 10.; //* maxBarycenter_/maxRange_ ;
+    //assert(_barycenter <= maxBarycenter_ && "Returning barycenter > maxBarycenter");
     return _barycenter; }
   cms_uint8_t width() const {return width_; }
   cms_uint8_t avgCharge() const { 

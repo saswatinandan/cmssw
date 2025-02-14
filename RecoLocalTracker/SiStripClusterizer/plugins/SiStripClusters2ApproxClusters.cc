@@ -9,7 +9,7 @@
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 #include "DataFormats/GeometryVector/interface/LocalPoint.h"
 #include "DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h"
-#include "DataFormats/SiStripCluster/interface/SiStripApproximateClusterCollection_v1.h"
+#include "DataFormats/SiStripCluster/interface/SiStripApproximateClusterCollection.h"
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
 #include "DataFormats/SiStripCommon/interface/ConstantsForHardwareSystems.h"
 #include "DataFormats/TrackReco/interface/Track.h"
@@ -84,12 +84,12 @@ SiStripClusters2ApproxClusters::SiStripClusters2ApproxClusters(const edm::Parame
   csfToken_ = esConsumes(edm::ESInputTag("", csfLabel_));
 
   stripNoiseToken_ = esConsumes();
-  produces<v1::SiStripApproximateClusterCollection>();
+  produces<SiStripApproximateClusterCollection>();
 }
 
 void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup const& iSetup) {
   const auto& clusterCollection = event.get(clusterToken);
-  auto result = std::make_unique<v1::SiStripApproximateClusterCollection>();
+  auto result = std::make_unique<SiStripApproximateClusterCollection>();
   result->reserve(clusterCollection.size(), clusterCollection.dataSize());
 
   auto const beamSpotHandle = event.getHandle(beamSpotToken_);
