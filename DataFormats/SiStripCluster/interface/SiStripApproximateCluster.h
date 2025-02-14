@@ -30,9 +30,9 @@ public:
                                      bool peakFilter,
                                      bool first_cluster=0);
 
-  /*bool first_cluster() const {
+  bool first_cluster() const {
     return first_cluster_;
-  }*/
+  }
   float barycenter() const { 
     float _barycenter = compBarycenter_ / 10.;
     return _barycenter; }
@@ -52,7 +52,7 @@ private:
   bool filter_ = false;
   bool isSaturated_ = false;
   bool peakFilter_ = false;
-  //bool first_cluster_;
+  bool first_cluster_;
   static constexpr double maxavgChargeRange_ = 255; //255; //255; //255; //255;
   static constexpr double maxavgCharge_ = 255.;
   static constexpr double trimMaxADC_ = 30.;
