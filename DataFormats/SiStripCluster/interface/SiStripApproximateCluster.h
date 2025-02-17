@@ -52,7 +52,7 @@ public:
   bool peakFilter() const { return peakFilter_; }
 
 private:
-  unsigned int compBarycenter_ = 0;
+  cms_uint16_t compBarycenter_ = 0;
   cms_uint8_t width_ = 0;
   cms_uint8_t compavgCharge_ = 0;
   bool filter_ = false;
