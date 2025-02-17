@@ -258,7 +258,7 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
       if ( (convertedCluster.barycenter()) >= nStrips) {
          break;
       }
-      falling_barycenter = approxCluster.barycenter(previous_barycenter, module_length, first_cluster ? previous_module_length : module_length);
+      falling_barycenter = approxCluster.barycenter();
       first_cluster = false;
       ++clusBegin;
       firstStrip = convertedCluster.firstStrip();
