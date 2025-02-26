@@ -4,7 +4,8 @@
 #include <vector>
 
 #include "DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h"
-
+#include <iostream>
+#include <numeric>
 /**
  * This class provides a minimal interface that resembles
  * edmNew::DetSetVector, but is crafted such that we are comfortable
@@ -32,7 +33,7 @@ public:
   public:
     using const_iterator = std::vector<SiStripApproximateCluster>::const_iterator;
 
-    unsigned int id() const { return coll_->detIds_[detIndex_]; }
+    unsigned int id() const { return std::accumulate(coll_->detIds_.cbegin(), coll_->detIds_.cbegin()+detIndex_+1, 0); }
 
     void move(unsigned int clusBegin) const { clusBegin_ = clusBegin; }
     const_iterator begin() const { return coll_->clusters_.begin() + clusBegin_; }

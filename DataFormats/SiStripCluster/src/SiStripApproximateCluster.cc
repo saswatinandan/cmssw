@@ -20,7 +20,7 @@ SiStripApproximateCluster::SiStripApproximateCluster(const SiStripCluster& clust
   previous_cluster = barycenter(previous_cluster, module_length, previous_module_length);
   assert(cluster.barycenter() <= maxBarycenter_ && "Got a barycenter > maxBarycenter");
   assert(compBarycenter_ <= maxRange_ && "Filling compBarycenter > maxRange");
-  width_ = std::min(255,(int)cluster.size());
+  width_ = std::min(255,(int)cluster.size());//std::min(255,(int)cluster.size());//std::min(255,(int)cluster.size());//std::min(255,(int)cluster.size());
   double avgCharge_ = (cluster.charge() + width_/2)/ width_;
   assert(avgCharge_ <= maxavgCharge_ && "Got a avgCharge > maxavgCharge");
   compavgCharge_ = std::round(avgCharge_ * maxavgChargeRange_/maxavgCharge_);
