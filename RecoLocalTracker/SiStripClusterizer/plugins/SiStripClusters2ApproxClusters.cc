@@ -9,7 +9,7 @@
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 #include "DataFormats/GeometryVector/interface/LocalPoint.h"
 #include "DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h"
-#include "DataFormats/SiStripCluster/interface/SiStripApproximateClusterCollection_v1.h"
+#include "DataFormats/SiStripCluster/interface/SiStripApproximateClusterCollection.h"
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
 #include "DataFormats/SiStripCommon/interface/ConstantsForHardwareSystems.h"
 #include "DataFormats/TrackReco/interface/Track.h"
@@ -84,12 +84,12 @@ SiStripClusters2ApproxClusters::SiStripClusters2ApproxClusters(const edm::Parame
   csfToken_ = esConsumes(edm::ESInputTag("", csfLabel_));
 
   stripNoiseToken_ = esConsumes();
-  produces<v1::SiStripApproximateClusterCollection>();
+  produces<SiStripApproximateClusterCollection>();
 }
 
 void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup const& iSetup) {
   const auto& clusterCollection = event.get(clusterToken);
-  auto result = std::make_unique<v1::SiStripApproximateClusterCollection>();
+  auto result = std::make_unique<SiStripApproximateClusterCollection>();
   result->reserve(clusterCollection.size(), clusterCollection.dataSize());
 
   auto const beamSpotHandle = event.getHandle(beamSpotToken_);
@@ -134,7 +134,7 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
       // (almost) same logic as in StripSubClusterShapeTrajectoryFilter
       bool isTrivial = (std::abs(hitPredPos) < 2.f && hitStrips <= 2);
       if (!usable || isTrivial) {
-        ff.push_back(SiStripApproximateCluster(cluster, maxNSat, hitPredPos, previous_cluster, true, ((previous_cluster==-999) ? 1:0)));
+        ff.push_back(SiStripApproximateCluster(cluster, maxNSat, hitPredPos, previous_cluster, true));
       } else {
         bool peakFilter = false;
         SlidingPeakFinder pf(std::max<int>(2, std::ceil(std::abs(hitPredPos) + subclusterWindow_)));
@@ -148,7 +148,7 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
                             subclusterCutMIPs_,
                             subclusterCutSN_);
         peakFilter = pf.apply(cluster.amplitudes(), test);
-        ff.push_back(SiStripApproximateCluster(cluster, maxNSat, hitPredPos, previous_cluster, peakFilter, ((previous_cluster==-999) ? 1:0)));
+        ff.push_back(SiStripApproximateCluster(cluster, maxNSat, hitPredPos, previous_cluster, peakFilter));
       }
     }
   }

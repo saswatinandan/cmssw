@@ -4,7 +4,8 @@
 #include <vector>
 
 #include "DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h"
-
+#include <iostream>
+#include <numeric>
 /**
  * This class provides a minimal interface that resembles
  * edmNew::DetSetVector, but is crafted such that we are comfortable
@@ -43,9 +44,9 @@ public:
     DetSet(SiStripApproximateClusterCollection const* coll, unsigned int detIndex)
         : coll_(coll),
           detIndex_(detIndex),
-          clusBegin_(coll_->beginIndices_[detIndex]),
+          clusBegin_( detIndex == 0 ? coll_->beginIndices_[detIndex] : std::accumulate(coll_->beginIndices_.begin(), coll_->beginIndices_.begin()+detIndex_+1, 0)),
           clusEnd_(detIndex == coll_->beginIndices_.size() - 1 ? coll->clusters_.size()
-                                                               : coll_->beginIndices_[detIndex + 1]) {}
+                                                               : clusBegin_ + coll_->beginIndices_[detIndex + 1]) {}
 
     SiStripApproximateClusterCollection const* const coll_;
     unsigned int const detIndex_;

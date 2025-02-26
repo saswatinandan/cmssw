@@ -16,7 +16,7 @@
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h"
-#include "DataFormats/SiStripCluster/interface/SiStripApproximateClusterCollection_v1.h"
+#include "DataFormats/SiStripCluster/interface/SiStripApproximateClusterCollection.h"
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -73,7 +73,7 @@ private:
   edm::EDGetTokenT<reco::TrackCollection> tracksToken_; 
 
   // Event Data
-  edm::EDGetTokenT<v1::SiStripApproximateClusterCollection> approxClusterToken;
+  edm::EDGetTokenT<SiStripApproximateClusterCollection> approxClusterToken;
   edm::EDGetTokenT<edmNew::DetSetVector<SiStripCluster>> clusterForRawPrimeToken;
 
   // Event Setup Data
@@ -120,7 +120,7 @@ private:
 
 sep19_2_1_dump_rawprime::sep19_2_1_dump_rawprime(const edm::ParameterSet& conf) {
   inputTagApproxClusters = conf.getParameter<edm::InputTag>("approxSiStripClustersTag");
-  approxClusterToken 	 = consumes<v1::SiStripApproximateClusterCollection>(inputTagApproxClusters);
+  approxClusterToken 	 = consumes<SiStripApproximateClusterCollection>(inputTagApproxClusters);
   tracksToken_           = consumes<reco::TrackCollection>(conf.getParameter<edm::InputTag>("tracks"));
   doDumpInputOfSiStripClusters2ApproxClusters = conf.getParameter<bool>("doDumpInputOfSiStripClusters2ApproxClusters");
   inputTagClustersForRawPrime = conf.getParameter<edm::InputTag>("hltSiStripClusterizerForRawPrimeTag");
@@ -170,7 +170,7 @@ sep19_2_1_dump_rawprime::sep19_2_1_dump_rawprime(const edm::ParameterSet& conf) 
 sep19_2_1_dump_rawprime::~sep19_2_1_dump_rawprime() = default;
 
 void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventSetup& es) {
-  edm::Handle<v1::SiStripApproximateClusterCollection>  approxClusterCollection 	= event.getHandle(approxClusterToken);
+  edm::Handle<SiStripApproximateClusterCollection>  approxClusterCollection 	= event.getHandle(approxClusterToken);
   edm::Handle<edmNew::DetSetVector<SiStripCluster>> clusterForRawPrimeCollection = event.getHandle(clusterForRawPrimeToken);
 
   const auto& tracksHandle = event.getHandle(tracksToken_);
@@ -222,30 +222,17 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
   const auto& tkGeom = &es.getData(tkGeomToken_);
   const auto tkDets = tkGeom->dets();
 
-  unsigned int clusBegin = 0;
   for (const auto& detApproxClusters : *approxClusterCollection) {
     eventN = event.id().event();
     runN   = (int) event.id().run();
     lumi   = (int) event.id().luminosityBlock();
     detId  = detApproxClusters.id();
     float previous_barycenter = -999;
-    detApproxClusters.move(clusBegin);
-    bool first_cluster = false;
    //  if (event.id().event() != 8180236 ||  event.id().run() != 382216 || event.id().luminosityBlock() !=99) continue;
     //std::cout << eventN << "\t" <<  runN << "\t" << lumi << std::endl; 
     //std::cout << "detId " << detId << std::endl;
     for (const auto& approxCluster : detApproxClusters) {
 
-      if (first_cluster == false) {
-         assert(approxCluster.first_cluster());
-         first_cluster = true;
-      }
-      else {
-       if (approxCluster.first_cluster()) {
-       break;
-       }
-      }
-      ++clusBegin; 
       ///// 1. converting approxCluster to stripCluster: for the estimation of firstStrip, endStrip, adc info
       uint16_t nStrips{0};
       const auto& _detId = detId; // for the capture clause in the lambda function

@@ -1,6 +1,6 @@
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h"
-#include "DataFormats/SiStripCluster/interface/SiStripApproximateClusterCollection_v1.h"
+#include "DataFormats/SiStripCluster/interface/SiStripApproximateClusterCollection.h"
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -25,7 +25,7 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 private:
-  edm::EDGetTokenT<v1::SiStripApproximateClusterCollection> clusterToken_;
+  edm::EDGetTokenT<SiStripApproximateClusterCollection> clusterToken_;
   edm::ESGetToken<TrackerGeometry, TrackerDigiGeometryRecord> tkGeomToken_;
 };
 
@@ -42,7 +42,6 @@ void SiStripApprox2Clusters::produce(edm::StreamID id, edm::Event& event, const 
   const auto& tkGeom = &iSetup.getData(tkGeomToken_);
   const auto& tkDets = tkGeom->dets();
 
-  unsigned int clusBegin = 0;
   for (const auto& detClusters : clusterCollection) {
     edmNew::DetSetVector<SiStripCluster>::FastFiller ff{*result, detClusters.id()};
     unsigned int detId = detClusters.id();
@@ -55,20 +54,7 @@ void SiStripApprox2Clusters::produce(edm::StreamID id, edm::Event& event, const 
     nStrips = p.nstrips() - 1;
 
     float previous_barycenter = -999;
-    detClusters.move(clusBegin);
-    bool first_cluster = false;
     for (const auto& cluster : detClusters) {
-
-      if (first_cluster == false) {
-         assert(cluster.first_cluster());
-         first_cluster = true;
-      }
-      else {
-       if (cluster.first_cluster()) {
-       break;
-       }
-      }
-      ++clusBegin;
       const auto convertedCluster = SiStripCluster(cluster, nStrips, previous_barycenter);
       ff.push_back(convertedCluster);
       previous_barycenter = convertedCluster.barycenter(); 
