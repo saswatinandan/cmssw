@@ -499,8 +499,8 @@ process.hltPreDatasetHIPhysicsRawPrime = cms.EDFilter( "HLTPrescaler",
 
 process.hltOutputPhysicsHIPhysicsRawPrime0 = cms.OutputModule( "PoolOutputModule",
     fileName = cms.untracked.string( "outputPhysicsHIPhysicsRawPrime0.root" ),
-    compressionAlgorithm = cms.untracked.string( "ZSTD" ),
-    compressionLevel = cms.untracked.int32( 3 ),
+    compressionAlgorithm = cms.untracked.string( "LZMA" ),
+    compressionLevel = cms.untracked.int32( 4 ),
     fastCloning = cms.untracked.bool( False ),
     dataset = cms.untracked.PSet(
         filterName = cms.untracked.string( "" ),
@@ -589,7 +589,7 @@ _customInfo['inputFiles'][True]  = "file:RelVal_Raw_GRun_DATA.root"
 _customInfo['inputFiles'][False] = "file:RelVal_Raw_GRun_MC.root"
 _customInfo['maxEvents' ]=  -1
 _customInfo['globalTag' ]= "140X_dataRun3_Prompt_v3"
-_customInfo['inputFile' ]=  ['/store/data/Run2024F/Muon0/RAW-RECO/ZMu-PromptReco-v1/000/382/216/00000/aadd1ab9-4eb8-4fb2-ac62-bdd1bebe882e.root']#'/store/data/Run2024F/Muon0/RAW-RECO/ZMu-PromptReco-v1/000/382/229/00000/0fd42df0-c533-49df-ae69-8a7195b340c3.root']
+_customInfo['inputFile' ]=  ['file:/scratch/nandan/inputfile_for_prehlt/aadd1ab9-4eb8-4fb2-ac62-bdd1bebe882e.root']#'/store/data/Run2024F/Muon0/RAW-RECO/ZMu-PromptReco-v1/000/382/229/00000/0fd42df0-c533-49df-ae69-8a7195b340c3.root']
 _customInfo['realData'  ]=  True
 
 from HLTrigger.Configuration.customizeHLTforALL import customizeHLTforAll
