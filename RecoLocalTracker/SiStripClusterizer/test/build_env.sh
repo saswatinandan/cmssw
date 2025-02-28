@@ -8,6 +8,7 @@ export remove=$6
 export output=/scratch/$(whoami)/$7
 export tmp=/home/users/$(whoami)/tmp/$7
 export cluster=$8
+export git_branch=$9
 
 echo $tmp
 echo $output
@@ -28,11 +29,15 @@ eval "cmsrel CMSSW_14_0_11"
 eval "cd CMSSW_14_0_11/src/"
 eval "cmsenv"
 eval "git cms-init"
-eval "git pull git@github.com:saswatinandan/cmssw.git default_10"
+eval "git checkout -b ${git_branch}"
+eval "git pull git@github.com:saswatinandan/cmssw.git ${git_branch}"
 eval "git cms-addpkg Configuration/Eras DataFormats/SiStripCluster"
 eval "git cms-addpkg RecoLocalTracker/SiStripClusterizer" 
 eval "scram b -j 8"
 eval "cd RecoLocalTracker/SiStripClusterizer/test"
+
+eval "git remote -v >  git.log"
+eval "git branch -v >>  git.log"
 
 export current_dir=$(pwd)
 echo 'curent dir: ', $current_dir
