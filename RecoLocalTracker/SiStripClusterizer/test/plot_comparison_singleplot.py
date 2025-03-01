@@ -40,11 +40,14 @@ def draw(x_vals, y_vals, texts, obj, rawtype):
   print(texts)
   sorted_xvals = sorted(x_vals)
   plt.text(sorted_xvals[len(x_vals)-3], max(y_vals), '(barycenter,avgCharge)')
-  plt.title(f'size vs unmatched {obj} in % for {rawtype}', fontsize=20)
+  plt.title(f'size vs unmatched {obj}', fontsize=20)
   plt.xlabel('size', fontsize=20)
   plt.ylabel('unmatched in %', fontsize=20)
   for i, text in enumerate(texts):
-    ax.text(x_vals[i], y_vals[i], text)
+    if i == len(texts)-1:
+      ax.text(x_vals[i], y_vals[i], text, color='red')
+    else:
+      ax.text(x_vals[i], y_vals[i], text)
   ax.grid(True)
   plt.savefig(f'singleplot_{obj}_{rawtype}.png')
   plt.close('all')
@@ -74,6 +77,22 @@ def build_array(obj, rawtype):
             val = float(line.split(f'in {rawtype} ')[-1].split('%')[0])
             unmatched.append(val)
 
+  input = f'/scratch/nandan/default_10_compression_LZMA_barycenter_16bit_width_8bit_avgCharge_8bit'
+  input_file = os.path.join(input, 'size.log')
+  lines = readfile(input_file)
+
+  for idx, line in enumerate(lines):
+
+     if 'SiStripApproximateClusterCollection_hltSiStripClusters2ApproxClusters__HLTX' in line:
+         sizes.append(float(line.split(' ')[-1]))
+
+  input_file = os.path.join(input, 'object.log')
+  lines = readfile(input_file)
+  for idx, line in enumerate(lines):
+      if f'not matched {obj}' in line and  f'{rawtype} ' in line:
+            val = float(line.split(f'in {rawtype} ')[-1].split('%')[0])
+            unmatched.append(val)
+  texts.append(('def_16', 'def_8'))
   draw(sizes, unmatched, texts, obj, rawtype)
 
 for raw in ['raw', 'rawp']:
