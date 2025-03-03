@@ -6,14 +6,20 @@
 SiStripApproximateCluster::SiStripApproximateCluster(const SiStripCluster& cluster,
                                                      unsigned int maxNSat,
                                                      float hitPredPos,
+                                                     float& previous_cluster,
+                                                     unsigned int& module_length,
+                                                     unsigned int& previous_module_length,
                                                      bool peakFilter) {
-  barycenter_ = std::round(cluster.barycenter() * 10);
+ // if (previous_cluster == -999.)
+      barycenter_ = std::round(cluster.barycenter() * 10);
+  //else
+    //  barycenter_ = std::round(((cluster.barycenter()-previous_cluster)*10)+(module_length-previous_module_length));
   width_ = cluster.size();
   avgCharge_ = cluster.charge() / cluster.size();
   filter_ = false;
   isSaturated_ = false;
   peakFilter_ = peakFilter;
-
+  previous_cluster = barycenter(previous_cluster, module_length, previous_module_length);
   //mimicing the algorithm used in StripSubClusterShapeTrajectoryFilter...
   //Looks for 3 adjacent saturated strips (ADC>=254)
   const auto& ampls = cluster.amplitudes();

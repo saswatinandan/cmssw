@@ -24,9 +24,19 @@ public:
   explicit SiStripApproximateCluster(const SiStripCluster& cluster,
                                      unsigned int maxNSat,
                                      float hitPredPos,
+                                     float& previous_cluster,
+                                     unsigned int& module_length,
+                                     unsigned int& previous_module_length,
                                      bool peakFilter);
 
-  cms_uint16_t barycenter() const { return barycenter_; }
+  cms_uint16_t barycenter(float previous_barycenter=0,
+                   unsigned int module_length=0, unsigned int previous_module_length=0) const { 
+   if (  previous_barycenter == -999 )
+      return barycenter_;
+   else {
+      return ((barycenter_) - (module_length-previous_module_length)) + previous_barycenter;
+    }
+ }
   cms_uint8_t width() const { return width_; }
   cms_uint8_t avgCharge() const { return avgCharge_; }
   bool filter() const { return filter_; }
