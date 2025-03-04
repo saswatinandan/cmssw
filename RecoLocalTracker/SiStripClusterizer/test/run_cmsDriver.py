@@ -41,7 +41,7 @@ os.system(run_cmd)
 if not options.strip_charge_cut:
   replace_line('prehlt.py',
               [('clusterChargeCut = cms.PSet(  refToPSet_ = cms.string( "HLTSiStripClusterChargeCutTight" ) ),', 'clusterChargeCut = cms.PSet(  refToPSet_ = cms.string( "HLTSiStripClusterChargeCutNone" ) ),')
-              ] 
+              ]) 
 cmd_hlt = f'hltGetConfiguration /users/vmuralee/PREmenu/V9 --globaltag 410X_dataRun3_HLT_for2024TSGStudies_v1 --data --unprescale --max-events {number} --eras Run3 --input /store/data/Run2024F/Muon0/RAW-RECO/ZMu-PromptReco-v1/000/382/216/00000/aadd1ab9-4eb8-4fb2-ac62-bdd1bebe882e.root > prehlt.py'
 
 #os.system(cmd_hlt)
