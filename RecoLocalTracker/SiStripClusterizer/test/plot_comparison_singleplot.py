@@ -29,26 +29,41 @@ def readfile(input_file):
      lines = f.readlines()
   return lines
 
+def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, unmatched, texts, ver):
+
+  input = f'/scratch/nandan/{dirname}_barycenter_{bary_bit}bit_width_8bit_avgCharge_{chrg_bit}bit/'
+  input_file = os.path.join(input, 'size.log')
+  lines = readfile(input_file)
+
+  for idx, line in enumerate(lines):
+
+     if 'SiStripApproximateClusterCollection_hltSiStripClusters2ApproxClusters__HLTX' in line:
+         sizes.append(float(line.split(' ')[-1]))
+
+  input_file = os.path.join(input, 'object.log')
+  lines = readfile(input_file)
+  for idx, line in enumerate(lines):
+      if f'not matched {obj}' in line and  f'{rawtype} ' in line:
+            val = float(line.split(f'in {rawtype} ')[-1].split('%')[0])
+            unmatched.append(val)
+  texts.append((f'{ver}_{bary_bit}', f'{ver}_{chrg_bit}'))
+  print(texts) 
 def draw(x_vals, y_vals, texts, obj, rawtype):
 
   fig = plt.figure(figsize=(8,6))
   ax = fig.add_subplot(111)
   plt.scatter(x_vals, y_vals)
-  print(obj)
-  print(x_vals)
-  print(y_vals)
-  print(texts)
   sorted_xvals = sorted(x_vals)
   plt.text(sorted_xvals[len(x_vals)-3], max(y_vals), '(barycenter,avgCharge)')
   plt.title(f'size vs unmatched {obj}', fontsize=20)
   plt.xlabel('size', fontsize=20)
   plt.ylabel('unmatched in %', fontsize=20)
   for i, text in enumerate(texts):
-    if i == len(texts)-3:
+    if isinstance(text[0], str) and 'def' in text[0]:
       ax.text(x_vals[i], y_vals[i], text, color='red')
-    elif i == len(texts)-2:
+    elif isinstance(text[0], str) and 'v2' in text[0]:
       ax.text(x_vals[i], y_vals[i], text, color='green')
-    elif i == len(texts)-1:
+    elif isinstance(text[0], str) and 'v1' in text[0]:
       ax.text(x_vals[i], y_vals[i], text, color='blue')
     else:
       ax.text(x_vals[i], y_vals[i], text)
@@ -81,57 +96,25 @@ def build_array(obj, rawtype):
             val = float(line.split(f'in {rawtype} ')[-1].split('%')[0])
             unmatched.append(val)
 
-  input = f'/scratch/nandan/default_10_compression_LZMA_barycenter_16bit_width_8bit_avgCharge_8bit'
-  input_file = os.path.join(input, 'size.log')
-  lines = readfile(input_file)
-
-  for idx, line in enumerate(lines):
-
-     if 'SiStripApproximateClusterCollection_hltSiStripClusters2ApproxClusters__HLTX' in line:
-         sizes.append(float(line.split(' ')[-1]))
-
-  input_file = os.path.join(input, 'object.log')
-  lines = readfile(input_file)
-  for idx, line in enumerate(lines):
-      if f'not matched {obj}' in line and  f'{rawtype} ' in line:
-            val = float(line.split(f'in {rawtype} ')[-1].split('%')[0])
-            unmatched.append(val)
-  texts.append(('def_16', 'def_8'))
-
-  input = f'/scratch/nandan/flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA_barycenter_15bit_width_8bit_avgCharge_8bit/'
-  input_file = os.path.join(input, 'size.log')
-  lines = readfile(input_file)
-
-  for idx, line in enumerate(lines):
-
-     if 'SiStripApproximateClusterCollection_hltSiStripClusters2ApproxClusters__HLTX' in line:
-         sizes.append(float(line.split(' ')[-1]))
-
-  input_file = os.path.join(input, 'object.log')
-  lines = readfile(input_file)
-  for idx, line in enumerate(lines):
-      if f'not matched {obj}' in line and  f'{rawtype} ' in line:
-            val = float(line.split(f'in {rawtype} ')[-1].split('%')[0])
-            unmatched.append(val)
-  texts.append(('v2_15', 'v2_8'))
-
-  input = f'/scratch/nandan/remove_beginindices_v1_compression_LZMA_barycenter_14bit_width_8bit_avgCharge_8bit/'
-  input_file = os.path.join(input, 'size.log')
-  lines = readfile(input_file)
-
-  for idx, line in enumerate(lines):
-
-     if 'SiStripApproximateClusterCollection_hltSiStripClusters2ApproxClusters__HLTX' in line:
-         sizes.append(float(line.split(' ')[-1]))
-
-  input_file = os.path.join(input, 'object.log')
-  lines = readfile(input_file)
-  for idx, line in enumerate(lines):
-      if f'not matched {obj}' in line and  f'{rawtype} ' in line:
-            val = float(line.split(f'in {rawtype} ')[-1].split('%')[0])
-            unmatched.append(val)
-  texts.append(('v1_14', 'v1_8'))
-
+  update_list('default_10_compression_LZMA', 16, 8, rawtype, sizes, unmatched, texts, 'def')
+  update_list('default_10_wochargecut_compression_LZMA', 16, 8, rawtype, sizes, unmatched, texts, 'def_wochargecut')
+  update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 8, rawtype, sizes, unmatched, texts, 'v2')
+  #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 5, rawtype, sizes, unmatched, texts, 'v2')
+  #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 4, rawtype, sizes, unmatched, texts, 'v2')
+  #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 5, rawtype, sizes, unmatched, texts, 'v2')
+  #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 4, rawtype, sizes, unmatched, texts, 'v2')
+  #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 8, rawtype, sizes, unmatched, texts, 'v2')
+  #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 7, rawtype, sizes, unmatched, texts, 'v2')
+  #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 6, rawtype, sizes, unmatched, texts, 'v2')
+  update_list('remove_beginindices_v1_compression_LZMA', 14, 8, rawtype, sizes, unmatched, texts, 'v1')
+  update_list('keep_diff_beginindices_compression_LZMA', 14, 8, rawtype, sizes, unmatched, texts, 'v1.1')
+  update_list('keep_diff_beginindices_compression_LZMA', 14, 5, rawtype, sizes, unmatched, texts, 'v1.1')
+  update_list('keep_diff_beginindices_compression_LZMA', 14, 7, rawtype, sizes, unmatched, texts, 'v1.1')
+  update_list('keep_diff_beginindices_compression_LZMA', 14, 6, rawtype, sizes, unmatched, texts, 'v1.1')
+  update_list('keep_diff_beginindices_compression_LZMA', 13, 5, rawtype, sizes, unmatched, texts, 'v1.1')
+  update_list('keep_diff_beginindices_compression_LZMA', 13, 7, rawtype, sizes, unmatched, texts, 'v1.1')
+  update_list('keep_diff_beginindices_compression_LZMA', 13, 6, rawtype, sizes, unmatched, texts, 'v1.1')
+  
   draw(sizes, unmatched, texts, obj, rawtype)
 
 for raw in ['raw', 'rawp']:
