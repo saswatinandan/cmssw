@@ -44,8 +44,12 @@ def draw(x_vals, y_vals, texts, obj, rawtype):
   plt.xlabel('size', fontsize=20)
   plt.ylabel('unmatched in %', fontsize=20)
   for i, text in enumerate(texts):
-    if i == len(texts)-1:
+    if i == len(texts)-3:
       ax.text(x_vals[i], y_vals[i], text, color='red')
+    elif i == len(texts)-2:
+      ax.text(x_vals[i], y_vals[i], text, color='green')
+    elif i == len(texts)-1:
+      ax.text(x_vals[i], y_vals[i], text, color='blue')
     else:
       ax.text(x_vals[i], y_vals[i], text)
   ax.grid(True)
@@ -93,6 +97,41 @@ def build_array(obj, rawtype):
             val = float(line.split(f'in {rawtype} ')[-1].split('%')[0])
             unmatched.append(val)
   texts.append(('def_16', 'def_8'))
+
+  input = f'/scratch/nandan/flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA_barycenter_15bit_width_8bit_avgCharge_8bit/'
+  input_file = os.path.join(input, 'size.log')
+  lines = readfile(input_file)
+
+  for idx, line in enumerate(lines):
+
+     if 'SiStripApproximateClusterCollection_hltSiStripClusters2ApproxClusters__HLTX' in line:
+         sizes.append(float(line.split(' ')[-1]))
+
+  input_file = os.path.join(input, 'object.log')
+  lines = readfile(input_file)
+  for idx, line in enumerate(lines):
+      if f'not matched {obj}' in line and  f'{rawtype} ' in line:
+            val = float(line.split(f'in {rawtype} ')[-1].split('%')[0])
+            unmatched.append(val)
+  texts.append(('v2_15', 'v2_8'))
+
+  input = f'/scratch/nandan/remove_beginindices_v1_compression_LZMA_barycenter_14bit_width_8bit_avgCharge_8bit/'
+  input_file = os.path.join(input, 'size.log')
+  lines = readfile(input_file)
+
+  for idx, line in enumerate(lines):
+
+     if 'SiStripApproximateClusterCollection_hltSiStripClusters2ApproxClusters__HLTX' in line:
+         sizes.append(float(line.split(' ')[-1]))
+
+  input_file = os.path.join(input, 'object.log')
+  lines = readfile(input_file)
+  for idx, line in enumerate(lines):
+      if f'not matched {obj}' in line and  f'{rawtype} ' in line:
+            val = float(line.split(f'in {rawtype} ')[-1].split('%')[0])
+            unmatched.append(val)
+  texts.append(('v1_14', 'v1_8'))
+
   draw(sizes, unmatched, texts, obj, rawtype)
 
 for raw in ['raw', 'rawp']:
