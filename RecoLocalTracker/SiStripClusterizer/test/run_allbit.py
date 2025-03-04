@@ -13,6 +13,7 @@ parser.add_argument("-c", type=int, dest="cluster", default=1, help="want flatnt
 parser.add_argument("-o", dest="output", default='output', help="output directory name")
 parser.add_argument("-p", type=int, dest="parallel", default=5, help="how many runs you want at the same time ")
 parser.add_argument("-g", dest="git_branch", default='saswati', help="which git branch you want")
+parser.add_argument("-s", type=int, dest="strip_charge_cut", default=1, help="want to add chage cut")
 
 options = parser.parse_args()
 barycenter_bits = options.barycenter_bits
@@ -31,7 +32,7 @@ with open('makefile', 'w') as f:
            f.write(f'{bb}bit_{wb}bit_{ab}bit:\n')
            output = f'{options.output}_barycenter_{bb}bit_width_{wb}bit_avgCharge_{ab}bit'
            if options.cms_command:
-              f.write(f'\tbash build_env.sh {bb}bit {wb}bit {ab}bit {options.number} {options.threads} {options.remove} {output} {options.cluster} {options.git_branch}\n')
+              f.write(f'\tbash build_env.sh {bb}bit {wb}bit {ab}bit {options.number} {options.threads} {options.remove} {output} {options.cluster} {options.git_branch} {options.strip_charge_cut}\n')
            else:
             outputdir = os.path.join(f'/scratch/{os.getlogin()}', output)
             pwd       = os.getcwd()

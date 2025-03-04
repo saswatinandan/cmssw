@@ -9,6 +9,7 @@ export output=/scratch/$(whoami)/$7
 export tmp=/home/users/$(whoami)/tmp/$7
 export cluster=$8
 export git_branch=$9
+export strip_charge_cut=${10}
 
 echo $tmp
 echo $output
@@ -42,7 +43,9 @@ eval "git branch -v >>  git.log"
 export current_dir=$(pwd)
 echo 'curent dir: ', $current_dir
 
-python3 run_cmsDriver.py -b $barycenter_bit -w $width_bit -a $avgCharge_bit -n $evn -t $thread -c $cluster
+echo $strip_charge_cut
+echo "python3 run_cmsDriver.py -b $barycenter_bit -w $width_bit -a $avgCharge_bit -n $evn -t $thread -c $cluster -s $strip_charge_cut"
+python3 run_cmsDriver.py -b $barycenter_bit -w $width_bit -a $avgCharge_bit -n $evn -t $thread -c $cluster -s $strip_charge_cut
 
 eval "cd ${output}"
 eval "cp $current_dir/*png ."
