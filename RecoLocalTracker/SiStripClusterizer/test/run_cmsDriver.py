@@ -8,6 +8,7 @@ parser.add_argument("-a", dest="avgCharge_bit", default='8bit', help="bit to be 
 parser.add_argument("-n", dest="number", default='100', help="how many numbers of events")
 parser.add_argument("-t", dest="threads", default='20', help="how many threads")
 parser.add_argument("-c", type=int, dest="cluster", default=1, help="want flatntuple for cluster")
+parser.add_argument("-s", type=int, dest="strip_charge_cut", default=1, help="want charge cut")
 
 options = parser.parse_args()
 barycenter_bit = options.barycenter_bit
@@ -37,6 +38,10 @@ os.system(run_cmd)
 
 ### hlt ###
 
+if not options.strip_charge_cut:
+  replace_line('prehlt.py',
+              [('clusterChargeCut = cms.PSet(  refToPSet_ = cms.string( "HLTSiStripClusterChargeCutTight" ) ),', 'clusterChargeCut = cms.PSet(  refToPSet_ = cms.string( "HLTSiStripClusterChargeCutNone" ) ),')
+              ] 
 cmd_hlt = f'hltGetConfiguration /users/vmuralee/PREmenu/V9 --globaltag 410X_dataRun3_HLT_for2024TSGStudies_v1 --data --unprescale --max-events {number} --eras Run3 --input /store/data/Run2024F/Muon0/RAW-RECO/ZMu-PromptReco-v1/000/382/216/00000/aadd1ab9-4eb8-4fb2-ac62-bdd1bebe882e.root > prehlt.py'
 
 #os.system(cmd_hlt)
