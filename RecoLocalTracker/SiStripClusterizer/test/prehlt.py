@@ -499,8 +499,8 @@ process.hltPreDatasetHIPhysicsRawPrime = cms.EDFilter( "HLTPrescaler",
 
 process.hltOutputPhysicsHIPhysicsRawPrime0 = cms.OutputModule( "PoolOutputModule",
     fileName = cms.untracked.string( "outputPhysicsHIPhysicsRawPrime0.root" ),
-    compressionAlgorithm = cms.untracked.string( "LZMA" ),
-    compressionLevel = cms.untracked.int32( 4 ),
+    compressionAlgorithm = cms.untracked.string( "ZSTD" ),
+    compressionLevel = cms.untracked.int32( 3 ),
     fastCloning = cms.untracked.bool( False ),
     dataset = cms.untracked.PSet(
         filterName = cms.untracked.string( "" ),
