@@ -9,6 +9,7 @@ parser.add_argument("-n", dest="number", default='100', help="how many numbers o
 parser.add_argument("-t", dest="threads", default='20', help="how many threads")
 parser.add_argument("-c", type=int, dest="cluster", default=1, help="want flatntuple for cluster")
 parser.add_argument("-s", type=int, dest="strip_charge_cut", default=1, help="want charge cut")
+parser.add_argument("-r", dest="raw_file", default='/home/users/nandan/backup/flatntuple_step5_RAW2DIGI_L1Reco_RECO_wchargecut.root', help="file for raw data")
 
 options = parser.parse_args()
 barycenter_bit = options.barycenter_bit
@@ -98,7 +99,7 @@ os.system(run_cmd)
 
 #### flat ntuple ####
 
-run_cmd = f'python3 run_flatNtuplizer.py -rp {output_step_reco} -c -n {number}' if options.cluster\
-         else f'python3 run_flatNtuplizer.py -rp {output_step_reco} -n {number}'
+run_cmd = f'python3 run_flatNtuplizer.py -rp {output_step_reco} -r {options.raw_file} -c -n {number}' if options.cluster\
+         else f'python3 run_flatNtuplizer.py -rp {output_step_reco} -r {options.raw_file} -n {number}'
 print(run_cmd)
 os.system(run_cmd)
