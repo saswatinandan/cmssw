@@ -17,6 +17,7 @@ threads = options.threads
 width_bit = options.width_bit
 avgCharge_bit = options.avgCharge_bit
 
+print(options.barycenter_bit)
 def replace_line(infile, replaces_to_vals):
 
     with open(infile, 'r') as f:
@@ -31,6 +32,20 @@ def replace_line(infile, replaces_to_vals):
                    line = line.replace(replace, val)
                    break 
             f.write(line)
+
+-### SiStripApproxCluster.h ####
+
+maxRange_ = (1<<int(barycenter_bit.strip('bit'))) -1
+replace_line('../../../DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h',
+             [('maxRange_ = ', f'maxRange_ = {maxRange_}; //')])
+    
+maxRange_ = (1<<int(width_bit.strip('bit'))) -1
+replace_line('../../../DataFormats/SiStripCluster/src/SiStripApproximateCluster.cc',
+               [('width_ = ', 'width_ = ' + f'std::min({maxRange_},(int)cluster.size());//')])
+
+maxRange_ = (1<<int(avgCharge_bit.strip('bit'))) -1
+replace_line('../../../DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h',
+               [('maxavgChargeRange_ = ', f'maxavgChargeRange_ = {maxRange_}; //')])
 
 run_cmd = 'scram b -j 8'
 print(run_cmd)
