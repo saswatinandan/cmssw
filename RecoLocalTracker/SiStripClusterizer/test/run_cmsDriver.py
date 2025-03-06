@@ -34,7 +34,7 @@ def replace_line(infile, replaces_to_vals):
                    break 
             f.write(line)
 
--### SiStripApproxCluster.h ####
+### SiStripApproxCluster.h ####
 
 maxRange_ = (1<<int(barycenter_bit.strip('bit'))) -1
 replace_line('../../../DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h',
