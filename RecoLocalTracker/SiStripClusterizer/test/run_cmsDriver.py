@@ -84,7 +84,7 @@ os.system(run_cmd)
 
 #### flat ntuple ####
 
-run_cmd = f'python3 run_flatNtuplizer.py -rp {output_step_reco} -r {options.r} -c -n {number}' if options.cluster\
-         else f'python3 run_flatNtuplizer.py -rp {output_step_reco} -r {options.r} -n {number}'
+run_cmd = f'python3 run_flatNtuplizer.py -rp {output_step_reco} -r {options.raw_file} -c -n {number}' if options.cluster\
+         else f'python3 run_flatNtuplizer.py -rp {output_step_reco} -r {options.raw_file} -n {number}'
 print(run_cmd)
 os.system(run_cmd)
