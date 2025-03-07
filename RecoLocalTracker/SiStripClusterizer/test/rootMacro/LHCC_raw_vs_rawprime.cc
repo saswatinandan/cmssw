@@ -140,15 +140,19 @@ void event_loop( map< int, map< int, map<int, bool> > >& evtMatchedMap,
                   evthist.fill("trk_nhits", treereader.trkNHit[trkIdx]);
                   evthist.fill("trk_pterrDpt", std::abs(treereader.trkPtError[trkIdx]/treereader.trkPt[trkIdx]));
 
+                  evthist.fill("trk_cutflow", trk_cuts::nocut);
                   evthist.fill("trk_cutflow_z"+to_string(treereader.trkAlgo[trkIdx]), abs(treereader.inner_z[trkIdx]), trk_cuts::nocut);
                   evthist.fill("trk_cutflow_xy"+to_string(treereader.trkAlgo[trkIdx]), abs(treereader.inner_xy[trkIdx]), trk_cuts::nocut);
                   if(treereader.trkChi2[trkIdx] > cut_chi2) continue;
+                  evthist.fill("trk_cutflow", trk_cuts::chi2);
                   evthist.fill("trk_cutflow_z"+to_string(treereader.trkAlgo[trkIdx]), abs(treereader.inner_z[trkIdx]), trk_cuts::chi2);
                   evthist.fill("trk_cutflow_xy"+to_string(treereader.trkAlgo[trkIdx]), abs(treereader.inner_xy[trkIdx]), trk_cuts::chi2);
                   if(std::abs(treereader.trkPtError[trkIdx]/treereader.trkPt[trkIdx]) >= cut_ptRes) continue;
+                  evthist.fill("trk_cutflow", trk_cuts::ptRes);
                   evthist.fill("trk_cutflow_z"+to_string(treereader.trkAlgo[trkIdx]), abs(treereader.inner_z[trkIdx]), trk_cuts::ptRes);
                   evthist.fill("trk_cutflow_xy"+to_string(treereader.trkAlgo[trkIdx]), abs(treereader.inner_xy[trkIdx]), trk_cuts::ptRes);
                   if((int) treereader.trkNHit[trkIdx] < cut_nhits) continue;
+                  evthist.fill("trk_cutflow", trk_cuts::nhits);
                   evthist.fill("trk_cutflow_z"+to_string(treereader.trkAlgo[trkIdx]), abs(treereader.inner_z[trkIdx]), trk_cuts::nhits);
                   evthist.fill("trk_cutflow_xy"+to_string(treereader.trkAlgo[trkIdx]), abs(treereader.inner_xy[trkIdx]), trk_cuts::nhits);
                   evthist.fill("trk_pt", treereader.trkPt[trkIdx]);
