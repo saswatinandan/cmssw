@@ -84,7 +84,8 @@ os.system(run_cmd)
 
 #### flat ntuple ####
 
-run_cmd = f'python3 run_flatNtuplizer.py -rp {output_step_reco} -r {options.raw_file} -c -n {number}' if options.cluster\
-         else f'python3 run_flatNtuplizer.py -rp {output_step_reco} -r {options.raw_file} -n {number}'
+raw_file = options.raw_file if options.strip_charge_cut else '/home/users/nandan/backup/flatntuple_step5_RAW2DIGI_L1Reco_RECO_wGT140.root' 
+run_cmd = f'python3 run_flatNtuplizer.py -rp {output_step_reco} -r {raw_file} -c -n {number}' if options.cluster\
+         else f'python3 run_flatNtuplizer.py -rp {output_step_reco} -r {raw_file} -n {number}'
 print(run_cmd)
 os.system(run_cmd)
