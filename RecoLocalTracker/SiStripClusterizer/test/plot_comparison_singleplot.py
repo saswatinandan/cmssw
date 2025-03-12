@@ -24,7 +24,7 @@ x = np.sort(x)
 widths = np.array(widths)
 avgCharge = np.array(avgCharges)
 
-colors = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w']
+colors = ['b', 'r', 'g', 'c', 'm', 'y', 'k', 'w']
 
 def readfile(input_file):
 
@@ -32,7 +32,7 @@ def readfile(input_file):
      lines = f.readlines()
   return lines
 
-def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, events):
+def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, events=0):
 
   input = f'/scratch/nandan/{dirname}_barycenter_{bary_bit}bit_width_8bit_avgCharge_{chrg_bit}bit/'
   input_file = os.path.join(input, 'size.log')
@@ -54,24 +54,22 @@ def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, 
     f = TFile(input_file, 'r')
     yvals[ver].append(f.Get(f'{rawtype}_trk_cutflow_z4').GetBinContent(1,1))
     
-  
   texts[ver].append((f'{bary_bit}', f'{chrg_bit}'))
 
-def draw(x_vals, y_vals, texts, obj, rawtype):
+def draw(x_vals, y_vals, texts, ytitle, obj, rawtype, filename=''):
 
   fig = plt.figure(figsize=(8,6))
   ax = fig.add_subplot(111)
-  colors = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w']
   for idx, key in enumerate(texts.keys()):
     plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
     for i, text in enumerate(texts[key]):
-      ax.text(x_vals[key][i], y_vals[key][i], text, color=colors[idx])
+      ax.text(x_vals[key][i], y_vals[key][i], text)#, color=colors[idx])
   plt.title(f'size vs {obj}', fontsize=20)
-  plt.xlabel('size', fontsize=20)
-  plt.ylabel(f'{obj}', fontsize=20)
+  plt.xlabel('size of approx cluster in Byte', fontsize=20)
+  plt.ylabel(ytitle, fontsize=20)
   plt.legend()
   ax.grid(True)
-  plt.savefig(f'singleplot_{obj}_{rawtype}.png')
+  plt.savefig(f'singleplot_{obj}_{rawtype}.png' if filename=='' else f'{filename}.png')
   plt.close('all')
 
 def build_array(obj, rawtype):
@@ -82,55 +80,45 @@ def build_array(obj, rawtype):
 
   compare = 'cutflow'
 
-  texts['def'] = []
-  yvals['def'] = []
-  sizes['def'] = []
+  texts['rawp'] = []
+  yvals['rawp'] = []
+  sizes['rawp'] = []
 
   for avgCharge in avgCharges:
     for bit in x:
-      update_list(output, bit, avgCharge, rawtype, sizes, yvals, texts, 'def', options.events)
+      update_list(output, bit, avgCharge, rawtype, sizes, yvals, texts, 'rawp', options.events)
   
-  if options.events:
-   texts['def_wocharge_cut'] = []
-   yvals['def_wocharge_cut'] = []
-   sizes['def_wocharge_cut'] = []
-
-   for avgCharge in avgCharges:
-    for bit in x:
-      update_list('test_wochargecut_compression_LZMA', bit, avgCharge, rawtype, sizes, yvals, texts, 'def_wocharge_cut', options.events)
-
-  texts['def_HI'] = []
-  yvals['def_HI'] = []
-  sizes['def_HI'] = []
+  texts['HI_rawp'] = []
+  yvals['HI_rawp'] = []
+  sizes['HI_rawp'] = []
   
-  update_list('default_10_compression_LZMA', 16, 8, rawtype, sizes, yvals, texts, 'def_HI', options.events)
-  if options.events:
-    texts['def_HI_wocharge_cut'] = []
-    yvals['def_HI_wocharge_cut'] = []
-    sizes['def_HI_wocharge_cut'] = []
-    update_list('default_10_wochargecut_compression_LZMA', 16, 8, rawtype, sizes, yvals, texts, 'def_HI_wocharge_cut', options.events)
-
+  update_list('default_10_compression_LZMA', 16, 8, rawtype, sizes, yvals, texts, 'HI_rawp', options.events)
   if options.version == 'v2':
-    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 8, rawtype, sizes, unmatched, texts, 'v2')
-    #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 5, rawtype, sizes, unmatched, texts, 'v2')
-    #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 4, rawtype, sizes, unmatched, texts, 'v2')
-    #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 5, rawtype, sizes, unmatched, texts, 'v2')
-    #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 4, rawtype, sizes, unmatched, texts, 'v2')
-    #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 8, rawtype, sizes, unmatched, texts, 'v2')
-    #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 7, rawtype, sizes, unmatched, texts, 'v2')
-    #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 6, rawtype, sizes, unmatched, texts, 'v2')
+    texts['v2'] = []
+    yvals['v2'] = []
+    sizes['v2'] = []
+    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 8, rawtype, sizes, yvals, texts, 'v2')
+    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 5, rawtype, sizes, yvals, texts, 'v2')
+    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 4, rawtype, sizes, yvals, texts, 'v2')
+    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 5, rawtype, sizes, yvals, texts, 'v2')
+    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 4, rawtype, sizes, yvals, texts, 'v2')
+    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 8, rawtype, sizes, yvals, texts, 'v2')
   elif options.version == 'v1':
-    update_list('remove_beginindices_v1_compression_LZMA', 14, 8, rawtype, sizes, unmatched, texts, 'v1')
+    texts['v1'] = []
+    yvals['v1'] = []
+    sizes['v1'] = []
+    update_list('remove_beginindices_v1_compression_LZMA', 14, 8, rawtype, sizes, yvals, texts, 'v1')
   elif options.version == 'v1.1':
-    update_list('keep_diff_beginindices_compression_LZMA', 14, 8, rawtype, sizes, unmatched, texts, 'v1.1')
-    update_list('keep_diff_beginindices_compression_LZMA', 14, 5, rawtype, sizes, unmatched, texts, 'v1.1')
-    update_list('keep_diff_beginindices_compression_LZMA', 14, 7, rawtype, sizes, unmatched, texts, 'v1.1')
-    update_list('keep_diff_beginindices_compression_LZMA', 14, 6, rawtype, sizes, unmatched, texts, 'v1.1')
-    update_list('keep_diff_beginindices_compression_LZMA', 13, 5, rawtype, sizes, unmatched, texts, 'v1.1')
-    update_list('keep_diff_beginindices_compression_LZMA', 13, 7, rawtype, sizes, unmatched, texts, 'v1.1')
-    update_list('keep_diff_beginindices_compression_LZMA', 13, 6, rawtype, sizes, unmatched, texts, 'v1.1')
+    texts['v1.1'] = []
+    yvals['v1.1'] = []
+    sizes['v1.1'] = []
+    update_list('keep_diff_beginindices_compression_LZMA', 14, 8, rawtype, sizes, yvals, texts, 'v1.1')
+    update_list('keep_diff_beginindices_compression_LZMA', 14, 5, rawtype, sizes, yvals, texts, 'v1.1')
+    update_list('keep_diff_beginindices_compression_LZMA', 14, 6, rawtype, sizes, yvals, texts, 'v1.1')
+    update_list('keep_diff_beginindices_compression_LZMA', 13, 5, rawtype, sizes, yvals, texts, 'v1.1')
+    update_list('keep_diff_beginindices_compression_LZMA', 13, 6, rawtype, sizes, yvals, texts, 'v1.1')
   
-  draw(sizes, yvals, texts, f'unmatched {obj} in %, rawtype)
+  draw(sizes, yvals, texts, f'unmatched {obj} in %', obj, rawtype)
 
 if not options.events:
   for raw in ['raw', 'rawp']:
@@ -142,40 +130,28 @@ else:
   sizes = {}
   yvals = {}
 
-  texts['raw'] = []
-  yvals['raw'] = []
-  sizes['raw'] = []
+  texts['wchargecut_rawp'] = []
+  yvals['wchargecut_rawp'] = []
+  sizes['wchargecut_rawp'] = []
 
-  update_list('test_compression_LZMA', 16, 8, 'raw', sizes, yvals, texts, 'raw', 1)
+  update_list('test_compression_LZMA', 16, 8, 'rawp', sizes, yvals, texts, 'wchargecut_rawp', options.events)
 
-  texts['wochargecut_raw'] = []
-  yvals['wochargecut_raw'] = []
-  sizes['wochargecut_raw'] = []
+  texts['wochargecut_rawp'] = []
+  yvals['wochargecut_rawp'] = []
+  sizes['wochargecut_rawp'] = []
 
-  update_list('test_wochargecut_compression_LZMA', 16, 8, 'raw', sizes, yvals, texts, 'wochargecut_raw', 1)
+  update_list('test_wochargecut_compression_LZMA', 16, 8, 'rawp', sizes, yvals, texts, 'wochargecut_rawp', options.events)
 
-  texts['def_rawp'] = []
-  yvals['def_rawp'] = []
-  sizes['def_rawp'] = []
+  texts['wchargecut_HI_rawp'] = []
+  yvals['wchargecut_HI_rawp'] = []
+  sizes['wchargecut_HI_rawp'] = []
 
-  update_list('test_compression_LZMA', 16, 8, 'rawp', sizes, yvals, texts, 'def_rawp', options.events)
+  update_list('default_10_compression_LZMA', 16, 8, 'rawp', sizes, yvals, texts, 'wchargecut_HI_rawp', options.events)
 
-  texts['def_wochargecut_rawp'] = []
-  yvals['def_wochargecut_rawp'] = []
-  sizes['def_wochargecut_rawp'] = []
+  texts['wochargecut_HI_rawp'] = []
+  yvals['wochargecut_HI_rawp'] = []
+  sizes['wochargecut_HI_rawp'] = []
 
-  update_list('test_wochargecut_compression_LZMA', 16, 8, 'rawp', sizes, yvals, texts, 'def_wochargecut_rawp', options.events)
+  update_list('default_10_wochargcut_compression_LZMA', 16, 8, 'rawp', sizes, yvals, texts, 'wochargecut_HI_rawp', options.events)
 
-  texts['def_HI_rawp'] = []
-  yvals['def_HI_rawp'] = []
-  sizes['def_HI_rawp'] = []
-
-  update_list('default_10_compression_LZMA', 16, 8, 'rawp', sizes, yvals, texts, 'def_HI_rawp', options.events)
-
-  texts['def_HI_wochargecut_rawp'] = []
-  yvals['def_HI_wochargecut_rawp'] = []
-  sizes['def_HI_wochargecut_rawp'] = []
-
-  update_list('default_10_wochargcut_compression_LZMA', 16, 8, 'rawp', sizes, yvals, texts, 'def_HI_wochargecut_rawp', options.events)
-
-  draw(sizes, yvals, texts, '# of tracks', 'raw_rawp')
+  draw(sizes, yvals, texts, '# of tracks', 'tracks', 'rawp', 'chargecut')
