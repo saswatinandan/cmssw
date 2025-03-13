@@ -37,6 +37,7 @@
 #include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit1D.h"
+#include "DataFormats/SiStripCluster/interface/SiStripClusterTools.h"
 
 #include "assert.h"
 //ROOT inclusion
@@ -94,6 +95,7 @@ private:
   float       falling_barycenter;
   uint16_t    size;
   int         charge;
+  float       chargePerCM;
   bool        low_pt_trk_cluster;
   bool        high_pt_trk_cluster;
   int         trk_algo;
@@ -143,6 +145,7 @@ sep19_2_1_dump_rawprime::sep19_2_1_dump_rawprime(const edm::ParameterSet& conf) 
   onlineClusterTree->Branch("falling_barycenter", &falling_barycenter, "falling_barycenter/F");
   onlineClusterTree->Branch("size", &size, "size/s");
   onlineClusterTree->Branch("charge", &charge, "charge/I");
+  onlineClusterTree->Branch("chargePerCM", &chargePerCM, "chargePerCM/F");
   onlineClusterTree->Branch("low_pt_trk_cluster", &low_pt_trk_cluster, "low_pt_trk_cluster/b");
   onlineClusterTree->Branch("high_pt_trk_cluster", &high_pt_trk_cluster, "high_pt_trk_cluster/b");
   onlineClusterTree->Branch("trk_algo", &trk_algo, "trk_algo/I");
@@ -248,6 +251,7 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
       falling_barycenter = approxCluster.barycenter();
       size       = convertedCluster.size();
       charge     = convertedCluster.charge();
+      chargePerCM = siStripClusterTools::chargePerCM(detId,convertedCluster);
 
       for (int strip = firstStrip; strip < endStrip+1; ++strip)
       {
@@ -270,11 +274,11 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
         {
            if (trk_cluster_property.barycenter == barycenter)
            {
-               /*assert( (size == trk_cluster_property.size)
+               assert( (size == trk_cluster_property.size)
                       && (firstStrip == trk_cluster_property.firstStrip)
                       && (endStrip == trk_cluster_property.endStrip)
                       && (charge == trk_cluster_property.charge)
-               );*/
+               );
                low_pt_trk_cluster = trk_cluster_property.low_pt_trk_cluster;
                high_pt_trk_cluster = trk_cluster_property.high_pt_trk_cluster;
                trk_algo           = trk_cluster_property.trk_algo;
