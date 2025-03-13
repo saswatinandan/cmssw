@@ -103,6 +103,9 @@ def build_array(obj, rawtype):
     update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 5, rawtype, sizes, yvals, texts, 'v2')
     update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 4, rawtype, sizes, yvals, texts, 'v2')
     update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 8, rawtype, sizes, yvals, texts, 'v2')
+    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 7, rawtype, sizes, yvals, texts, 'v2')
+    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 6, rawtype, sizes, yvals, texts, 'v2')
+    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 13, 8, rawtype, sizes, yvals, texts, 'v2')
   elif options.version == 'v1':
     texts['v1'] = []
     yvals['v1'] = []
