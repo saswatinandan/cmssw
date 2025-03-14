@@ -100,6 +100,8 @@ def build_array(obj, rawtype):
     update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 8, rawtype, sizes, yvals, texts, 'v2')
     update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 5, rawtype, sizes, yvals, texts, 'v2')
     update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 4, rawtype, sizes, yvals, texts, 'v2')
+    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 7, rawtype, sizes, yvals, texts, 'v2')
+    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 6, rawtype, sizes, yvals, texts, 'v2')
     update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 5, rawtype, sizes, yvals, texts, 'v2')
     update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 4, rawtype, sizes, yvals, texts, 'v2')
     update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 8, rawtype, sizes, yvals, texts, 'v2')
