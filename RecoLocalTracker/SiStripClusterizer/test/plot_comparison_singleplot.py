@@ -114,6 +114,8 @@ def build_array(obj, rawtype):
     sizes['v1'] = []
     update_list('remove_beginindices_v1_compression_LZMA', 14, 8, rawtype, sizes, yvals, texts, 'v1')
     update_list('remove_beginindices_v1_compression_LZMA', 14, 5, rawtype, sizes, yvals, texts, 'v1')
+    update_list('remove_beginindices_v1_compression_LZMA', 14, 6, rawtype, sizes, yvals, texts, 'v1')
+    update_list('remove_beginindices_v1_compression_LZMA', 14, 7, rawtype, sizes, yvals, texts, 'v1')
     update_list('remove_beginindices_v1_compression_LZMA', 14, 4, rawtype, sizes, yvals, texts, 'v1')
     update_list('remove_beginindices_v1_compression_LZMA', 14, 3, rawtype, sizes, yvals, texts, 'v1')
   elif options.version == 'v1.1':
