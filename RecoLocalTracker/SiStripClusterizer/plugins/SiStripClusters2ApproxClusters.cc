@@ -113,7 +113,7 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
   std::vector<uint16_t> v_strip;
   nlohmann::json data;
   for (const auto& detClusters : clusterCollection) {
-  //if (event.id().event() != 8168080) continue; 
+  //if (event.id().event() != 8095730) continue; 
     auto ff = result->beginDet(detClusters.id());
     //float previous_cluster = -999.;
     unsigned int detId = detClusters.id();

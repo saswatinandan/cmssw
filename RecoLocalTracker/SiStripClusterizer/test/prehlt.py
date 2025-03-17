@@ -551,7 +551,7 @@ process.maxEvents = cms.untracked.PSet(
 
 # enable TrigReport, TimeReport and MultiThreading
 process.options.wantSummary = True
-process.options.numberOfThreads = 100
+process.options.numberOfThreads = 1
 process.options.numberOfStreams = 0
 
 # override the GlobalTag, connection string and pfnPrefix
@@ -588,6 +588,7 @@ _customInfo['inputFiles']={}
 _customInfo['inputFiles'][True]  = "file:RelVal_Raw_GRun_DATA.root"
 _customInfo['inputFiles'][False] = "file:RelVal_Raw_GRun_MC.root"
 _customInfo['maxEvents' ]=  -1
+#_customInfo['skipEvent' ]=  2
 _customInfo['globalTag' ]= "140X_dataRun3_Prompt_v3"
 _customInfo['inputFile' ]=  ['file:/scratch/nandan/inputfile_for_prehlt/aadd1ab9-4eb8-4fb2-ac62-bdd1bebe882e.root']#'/store/data/Run2024F/Muon0/RAW-RECO/ZMu-PromptReco-v1/000/382/229/00000/0fd42df0-c533-49df-ae69-8a7195b340c3.root']
 _customInfo['realData'  ]=  True

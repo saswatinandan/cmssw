@@ -11,16 +11,30 @@ SiStripApproximateCluster::SiStripApproximateCluster(const SiStripCluster& clust
                                                      unsigned int& module_length,
                                                      unsigned int& previous_module_length,
                                                      bool peakFilter) {
+
+  std::ostringstream current;
+  current.precision(2);
   if (previous_cluster == -999.)
-   compBarycenter_ = std::round(cluster.barycenter() * maxRange_/maxBarycenter_);
+  {
+    current << std::fixed << cluster.barycenter();
+    std::string threshold = current.str();
+    compBarycenter_ = std::stoi(threshold.substr(0,threshold.find(".")));
+    compBarycenter_float = std::stoi(threshold.substr(threshold.find(".")+1));
+  }
   else
-   compBarycenter_ = std::round(((cluster.barycenter()-previous_cluster)+(module_length-previous_module_length))* maxRange_/maxBarycenter_);// + module_length;
-  //std::cout << ".cc compBarycenter_= " << compBarycenter_ << ", barycenter= " << cluster.barycenter() <<  ", module length= " << module_length  << ", previous barycenter= " << previous_cluster << ", previous_module_length= " << previous_module_length << std::endl;
+  {
+    current << std::fixed << (cluster.barycenter()-previous_cluster)+(module_length-previous_module_length);
+    std::string threshold = current.str();
+    compBarycenter_ = std::stoi(threshold.substr(0,threshold.find(".")));
+    compBarycenter_float = std::stoi(threshold.substr(threshold.find(".")+1));
+  }
+   //compBarycenter_ = (barycenter_int-previous_cluster)+(module_length-previous_module_length);//std::round(((cluster.barycenter()-previous_cluster)+(module_length-previous_module_length))* maxRange_/maxBarycenter_);// + module_length;
+  //std::cout << ".cc compBarycenter_= " << compBarycenter_ << ", compBarycenter_float= " << int(compBarycenter_float) << ", barycenter= " << cluster.barycenter() <<  ", module length= " << module_length  << ", previous barycenter= " << previous_cluster << ", previous_module_length= " << previous_module_length << std::endl;
   //std::cout << ((cluster.barycenter()+module_length)-(previous_cluster+previous_module_length)) << std::endl;
   previous_cluster = barycenter(previous_cluster, module_length, previous_module_length);
   assert(cluster.barycenter() <= maxBarycenter_ && "Got a barycenter > maxBarycenter");
-  assert(compBarycenter_ <= maxRange_ && "Filling compBarycenter > maxRange");
-  width_ = std::min(255,(int)cluster.size());//std::min(255,(int)cluster.size());//std::min(255,(int)cluster.size());//std::min(255,(int)cluster.size());
+  //assert(compBarycenter_ <= maxRange_ && "Filling compBarycenter > maxRange");
+  width_ = std::min(255,(int)cluster.size());//std::min(255,(int)cluster.size());//std::min(255,(int)cluster.size());//std::min(255,(int)cluster.size());//std::min(255,(int)cluster.size());//std::min(255,(int)cluster.size());//std::min(255,(int)cluster.size());
   double avgCharge_ = (cluster.charge() + width_/2)/ width_;
   assert(avgCharge_ <= maxavgCharge_ && "Got a avgCharge > maxavgCharge");
   compavgCharge_ = std::round(avgCharge_ * maxavgChargeRange_/maxavgCharge_);
