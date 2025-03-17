@@ -126,6 +126,7 @@ def build_array(obj, rawtype):
     update_list('keep_diff_beginindices_compression_LZMA', 14, 5, rawtype, sizes, yvals, texts, 'v1.1')
     update_list('keep_diff_beginindices_compression_LZMA', 14, 6, rawtype, sizes, yvals, texts, 'v1.1')
     update_list('keep_diff_beginindices_compression_LZMA', 14, 7, rawtype, sizes, yvals, texts, 'v1.1')
+    update_list('keep_diff_beginindices_compression_LZMA', 13, 7, rawtype, sizes, yvals, texts, 'v1.1')
     update_list('keep_diff_beginindices_compression_LZMA', 13, 5, rawtype, sizes, yvals, texts, 'v1.1')
     update_list('keep_diff_beginindices_compression_LZMA', 13, 6, rawtype, sizes, yvals, texts, 'v1.1')
   
