@@ -29,7 +29,7 @@ SiStripApproximateCluster::SiStripApproximateCluster(const SiStripCluster& clust
     compBarycenter_float = std::stoi(threshold.substr(threshold.find(".")+1));
   }
    //compBarycenter_ = (barycenter_int-previous_cluster)+(module_length-previous_module_length);//std::round(((cluster.barycenter()-previous_cluster)+(module_length-previous_module_length))* maxRange_/maxBarycenter_);// + module_length;
-  //std::cout << ".cc compBarycenter_= " << compBarycenter_ << ", compBarycenter_float= " << int(compBarycenter_float) << ", barycenter= " << cluster.barycenter() <<  ", module length= " << module_length  << ", previous barycenter= " << previous_cluster << ", previous_module_length= " << previous_module_length << std::endl;
+  std::cout << ".cc compBarycenter_= " << compBarycenter_ << ", compBarycenter_float= " << int(compBarycenter_float) << ", barycenter= " << cluster.barycenter() <<  ", module length= " << module_length  << ", previous barycenter= " << previous_cluster << ", previous_module_length= " << previous_module_length << std::endl;
   //std::cout << ((cluster.barycenter()+module_length)-(previous_cluster+previous_module_length)) << std::endl;
   previous_cluster = barycenter(previous_cluster, module_length, previous_module_length);
   assert(cluster.barycenter() <= maxBarycenter_ && "Got a barycenter > maxBarycenter");

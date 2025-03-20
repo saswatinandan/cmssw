@@ -108,12 +108,12 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
   unsigned int previous_module_length = 0;
   const auto tkDets = tkGeom->dets();
 
-  //std::cout << "event " << event.id().event() << "\t" <<  event.id().run() << "\t" << event.id().luminosityBlock() << std::endl;
+  std::cout << "event " << event.id().event() << "\t" <<  event.id().run() << "\t" << event.id().luminosityBlock() << std::endl;
   std::set<uint16_t> s_strip;
   std::vector<uint16_t> v_strip;
   nlohmann::json data;
   for (const auto& detClusters : clusterCollection) {
-  //if (event.id().event() != 8095730) continue; 
+  if (event.id().event() != 8095730) continue; 
     auto ff = result->beginDet(detClusters.id());
     //float previous_cluster = -999.;
     unsigned int detId = detClusters.id();
@@ -141,7 +141,7 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
     data[std::to_string(detId)+"_"+std::to_string(event.id().event())] = nStrips;
     assert(detClusters.size());
     bool first_cluster = true;
-    //std::cout << "changing detId " << detId << std::endl;
+    std::cout << "changing detId " << detId << std::endl;
     for (const auto& cluster : detClusters) {
       const LocalPoint& lp = LocalPoint(((cluster.barycenter() * 10 / (sistrip::STRIPS_PER_APV * nApvs)) -
                                          ((stripDet->surface().bounds().width()) * 0.5f)),

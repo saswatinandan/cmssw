@@ -41,7 +41,7 @@ public:
     else {
       _barycenter = (compress_barycenter+previous_barycenter)-(module_length-previous_module_length);//)((compBarycenter_ * maxBarycenter_/maxRange_) - (module_length-previous_module_length)) + previous_barycenter;
     }
-    //std::cout << ".h compBarycenter_= " << compBarycenter_ << ", barycenter= " << _barycenter << ", module length= " << module_length  << ", previous barycenter= " << previous_barycenter << ", previous_module_length= " << previous_module_length << std::endl;
+    std::cout << ".h compBarycenter_= " << compBarycenter_ << ", barycenter= " << _barycenter << "compBarycenter_float= " << int(compBarycenter_float) << " compress_barycenter= " << compress_barycenter << ", module length= " << module_length  << ", previous barycenter= " << previous_barycenter << ", previous_module_length= " << previous_module_length << std::endl;
   //std::cout << _barycenter << "\t" << compress_barycenter << "\t" << previous_barycenter << "\t" << module_length << "\t" << previous_module_length << std::endl;
     assert(_barycenter <= maxBarycenter_ && "Returning barycenter > maxBarycenter");
     return _barycenter; }
