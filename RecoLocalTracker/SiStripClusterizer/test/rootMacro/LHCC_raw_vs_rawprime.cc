@@ -119,20 +119,16 @@ void event_loop( map< int, map< int, map<int, bool> > >& evtMatchedMap,
                    EvthistManager& evthist,
                    map<int, vector<Track> >& r_good_lowpt_trk,
 		   map<int, vector<Track> >& r_good_highpt_trk,
-                   map<int, vector<Jet> >& r_goodjet,
-                   std::vector<int>& large_notrks
+                   map<int, vector<Jet> >& r_goodjet
 		  ){
        
 	std::cout << "analyzing " << std::endl;
-        bool raw_event = (large_notrks.size() == 0) ? true : false;
 
 	for (int idx = 0; idx < treereader.nentries; ++idx) {
 
-                int total_trk(0);
 		if(idx%1000 == 0) cout << "Scanning raw tracks: " << idx << "/" << treereader.nentries << endl;
-                treereader.tree->GetEntry(idx);
-                //std::cout << raw_event << "\t" << treereader.event << "\t" << std::count(large_notrks.begin(), large_notrks.end(), treereader.event) << std::endl;
-                if (! raw_event && std::count(large_notrks.begin(), large_notrks.end(), treereader.event) == 0 ) continue;
+
+		treereader.tree->GetEntry(idx);
 
 		if ( !evtMatchedMap[treereader.run][treereader.lumi][treereader.event]) continue;
 
@@ -167,7 +163,6 @@ void event_loop( map< int, map< int, map<int, bool> > >& evtMatchedMap,
                   evthist.fill("trk_inner_xy", treereader.inner_xy[trkIdx]);
                   evthist.fill("trk_inner_z", treereader.inner_z[trkIdx]);
 
-                  total_trk += 1;
 		  if (treereader.trkPt[trkIdx] < 1.0)
                      r_good_lowpt_trk[treereader.event].emplace_back(trkIdx, treereader.trkPt[trkIdx],
                        treereader.trkEta[trkIdx], treereader.trkPhi[trkIdx],
@@ -184,14 +179,6 @@ void event_loop( map< int, map< int, map<int, bool> > >& evtMatchedMap,
                        treereader.trkAlgo[trkIdx], treereader.trkNHit[trkIdx],
                        treereader.trkNdof[trkIdx], treereader.trkNlayer[trkIdx],
                        treereader.trkChi2[trkIdx], treereader.trkPtError[trkIdx]);
-                }
-                if (raw_event)
-                {
-                  if (total_trk > 5000) large_notrks.push_back(treereader.event);
-                  else {
-                    r_good_lowpt_trk.erase(treereader.event);
-                    r_good_highpt_trk.erase(treereader.event);
-                  }
                 }
 
                  ///// jet ////
@@ -382,10 +369,9 @@ int main(int argc, char const *argv[]) { //LHCC_raw_vs_rawprime() {
         map<int, vector<Jet> > r_goodjet;
 
 	cout << "calling eventloop for raw" << endl;
-        std::vector<int> large_notrks;
+
 	event_loop(evtMatchedMap, treereader_r, evthist_r,
-		   r_good_lowpt_trk, r_good_highpt_trk, r_goodjet,
-                   large_notrks
+		   r_good_lowpt_trk, r_good_highpt_trk, r_goodjet
 		  );
 
 	/////// rawprime ////
@@ -399,8 +385,7 @@ int main(int argc, char const *argv[]) { //LHCC_raw_vs_rawprime() {
 	cout << "calling eventloop for rawp" << endl;
 
 	event_loop(evtMatchedMap, treereader_rp, evthist_rp,
-                   rp_good_lowpt_trk, rp_good_highpt_trk, rp_goodjet,
-                   large_notrks
+                   rp_good_lowpt_trk, rp_good_highpt_trk, rp_goodjet
                   );	
 	
 	f->cd();
