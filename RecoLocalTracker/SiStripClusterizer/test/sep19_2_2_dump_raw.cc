@@ -182,12 +182,14 @@ void sep19_2_2_dump_raw::analyze(const edm::Event& event, const edm::EventSetup&
   
   const auto& tkGeom = &es.getData(tkGeomToken_);
   const auto tkDets = tkGeom->dets();
+
   for (const auto& detSiStripClusters : *clusterCollection) {
     eventN = event.id().event();
     runN   = (int) event.id().run();
     lumi   = (int) event.id().luminosityBlock();
     detId = detSiStripClusters.detId();
     for (const auto& stripCluster : detSiStripClusters) {
+
       firstStrip  = stripCluster.firstStrip();
       endStrip    = stripCluster.endStrip();
       barycenter  = stripCluster.barycenter();

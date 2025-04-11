@@ -128,7 +128,7 @@ process=convertToUnscheduled(process)
 
 
 # Customisation from command line
-process.options.numberOfThreads = 20
+process.options.numberOfThreads = 8
 process.options.numberOfStreams = 0
 
 #Have logErrorHarvester wait for the same EDProducers to finish as those providing data for the OutputModule

@@ -27,19 +27,10 @@ public:
                                      unsigned int maxNSat,
                                      float hitPredPos,
                                      float& previous_cluster,
-                                     unsigned int& module_length,
-                                     unsigned int& previous_module_length,
                                      bool peakFilter);
 
-  float barycenter(float previous_barycenter=0,
-                   unsigned int module_length=0, unsigned int previous_module_length=0) const {
-    float _barycenter;
-    if (  previous_barycenter == -999 )
-      _barycenter = compBarycenter_ * maxBarycenter_/maxRange_;
-    else {
-      _barycenter = ((compBarycenter_ * maxBarycenter_/maxRange_) - (module_length-previous_module_length)) + previous_barycenter;
-    }
-  //  std::cout << ".h compBarycenter_= " << compBarycenter_ << ", barycenter= " << _barycenter << ", module length= " << module_length  << ", previous barycenter= " << previous_barycenter << ", previous_module_length= " << previous_module_length << std::endl;
+  float barycenter() const { 
+    float _barycenter = compBarycenter_ * maxBarycenter_/maxRange_ ;
     assert(_barycenter <= maxBarycenter_ && "Returning barycenter > maxBarycenter");
     return _barycenter; }
   cms_uint8_t width() const {return width_; }
@@ -58,9 +49,9 @@ private:
   bool filter_ = false;
   bool isSaturated_ = false;
   bool peakFilter_ = false;
-  static constexpr double maxRange_ = 32767;
-  static constexpr double maxBarycenter_ = 1536.;
-  static constexpr double maxavgChargeRange_ = 255; //255; //255; //255;
+  static constexpr double maxRange_ = 16383;
+  static constexpr double maxBarycenter_ = 768.;
+  static constexpr double maxavgChargeRange_ = 255;
   static constexpr double maxavgCharge_ = 255.;
   static constexpr double trimMaxADC_ = 30.;
   static constexpr double trimMaxFracTotal_ = .15;
