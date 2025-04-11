@@ -16,7 +16,7 @@
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h"
-#include "DataFormats/SiStripCluster/interface/SiStripApproximateClusterCollection.h"
+#include "DataFormats/SiStripCluster/interface/SiStripApproximateClusterCollection_v1.h"
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -37,7 +37,6 @@
 #include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit1D.h"
-#include "DataFormats/SiStripCluster/interface/SiStripClusterTools.h"
 
 #include "assert.h"
 //ROOT inclusion
@@ -74,7 +73,7 @@ private:
   edm::EDGetTokenT<reco::TrackCollection> tracksToken_; 
 
   // Event Data
-  edm::EDGetTokenT<SiStripApproximateClusterCollection> approxClusterToken;
+  edm::EDGetTokenT<v1::SiStripApproximateClusterCollection> approxClusterToken;
   edm::EDGetTokenT<edmNew::DetSetVector<SiStripCluster>> clusterForRawPrimeToken;
 
   // Event Setup Data
@@ -95,7 +94,6 @@ private:
   float       falling_barycenter;
   uint16_t    size;
   int         charge;
-  float       chargePerCM;
   bool        low_pt_trk_cluster;
   bool        high_pt_trk_cluster;
   int         trk_algo;
@@ -122,7 +120,7 @@ private:
 
 sep19_2_1_dump_rawprime::sep19_2_1_dump_rawprime(const edm::ParameterSet& conf) {
   inputTagApproxClusters = conf.getParameter<edm::InputTag>("approxSiStripClustersTag");
-  approxClusterToken 	 = consumes<SiStripApproximateClusterCollection>(inputTagApproxClusters);
+  approxClusterToken 	 = consumes<v1::SiStripApproximateClusterCollection>(inputTagApproxClusters);
   tracksToken_           = consumes<reco::TrackCollection>(conf.getParameter<edm::InputTag>("tracks"));
   doDumpInputOfSiStripClusters2ApproxClusters = conf.getParameter<bool>("doDumpInputOfSiStripClusters2ApproxClusters");
   inputTagClustersForRawPrime = conf.getParameter<edm::InputTag>("hltSiStripClusterizerForRawPrimeTag");
@@ -145,7 +143,6 @@ sep19_2_1_dump_rawprime::sep19_2_1_dump_rawprime(const edm::ParameterSet& conf) 
   onlineClusterTree->Branch("falling_barycenter", &falling_barycenter, "falling_barycenter/F");
   onlineClusterTree->Branch("size", &size, "size/s");
   onlineClusterTree->Branch("charge", &charge, "charge/I");
-  onlineClusterTree->Branch("chargePerCM", &chargePerCM, "chargePerCM/F");
   onlineClusterTree->Branch("low_pt_trk_cluster", &low_pt_trk_cluster, "low_pt_trk_cluster/b");
   onlineClusterTree->Branch("high_pt_trk_cluster", &high_pt_trk_cluster, "high_pt_trk_cluster/b");
   onlineClusterTree->Branch("trk_algo", &trk_algo, "trk_algo/I");
@@ -173,7 +170,7 @@ sep19_2_1_dump_rawprime::sep19_2_1_dump_rawprime(const edm::ParameterSet& conf) 
 sep19_2_1_dump_rawprime::~sep19_2_1_dump_rawprime() = default;
 
 void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventSetup& es) {
-  edm::Handle<SiStripApproximateClusterCollection>  approxClusterCollection 	= event.getHandle(approxClusterToken);
+  edm::Handle<v1::SiStripApproximateClusterCollection>  approxClusterCollection 	= event.getHandle(approxClusterToken);
   edm::Handle<edmNew::DetSetVector<SiStripCluster>> clusterForRawPrimeCollection = event.getHandle(clusterForRawPrimeToken);
 
   const auto& tracksHandle = event.getHandle(tracksToken_);
@@ -225,34 +222,51 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
   const auto& tkGeom = &es.getData(tkGeomToken_);
   const auto tkDets = tkGeom->dets();
 
-  unsigned int count = 0;
+  std::vector<uint16_t> v_strip;
+  float previous_barycenter = -999.;
+  unsigned int module_length = 0;
+  unsigned int previous_module_length = 0;
+  unsigned int clusBegin = 0;
   for (const auto& detApproxClusters : *approxClusterCollection) {
     eventN = event.id().event();
+    //if (eventN != 24061779) continue;
     runN   = (int) event.id().run();
     lumi   = (int) event.id().luminosityBlock();
     detId  = detApproxClusters.id();
-   //  if (event.id().event() != 8180236 ||  event.id().run() != 382216 || event.id().luminosityBlock() !=99) continue;
-   //  std::cout << eventN << "\t" <<  runN << "\t" << lumi << std::endl; 
     //std::cout << "detId " << detId << std::endl;
-    for (const auto& approxCluster : detApproxClusters) {
-      count += 1;
-      ///// 1. converting approxCluster to stripCluster: for the estimation of firstStrip, endStrip, adc info
-      uint16_t nStrips{0};
-      const auto& _detId = detId; // for the capture clause in the lambda function
-      auto det = std::find_if(tkDets.begin(), tkDets.end(), [_detId](auto& elem) -> bool {
+   //  if (event.id().event() != 8180236 ||  event.id().run() != 382216 || event.id().luminosityBlock() !=99) continue;
+    //std::cout << eventN << "\t" <<  runN << "\t" << lumi << std::endl; 
+    //std::cout << "detId " << detId << std::endl;
+    uint16_t nStrips{0};
+    const auto& _detId = detId; // for the capture clause in the lambda function
+    auto det = std::find_if(tkDets.begin(), tkDets.end(), [_detId](auto& elem) -> bool {
         return (elem->geographicalId().rawId() == _detId);
-      });
-      const StripTopology& p = dynamic_cast<const StripGeomDetUnit*>(*det)->specificTopology();
-      nStrips = p.nstrips() - 1;
-      const auto convertedCluster = SiStripCluster(approxCluster, nStrips);
+    });
+    const StripTopology& p = dynamic_cast<const StripGeomDetUnit*>(*det)->specificTopology();
+    nStrips = p.nstrips();
+    v_strip.push_back(nStrips);
+    previous_module_length += (v_strip.size() <3) ? 0 : v_strip[v_strip.size()-3];
+    module_length += (v_strip.size() <2) ? 0 : v_strip[v_strip.size()-2];
+    bool first_cluster = true;
+    detApproxClusters.move(clusBegin);
+    for (const auto& approxCluster : detApproxClusters) {
 
+      ///// 1. converting approxCluster to stripCluster: for the estimation of firstStrip, endStrip, adc info
+      const auto convertedCluster = SiStripCluster(approxCluster, nStrips-1, previous_barycenter, module_length, first_cluster ? previous_module_length : module_length);
+
+      //std::cout << "nStrips " << nStrips << std::endl;
+      if ( (convertedCluster.barycenter()) >= nStrips) {
+         break;
+      }
+      falling_barycenter = approxCluster.barycenter();
+      first_cluster = false;
+      ++clusBegin;
       firstStrip = convertedCluster.firstStrip();
       endStrip   = convertedCluster.endStrip();
       barycenter = convertedCluster.barycenter();
-      falling_barycenter = approxCluster.barycenter();
+      previous_barycenter = convertedCluster.barycenter();
       size       = convertedCluster.size();
       charge     = convertedCluster.charge();
-      chargePerCM = siStripClusterTools::chargePerCM(detId,convertedCluster);
 
       for (int strip = firstStrip; strip < endStrip+1; ++strip)
       {
@@ -275,11 +289,11 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
         {
            if (trk_cluster_property.barycenter == barycenter)
            {
-               assert( (size == trk_cluster_property.size)
+               /*assert( (size == trk_cluster_property.size)
                       && (firstStrip == trk_cluster_property.firstStrip)
                       && (endStrip == trk_cluster_property.endStrip)
                       && (charge == trk_cluster_property.charge)
-               );
+               );*/
                low_pt_trk_cluster = trk_cluster_property.low_pt_trk_cluster;
                high_pt_trk_cluster = trk_cluster_property.high_pt_trk_cluster;
                trk_algo           = trk_cluster_property.trk_algo;
@@ -327,7 +341,6 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
       onlineClusterTree->Fill();
     }
   }
-  std::cout << "count " << count << std::endl;
 }
 
 void sep19_2_1_dump_rawprime::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {

@@ -33,6 +33,20 @@ def replace_line(infile, replaces_to_vals):
                    break 
             f.write(line)
 
+#barycenter_bit = int(barycenter_bit.strip('bit'))
+maxRange_ = (1<<int(barycenter_bit.strip('bit'))) -1
+replace_line('../../../DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h',
+             [('maxRange_ = ', f'maxRange_ = {maxRange_}; //')])
+
+#width_bit = int(width_bit.strip('bit'))
+maxRange_ = (1<<int(width_bit.strip('bit'))) -1
+replace_line('../../../DataFormats/SiStripCluster/src/SiStripApproximateCluster.cc',
+               [('width_ = ', 'width_ = ' + f'std::min({maxRange_},(int)cluster.size());//')])
+
+maxRange_ = (1<<int(avgCharge_bit.strip('bit'))) -1
+replace_line('../../../DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h',
+               [('maxavgChargeRange_ = ', f'maxavgChargeRange_ = {maxRange_}; //')])
+
 run_cmd = 'scram b -j 8'
 print(run_cmd)
 os.system(run_cmd)
