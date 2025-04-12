@@ -38,7 +38,7 @@ public:
       firstStrip_ |= mergedValueMask;  // if this is a candidate merged cluster
   }
 
-  SiStripCluster(const SiStripApproximateCluster cluster, const uint16_t maxStrips, float pc=-999);
+  SiStripCluster(const SiStripApproximateCluster cluster, const uint16_t maxStrips, float pc=-999, unsigned int module_length=0, unsigned int previous_module_length=0);
 
   // extend the cluster
   template <typename Iter>

@@ -42,36 +42,39 @@ void SiStripApprox2Clusters::produce(edm::StreamID id, edm::Event& event, const 
   const auto& tkGeom = &iSetup.getData(tkGeomToken_);
   const auto& tkDets = tkGeom->dets();
 
+  std::vector<uint16_t> v_strip;
+  float previous_barycenter = -999.;
+  unsigned int module_length = 0;
+  unsigned int previous_module_length = 0;
+
+  //std::cout << "event " << event.id().event() << "\t" <<  event.id().run() << "\t" << event.id().luminosityBlock() << std::endl;
   unsigned int clusBegin = 0;
   for (const auto& detClusters : clusterCollection) {
+    //if (event.id().event() != 8168080) continue;
     edmNew::DetSetVector<SiStripCluster>::FastFiller ff{*result, detClusters.id()};
     unsigned int detId = detClusters.id();
-    
+    //std::cout << "detId " << detId << std::endl;
     uint16_t nStrips{0};
     auto det = std::find_if(tkDets.begin(), tkDets.end(), [detId](auto& elem) -> bool {
       return (elem->geographicalId().rawId() == detId);
     });
     const StripTopology& p = dynamic_cast<const StripGeomDetUnit*>(*det)->specificTopology();
-    nStrips = p.nstrips() - 1;
-
-    float previous_barycenter = -999;
+    nStrips = p.nstrips();
+    v_strip.push_back(nStrips);
+    previous_module_length += (v_strip.size() <3) ? 0 : v_strip[v_strip.size()-3];
+    module_length += (v_strip.size() <2) ? 0 : v_strip[v_strip.size()-2];
+    bool first_cluster = true;
     detClusters.move(clusBegin);
-    bool first_cluster = false;
+    //std::cout << "detId " << detId << std::endl;
     for (const auto& cluster : detClusters) {
-
-      if (first_cluster == false) {
-         assert(cluster.first_cluster());
-         first_cluster = true;
+      const auto convertedCluster = SiStripCluster(cluster, nStrips-1, previous_barycenter, module_length, first_cluster ? previous_module_length : module_length);
+      if ( (convertedCluster.barycenter()) >= nStrips) {
+         break;
       }
-      else {
-       if (cluster.first_cluster()) {
-       break;
-       }
-      }
+      previous_barycenter = convertedCluster.barycenter();
       ++clusBegin;
-      const auto convertedCluster = SiStripCluster(cluster, nStrips, previous_barycenter);
       ff.push_back(convertedCluster);
-      previous_barycenter = convertedCluster.barycenter(); 
+      first_cluster = false; 
     }
   }
 
