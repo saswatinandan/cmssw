@@ -22,11 +22,8 @@ SiStripCluster::SiStripCluster(const SiStripDigiRange& range) : firstStrip_(rang
   amplitudes_ = v;
 }
 
-SiStripCluster::SiStripCluster(const SiStripApproximateCluster cluster, const uint16_t maxStrips, float p_bc) : error_x(-99999.9) {
-  if (p_bc == -999)
-   barycenter_ = cluster.barycenter();
-  else
-    barycenter_ = cluster.barycenter() + p_bc;
+SiStripCluster::SiStripCluster(const SiStripApproximateCluster cluster, const uint16_t maxStrips) : error_x(-99999.9) {
+  barycenter_ = cluster.barycenter();
   charge_ = cluster.width() * cluster.avgCharge();
   amplitudes_.resize(cluster.width(), cluster.avgCharge());
   filter_ = cluster.filter();
