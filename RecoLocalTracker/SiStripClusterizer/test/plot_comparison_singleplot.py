@@ -125,12 +125,12 @@ def build_array(obj, rawtype):
     yvals['v1.1'] = []
     sizes['v1.1'] = []
     update_list('HI_wchargecut_v1p1', 14, 8, rawtype, sizes, yvals, texts, 'v1.1')
-    update_list('HI_wchargecut_v1p1', 14, 5, rawtype, sizes, yvals, texts, 'v1.1')
+    #update_list('HI_wchargecut_v1p1', 14, 5, rawtype, sizes, yvals, texts, 'v1.1')
     update_list('HI_wchargecut_v1p1', 14, 6, rawtype, sizes, yvals, texts, 'v1.1')
-    update_list('HI_wchargecut_v1p1', 14, 7, rawtype, sizes, yvals, texts, 'v1.1')
-    update_list('HI_wchargecut_v1p1', 13, 7, rawtype, sizes, yvals, texts, 'v1.1')
-    update_list('HI_wchargecut_v1p1', 13, 5, rawtype, sizes, yvals, texts, 'v1.1')
-    update_list('HI_wchargecut_v1p1', 13, 6, rawtype, sizes, yvals, texts, 'v1.1')
+    #update_list('HI_wchargecut_v1p1', 14, 7, rawtype, sizes, yvals, texts, 'v1.1')
+    #update_list('HI_wchargecut_v1p1', 13, 7, rawtype, sizes, yvals, texts, 'v1.1')
+    #update_list('HI_wchargecut_v1p1', 13, 5, rawtype, sizes, yvals, texts, 'v1.1')
+    update_list('HI_wchargecut_v1p1', 14, 6, rawtype, sizes, yvals, texts, 'v1.1')
   
   draw(sizes, yvals, texts, f'unmatched {obj} in %', obj, rawtype)
 
