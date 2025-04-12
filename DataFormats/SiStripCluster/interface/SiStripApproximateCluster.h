@@ -26,8 +26,13 @@ public:
   explicit SiStripApproximateCluster(const SiStripCluster& cluster,
                                      unsigned int maxNSat,
                                      float hitPredPos,
-                                     bool peakFilter);
+                                     float& previous_cluster,
+                                     bool peakFilter,
+                                     bool first_cluster=0);
 
+  bool first_cluster() const {
+    return first_cluster_;
+  }
   float barycenter() const { 
     float _barycenter = compBarycenter_ * maxBarycenter_/maxRange_ ;
     assert(_barycenter <= maxBarycenter_ && "Returning barycenter > maxBarycenter");
@@ -48,9 +53,10 @@ private:
   bool filter_ = false;
   bool isSaturated_ = false;
   bool peakFilter_ = false;
-  static constexpr double maxRange_ = 65535;
+  bool first_cluster_;
+  static constexpr double maxRange_ = 65535; //65535; //65535; //65535; //65535;
   static constexpr double maxBarycenter_ = 768.;
-  static constexpr double maxavgChargeRange_ = 255;
+  static constexpr double maxavgChargeRange_ = 255; //255; //255; //255; //255;
   static constexpr double maxavgCharge_ = 255.;
   static constexpr double trimMaxADC_ = 30.;
   static constexpr double trimMaxFracTotal_ = .15;
