@@ -69,7 +69,7 @@ def draw(x_vals, y_vals, texts, ytitle, obj, rawtype, filename=''):
   plt.title(f'size vs {obj}', fontsize=20)
   plt.xlabel('size of approx cluster in Byte', fontsize=20)
   plt.ylabel(ytitle, fontsize=20)
-  plt.legend(fontsize=20)
+  plt.legend(fontsize=15)
   ax.grid(True)
   plt.savefig(f'singleplot_{obj}_{rawtype}.png' if filename=='' else f'{filename}.png')
   plt.close('all')
