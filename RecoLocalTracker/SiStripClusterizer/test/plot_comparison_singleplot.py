@@ -69,7 +69,7 @@ def draw(x_vals, y_vals, texts, ytitle, obj, rawtype, filename=''):
   plt.title(f'size vs {obj}', fontsize=20)
   plt.xlabel('size of approx cluster in Byte', fontsize=20)
   plt.ylabel(ytitle, fontsize=20)
-  plt.legend()
+  plt.legend(fontsize=15)
   ax.grid(True)
   plt.savefig(f'singleplot_{obj}_{rawtype}.png' if filename=='' else f'{filename}.png')
   plt.close('all')
@@ -114,12 +114,12 @@ def build_array(obj, rawtype):
     texts['v1'] = []
     yvals['v1'] = []
     sizes['v1'] = []
-    update_list('remove_beginindices_v1_compression_LZMA', 14, 8, rawtype, sizes, yvals, texts, 'v1')
-    update_list('remove_beginindices_v1_compression_LZMA', 14, 5, rawtype, sizes, yvals, texts, 'v1')
-    update_list('remove_beginindices_v1_compression_LZMA', 14, 6, rawtype, sizes, yvals, texts, 'v1')
-    update_list('remove_beginindices_v1_compression_LZMA', 14, 7, rawtype, sizes, yvals, texts, 'v1')
-    update_list('remove_beginindices_v1_compression_LZMA', 14, 4, rawtype, sizes, yvals, texts, 'v1')
-    update_list('remove_beginindices_v1_compression_LZMA', 14, 3, rawtype, sizes, yvals, texts, 'v1')
+    update_list('HI_wchargecut_v1', 14, 8, rawtype, sizes, yvals, texts, 'v1')
+    #update_list('HI_wchargecut_v1', 14, 5, rawtype, sizes, yvals, texts, 'v1')
+    update_list('HI_wchargecut_v1', 14, 6, rawtype, sizes, yvals, texts, 'v1')
+    #update_list('HI_wchargecut_v1', 14, 7, rawtype, sizes, yvals, texts, 'v1')
+    update_list('HI_wchargecut_v1', 14, 4, rawtype, sizes, yvals, texts, 'v1')
+    #update_list('HI_wchargecut_v1', 14, 3, rawtype, sizes, yvals, texts, 'v1')
   elif options.version == 'v1.1':
     texts['v1.1'] = []
     yvals['v1.1'] = []
