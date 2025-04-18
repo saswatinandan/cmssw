@@ -294,7 +294,7 @@ int main(int argc, char const *argv[])
 	                                    88, 0., 704. );
 	TH1F * h_barycenter_tot_sc = new TH1F( "RAW_offline_barrycenter", "(offline) raw cluster barycenter; yield",  
 	                                    950, 0., 950. );
-        TH1F* h_falling_barycenter_tot_ac = new TH1F("falling_barycenter", ";barycenter;yield", 328, 0, 32800.); 
+        TH1F* h_falling_barycenter_tot_ac = new TH1F("falling_barycenter", ";compressed #Delta barycenter;yield", 328, 0, 32800.); 
 
 	TH1F * h_size_tot_ac      = new TH1F( "RAW'_online_size", "(online) raw' cluster; size; yield",  
 	                                    50, 0., 50. );
@@ -931,7 +931,7 @@ int main(int argc, char const *argv[])
         h_charge_res->Scale(1/h_charge_res->Integral());
 	h_charge_res->Draw("");
 	latex.DrawLatexNDC(0.21,0.84,"CMS");
-	latex.DrawLatexNDC(0.31,0.84,"Preliminary");
+	latex.DrawLatexNDC(0.21,0.80,"Preliminary");
 	latex.DrawLatexNDC(0.33,0.945,"2024 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	latex.SetTextFont(43);
 	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_charge_res->GetMean()));
@@ -941,7 +941,8 @@ int main(int argc, char const *argv[])
 
         h_barycenter_res->Scale(1/h_barycenter_res->Integral());
 	h_barycenter_res->Draw("");
-	latex.DrawLatexNDC(0.31,0.84,"CMS Preliminary");
+	latex.DrawLatexNDC(0.21,0.84,"CMS");
+        latex.DrawLatexNDC(0.21,0.80,"Preliminary");
 	latex.DrawLatexNDC(0.33,0.945,"2024 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	latex.SetTextFont(43);
 	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_barycenter_res->GetMean()));
