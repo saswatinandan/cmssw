@@ -58,7 +58,7 @@ def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, 
   #print(yvals)
   texts[ver].append((f'{bary_bit}', f'{chrg_bit}'))
 
-def draw(x_vals, y_vals, texts, ytitle, obj, rawtype, filename=''):
+def draw(x_vals, y_vals, texts, ytitle, obj, rawtype):
 
   fig = plt.figure(figsize=(8,7))
   ax = fig.add_subplot(111)
@@ -75,9 +75,26 @@ def draw(x_vals, y_vals, texts, ytitle, obj, rawtype, filename=''):
   plt.legend(fontsize=15)
   ax.grid(True)
   plt.subplots_adjust(bottom=0.2, top=0.90, left=0.15)
-  plt.savefig(f'singleplot_{obj}_{rawtype}.png' if filename=='' else f'{filename}.png')
+  plt.savefig(f'singleplot_{obj}_{rawtype}.png')
   plt.close('all')
 
+def draw_trackno(x_vals, y_vals, texts, ytitle, obj, rawtype):
+
+      fig = plt.figure(figsize=(8,7))
+      ax = fig.add_subplot(111)
+      for idx, key in enumerate(texts.keys()):
+          plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
+          for i, text in enumerate(texts[key]):
+                ax.text(x_vals[key][i], y_vals[key][i], text, fontsize=12)
+      plt.xlabel('size of approx cluster in Byte', fontsize=15)
+      plt.ylabel(ytitle, fontsize=15)
+      #plt.xticks(fontsize=15)
+      #plt.yticks(fontsize=15)
+      plt.legend(fontsize=15, loc='best')
+      ax.grid(True)
+      plt.savefig('charge_cut.png')
+      plt.close('all')
+                                
 def build_array(obj, rawtype):
 
   texts = {}
@@ -150,28 +167,28 @@ else:
   sizes = {}
   yvals = {}
 
-  texts["with_chargecut_raw'"] = []
-  yvals["with_chargecut_raw'"] = []
-  sizes["with_chargecut_raw'"] = []
+  texts["chargecut_raw'"] = []
+  yvals["chargecut_raw'"] = []
+  sizes["chargecut_raw'"] = []
 
-  update_list('HI_wchargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "with_chargecut_raw'", options.events)
+  update_list('HI_wchargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "chargecut_raw'", options.events)
 
-  texts["without_chargecut_raw'"] = []
-  yvals["without_chargecut_raw'"] = []
-  sizes["without_chargecut_raw'"] = []
+  texts["no_chargecut_raw'"] = []
+  yvals["no_chargecut_raw'"] = []
+  sizes["no_chargecut_raw'"] = []
 
-  update_list('HI_wochargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "without_chargecut_raw'", options.events)
+  update_list('HI_wochargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "no_chargecut_raw'", options.events)
 
-  texts["with_chargecut_HI_raw'"] = []
-  yvals["with_chargecut_HI_raw'"] = []
-  sizes["with_chargecut_HI_raw'"] = []
+  texts["chargecut_HI_raw'"] = []
+  yvals["chargecut_HI_raw'"] = []
+  sizes["chargecut_HI_raw'"] = []
 
-  update_list('HI_wchargecut', 16, 8, "rawp", sizes, yvals, texts, "with_chargecut_HI_raw'", options.events)
+  update_list('HI_wchargecut', 16, 8, "rawp", sizes, yvals, texts, "chargecut_HI_raw'", options.events)
 
-  texts["without_chargecut_HI_raw'"] = []
-  yvals["without_chargecut_HI_raw'"] = []
-  sizes["without_chargecut_HI_raw'"] = []
+  texts["no_chargecut_HI_raw'"] = []
+  yvals["no_chargecut_HI_raw'"] = []
+  sizes["no_chargecut_HI_raw'"] = []
 
-  update_list('HI_wochargecut', 16, 8, 'rawp', sizes, yvals, texts, "without_chargecut_HI_raw'", options.events)
+  update_list('HI_wochargecut', 16, 8, 'rawp', sizes, yvals, texts, "no_chargecut_HI_raw'", options.events)
 
-  draw(sizes, yvals, texts, '# of tracks', 'tracks', 'rawp', 'chargecut')
+  draw_trackno(sizes, yvals, texts, '# of tracks', 'tracks', 'rawp')
