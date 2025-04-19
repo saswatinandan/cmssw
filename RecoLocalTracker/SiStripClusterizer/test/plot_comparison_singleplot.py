@@ -67,12 +67,14 @@ def draw(x_vals, y_vals, texts, ytitle, obj, rawtype, filename=''):
     for i, text in enumerate(texts[key]):
       ax.text(x_vals[key][i], y_vals[key][i], text, fontsize=12)#, color=colors[idx])
   #plt.title(f'size vs {obj}', fontsize=20)
-  plt.xlabel('size of approx cluster in Byte', fontsize=20, labelpad=10)
+  #plt.margins(x=0.80)
+  plt.xlabel('size of approx cluster in Byte', fontsize=20, labelpad=15)
   plt.ylabel(ytitle, fontsize=20, labelpad=15)
   plt.xticks(fontsize=20)
   plt.yticks(fontsize=20)
   plt.legend(fontsize=15)
   ax.grid(True)
+  plt.subplots_adjust(bottom=0.2, top=0.90, left=0.15)
   plt.savefig(f'singleplot_{obj}_{rawtype}.png' if filename=='' else f'{filename}.png')
   plt.close('all')
 
