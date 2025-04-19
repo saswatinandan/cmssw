@@ -678,10 +678,10 @@ int main(int argc, char const *argv[])
 	                                    "; size (RAW'-RAW)/RAW; yield",
 	                                    50, -.1, .1);
 	TH1F * h_charge_res     = new TH1F( "chagre_res", 
-	                                    "; charge (RAW'-RAW)/RAW; yield",
+	                                    "; total charge (raw'-raw)/raw; Normalized yield",
 	                                    50, -.1, .1);
 	TH1F * h_barycenter_res = new TH1F( "barycenter_res", 
-	                                    "; barycenter (RAW'-RAW)/RAW; yield",
+	                                    "; barycenter (raw'-raw)/raw; Normalized yield",
 	                                    50, -.1, .1);
 
 	ofstream matched_sc2ac_txt;

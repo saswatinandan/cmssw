@@ -14,7 +14,7 @@ class match_obj_histManager
         std::string pt = obj.find("high") == std::string::npos ? "low" : "high";
         std::string title = Form(";Raw_pt/Raw'_pt for %s pT tracks;yield", pt.c_str());
         hists["deltar"] = createhist(Form("%s_delta_r", base_name.c_str()), "delta_r;delta_r;yield", 50, 0., drcut);
-        hists["ratio"] = createhist(Form("%s_ratio", base_name.c_str()), Form(";Raw_pt/Raw'_pt for %s pT tracks;Normalized yield", pt.c_str()), 50, 0.95, 1.05);
+        hists["ratio"] = createhist(Form("%s_ratio", base_name.c_str()), Form(";pT(raw'/raw) for %s pT tracks;Normalized yield", pt.c_str()), 50, 0.95, 1.05);
        }
 
 
