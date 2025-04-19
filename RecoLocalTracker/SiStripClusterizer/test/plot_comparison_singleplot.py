@@ -52,7 +52,7 @@ def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, 
             yvals[ver].append(val)
   else:
     f = TFile(input_file, 'r')
-    yvals[ver].append(f.Get(f'{rawtype}_trk_cutflow_z4').GetBinContent(1,1))
+    yvals[ver].append(f.Get(f'{rawtype}_trk_cutflow').GetBinContent(1,1))
 
   #print(sizes)
   #print(yvals)
@@ -60,17 +60,21 @@ def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, 
 
 def draw(x_vals, y_vals, texts, ytitle, obj, rawtype, filename=''):
 
-  fig = plt.figure(figsize=(8,6))
+  fig = plt.figure(figsize=(8,7))
   ax = fig.add_subplot(111)
   for idx, key in enumerate(texts.keys()):
     plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
     for i, text in enumerate(texts[key]):
-      ax.text(x_vals[key][i], y_vals[key][i], text)#, color=colors[idx])
-  plt.title(f'size vs {obj}', fontsize=20)
-  plt.xlabel('size of approx cluster in Byte', fontsize=20)
-  plt.ylabel(ytitle, fontsize=20)
-  plt.legend()
+      ax.text(x_vals[key][i], y_vals[key][i], text, fontsize=12)#, color=colors[idx])
+  #plt.title(f'size vs {obj}', fontsize=20)
+  #plt.margins(x=0.80)
+  plt.xlabel('size of approx cluster in Byte', fontsize=20, labelpad=15)
+  plt.ylabel(ytitle, fontsize=20, labelpad=15)
+  plt.xticks(fontsize=20)
+  plt.yticks(fontsize=20)
+  plt.legend(fontsize=15)
   ax.grid(True)
+  plt.subplots_adjust(bottom=0.2, top=0.90, left=0.15)
   plt.savefig(f'singleplot_{obj}_{rawtype}.png' if filename=='' else f'{filename}.png')
   plt.close('all')
 
@@ -82,19 +86,19 @@ def build_array(obj, rawtype):
 
   compare = 'cutflow'
 
-  texts['rawp'] = []
-  yvals['rawp'] = []
-  sizes['rawp'] = []
+  texts["raw'"] = []
+  yvals["raw'"] = []
+  sizes["raw'"] = []
 
   for avgCharge in avgCharges:
     for bit in x:
-      update_list(output, bit, avgCharge, rawtype, sizes, yvals, texts, 'rawp', options.events)
+      update_list(output, bit, avgCharge, rawtype, sizes, yvals, texts, "raw'", options.events)
   
-  texts['HI_rawp'] = []
-  yvals['HI_rawp'] = []
-  sizes['HI_rawp'] = []
+  texts["HI_raw'"] = []
+  yvals["HI_raw'"] = []
+  sizes["HI_raw'"] = []
   
-  update_list('HI_wchargecut', 16, 8, rawtype, sizes, yvals, texts, 'HI_rawp', options.events)
+  update_list('HI_wchargecut', 16, 8, rawtype, sizes, yvals, texts, "HI_raw'", options.events)
   if options.version == 'v2':
     texts['v2'] = []
     yvals['v2'] = []
@@ -104,12 +108,12 @@ def build_array(obj, rawtype):
     update_list('HI_wchargecut_v2', 15, 4, rawtype, sizes, yvals, texts, 'v2')
     #update_list('HI_wchargecut_v2', 15, 7, rawtype, sizes, yvals, texts, 'v2')
     update_list('HI_wchargecut_v2', 15, 6, rawtype, sizes, yvals, texts, 'v2')
-    '''update_list('HI_wchargecut_v2', 14, 5, rawtype, sizes, yvals, texts, 'v2')
-    update_list('HI_wchargecut_v2', 14, 4, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('HI_wchargecut_v2', 14, 5, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('HI_wchargecut_v2', 14, 4, rawtype, sizes, yvals, texts, 'v2')
     update_list('HI_wchargecut_v2', 14, 8, rawtype, sizes, yvals, texts, 'v2')
-    update_list('HI_wchargecut_v2', 14, 7, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('HI_wchargecut_v2', 14, 7, rawtype, sizes, yvals, texts, 'v2')
     update_list('HI_wchargecut_v2', 14, 6, rawtype, sizes, yvals, texts, 'v2')
-    update_list('HI_wchargecut_v2', 13, 8, rawtype, sizes, yvals, texts, 'v2')'''
+    #update_list('HI_wchargecut_v2', 13, 8, rawtype, sizes, yvals, texts, 'v2')'''
   elif options.version == 'v1':
     texts['v1'] = []
     yvals['v1'] = []
@@ -131,11 +135,13 @@ def build_array(obj, rawtype):
     update_list('HI_wchargecut_v1p1', 13, 7, rawtype, sizes, yvals, texts, 'v1.1')
     update_list('HI_wchargecut_v1p1', 13, 5, rawtype, sizes, yvals, texts, 'v1.1')
     update_list('HI_wchargecut_v1p1', 13, 6, rawtype, sizes, yvals, texts, 'v1.1')
-  
-  draw(sizes, yvals, texts, f'unmatched {obj} in %', obj, rawtype)
+
+  pt = obj.split('_')[1].split('pt')[0]
+  ylabel = obj.split('_')[0]
+  draw(sizes, yvals, texts, f'unmatched {pt} pt {ylabel} in %', obj, rawtype)
 
 if not options.events:
-  for raw in ['raw', 'rawp']:
+  for raw in ['raw', "rawp"]:
      for obj in ['tracks_lowpt', 'tracks_highpt']:#, 'jet']:
         build_array(obj, raw)
 else:
@@ -144,28 +150,28 @@ else:
   sizes = {}
   yvals = {}
 
-  texts['wchargecut_rawp'] = []
-  yvals['wchargecut_rawp'] = []
-  sizes['wchargecut_rawp'] = []
+  texts["with_chargecut_raw'"] = []
+  yvals["with_chargecut_raw'"] = []
+  sizes["with_chargecut_raw'"] = []
 
-  update_list('test_compression_LZMA', 16, 8, 'rawp', sizes, yvals, texts, 'wchargecut_rawp', options.events)
+  update_list('HI_wchargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "with_chargecut_raw'", options.events)
 
-  texts['wochargecut_rawp'] = []
-  yvals['wochargecut_rawp'] = []
-  sizes['wochargecut_rawp'] = []
+  texts["without_chargecut_raw'"] = []
+  yvals["without_chargecut_raw'"] = []
+  sizes["without_chargecut_raw'"] = []
 
-  update_list('test_wochargecut_compression_LZMA', 16, 8, 'rawp', sizes, yvals, texts, 'wochargecut_rawp', options.events)
+  update_list('HI_wochargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "without_chargecut_raw'", options.events)
 
-  texts['wchargecut_HI_rawp'] = []
-  yvals['wchargecut_HI_rawp'] = []
-  sizes['wchargecut_HI_rawp'] = []
+  texts["with_chargecut_HI_raw'"] = []
+  yvals["with_chargecut_HI_raw'"] = []
+  sizes["with_chargecut_HI_raw'"] = []
 
-  update_list('default_10_compression_LZMA', 16, 8, 'rawp', sizes, yvals, texts, 'wchargecut_HI_rawp', options.events)
+  update_list('HI_wchargecut', 16, 8, "rawp", sizes, yvals, texts, "with_chargecut_HI_raw'", options.events)
 
-  texts['wochargecut_HI_rawp'] = []
-  yvals['wochargecut_HI_rawp'] = []
-  sizes['wochargecut_HI_rawp'] = []
+  texts["without_chargecut_HI_raw'"] = []
+  yvals["without_chargecut_HI_raw'"] = []
+  sizes["without_chargecut_HI_raw'"] = []
 
-  update_list('default_10_wochargcut_compression_LZMA', 16, 8, 'rawp', sizes, yvals, texts, 'wochargecut_HI_rawp', options.events)
+  update_list('HI_wochargecut', 16, 8, 'rawp', sizes, yvals, texts, "without_chargecut_HI_raw'", options.events)
 
   draw(sizes, yvals, texts, '# of tracks', 'tracks', 'rawp', 'chargecut')
