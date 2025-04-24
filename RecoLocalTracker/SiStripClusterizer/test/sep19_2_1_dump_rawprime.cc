@@ -91,7 +91,7 @@ private:
   uint16_t    firstStrip;
   uint16_t    endStrip;
   float       barycenter;
-  float       falling_barycenter;
+  UShort_t    falling_barycenter;
   uint16_t    size;
   int         charge;
   bool        low_pt_trk_cluster;
@@ -140,7 +140,7 @@ sep19_2_1_dump_rawprime::sep19_2_1_dump_rawprime(const edm::ParameterSet& conf) 
   onlineClusterTree->Branch("firstStrip", &firstStrip, "firstStrip/s");
   onlineClusterTree->Branch("endStrip", &endStrip, "endStrip/s");
   onlineClusterTree->Branch("barycenter", &barycenter, "barycenter/F");
-  onlineClusterTree->Branch("falling_barycenter", &falling_barycenter, "falling_barycenter/F");
+  onlineClusterTree->Branch("falling_barycenter", &falling_barycenter, "falling_barycenter/s");
   onlineClusterTree->Branch("size", &size, "size/s");
   onlineClusterTree->Branch("charge", &charge, "charge/I");
   onlineClusterTree->Branch("low_pt_trk_cluster", &low_pt_trk_cluster, "low_pt_trk_cluster/b");

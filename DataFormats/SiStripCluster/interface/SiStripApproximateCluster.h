@@ -30,6 +30,9 @@ public:
                                      unsigned int& module_length,
                                      unsigned int& previous_module_length,
                                      bool peakFilter);
+  const cms_uint16_t compBarycenter() const {
+    return compBarycenter_;
+  }
 
   float barycenter(float previous_barycenter=0,
                    unsigned int module_length=0, unsigned int previous_module_length=0) const {
