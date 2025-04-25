@@ -38,6 +38,12 @@ class EvthistManager
          hists["trk_pterrDpt"] = createhist(Form("%s_track_pterrDpt", base_name.c_str()), "track_pterrDpt;track_pTErr/pt;yield", 50, 0, 1);
          hists["trk_inner_xy"] = createhist(Form("%s_track_inner_xy", base_name.c_str()), ";inner_xy;yield", 200, -10., 10.);
          hists["trk_inner_z"] = createhist(Form("%s_track_inner_z", base_name.c_str()), ";inner_z;yield", 400, -50, 50);
+
+         hists["trk_cutflow"] = createhist(Form("%s_trk_cutflow", base_name.c_str()), "cutflow;;yield", trk_cuts::nhits, trk_cuts::nocut, trk_cuts::nhits+1);
+         hists["trk_cutflow"]->GetYaxis()->SetLabelSize(0.025);
+         for(int ibin=trk_cuts::nocut; ibin<=trk_cuts::nhits; ibin++)
+             hists["trk_cutflow"]->GetXaxis()->SetBinLabel(ibin, trk_cutToname[ibin].c_str());
+
          for (int i=TrackAlgorithm::undefAlgorithm; i<=TrackAlgorithm::displacedRegionalStep; i++) {
            bool displaced_region = std::find(std::begin(displaced_trk_algo), std::end(displaced_trk_algo), i) != std::end(displaced_trk_algo);
            std::string name = "trk_cutflow_z"+to_string(i);
