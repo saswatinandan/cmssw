@@ -114,22 +114,22 @@ def build_array(obj, rawtype):
   yvals["HI_raw'"] = []
   sizes["HI_raw'"] = []
   
-  update_list('default_10_compression_LZMA', 16, 8, rawtype, sizes, yvals, texts, "HI_raw'", options.events)
+  update_list('pp_wchargecut', 16, 8, rawtype, sizes, yvals, texts, "HI_raw'", options.events)
   if options.version == 'v2':
     texts['v2'] = []
     yvals['v2'] = []
     sizes['v2'] = []
-    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 8, rawtype, sizes, yvals, texts, 'v2')
-    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 5, rawtype, sizes, yvals, texts, 'v2')
-    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 4, rawtype, sizes, yvals, texts, 'v2')
-    #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 7, rawtype, sizes, yvals, texts, 'v2')
-    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 6, rawtype, sizes, yvals, texts, 'v2')
-    #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 5, rawtype, sizes, yvals, texts, 'v2')
-    #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 4, rawtype, sizes, yvals, texts, 'v2')
-    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 8, rawtype, sizes, yvals, texts, 'v2')
-    #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 7, rawtype, sizes, yvals, texts, 'v2')
-    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 6, rawtype, sizes, yvals, texts, 'v2')
-    #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 13, 8, rawtype, sizes, yvals, texts, 'v2')'''
+    update_list('pp_wchargecut_v2', 15, 8, rawtype, sizes, yvals, texts, 'v2')
+    update_list('pp_wchargecut_v2', 15, 5, rawtype, sizes, yvals, texts, 'v2')
+    update_list('pp_wchargecut_v2', 15, 4, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('pp_wchargecut_v2', 15, 7, rawtype, sizes, yvals, texts, 'v2')
+    update_list('pp_wchargecut_v2', 15, 6, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('pp_wchargecut_v2', 14, 5, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('pp_wchargecut_v2', 14, 4, rawtype, sizes, yvals, texts, 'v2')
+    update_list('pp_wchargecut_v2', 14, 8, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('pp_wchargecut_v2', 14, 7, rawtype, sizes, yvals, texts, 'v2')
+    update_list('pp_wchargecut_v2', 14, 6, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('pp_wchargecut_v2', 13, 8, rawtype, sizes, yvals, texts, 'v2')'''
   elif options.version == 'v1':
     texts['v1'] = []
     yvals['v1'] = []
