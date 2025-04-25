@@ -92,7 +92,7 @@ private:
   uint16_t    firstStrip;
   uint16_t    endStrip;
   float       barycenter;
-  float       falling_barycenter;
+  UShort_t    falling_barycenter;
   uint16_t    size;
   int         charge;
   float       chargePerCM;
@@ -142,7 +142,7 @@ sep19_2_1_dump_rawprime::sep19_2_1_dump_rawprime(const edm::ParameterSet& conf) 
   onlineClusterTree->Branch("firstStrip", &firstStrip, "firstStrip/s");
   onlineClusterTree->Branch("endStrip", &endStrip, "endStrip/s");
   onlineClusterTree->Branch("barycenter", &barycenter, "barycenter/F");
-  onlineClusterTree->Branch("falling_barycenter", &falling_barycenter, "falling_barycenter/F");
+  onlineClusterTree->Branch("falling_barycenter", &falling_barycenter, "falling_barycenter/s");
   onlineClusterTree->Branch("size", &size, "size/s");
   onlineClusterTree->Branch("charge", &charge, "charge/I");
   onlineClusterTree->Branch("chargePerCM", &chargePerCM, "chargePerCM/F");
@@ -231,10 +231,9 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
     lumi   = (int) event.id().luminosityBlock();
     detId  = detApproxClusters.id();
    //  if (event.id().event() != 8180236 ||  event.id().run() != 382216 || event.id().luminosityBlock() !=99) continue;
-    //std::cout << eventN << "\t" <<  runN << "\t" << lumi << std::endl; 
+   //  std::cout << eventN << "\t" <<  runN << "\t" << lumi << std::endl; 
     //std::cout << "detId " << detId << std::endl;
     for (const auto& approxCluster : detApproxClusters) {
-
       ///// 1. converting approxCluster to stripCluster: for the estimation of firstStrip, endStrip, adc info
       uint16_t nStrips{0};
       const auto& _detId = detId; // for the capture clause in the lambda function
