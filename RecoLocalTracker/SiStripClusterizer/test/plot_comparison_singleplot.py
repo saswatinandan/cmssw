@@ -171,24 +171,24 @@ else:
   yvals["raw':chargecut"] = []
   sizes["raw':chargecut"] = []
 
-  update_list('HI_wchargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "raw':chargecut", options.events)
+  update_list('pp_wchargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "raw':chargecut", options.events)
 
   texts["raw':no chargecut"] = []
   yvals["raw':no chargecut"] = []
   sizes["raw':no chargecut"] = []
 
-  update_list('HI_wochargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "raw':no chargecut", options.events)
+  update_list('pp_wochargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "raw':no chargecut", options.events)
 
   texts["HI_raw':chargecut"] = []
   yvals["HI_raw':chargecut"] = []
   sizes["HI_raw':chargecut"] = []
 
-  update_list('HI_wchargecut', 16, 8, "rawp", sizes, yvals, texts, "HI_raw':chargecut", options.events)
+  update_list('pp_wchargecut', 16, 8, "rawp", sizes, yvals, texts, "HI_raw':chargecut", options.events)
 
   texts["HI_raw':no chargecut"] = []
   yvals["HI_raw':no chargecut"] = []
   sizes["HI_raw':no chargecut"] = []
 
-  update_list('HI_wochargecut', 16, 8, 'rawp', sizes, yvals, texts, "HI_raw':no chargecut", options.events)
+  update_list('pp_wochargecut', 16, 8, 'rawp', sizes, yvals, texts, "HI_raw':no chargecut", options.events)
 
   draw_trackno(sizes, yvals, texts, '# of tracks', 'tracks', 'rawp')
