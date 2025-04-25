@@ -10,6 +10,9 @@ parser.add_argument("-b", type=int, dest="bits", nargs='+', default=[], help="bi
 parser.add_argument("-w", type=int, dest="widths", nargs='+', default=[], help="bit to be studied for width")
 parser.add_argument("-a", type=int, dest="avgCharges", nargs='+', default=[], help="bit to be studied for avgCharge")
 parser.add_argument("-o", dest="output", default='output', help="directory name where inputs are")
+parser.add_argument("-v", dest="version", default='', help="which version you want to compare")
+parser.add_argument("-e", action='store_true', dest="events", default=False, help="want to see # of events")
+
 options = parser.parse_args()
 bits = options.bits
 widths = options.widths
@@ -21,7 +24,7 @@ x = np.sort(x)
 widths = np.array(widths)
 avgCharge = np.array(avgCharges)
 
-colors = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w']
+colors = ['b', 'r', 'g', 'c', 'm', 'y', 'k', 'w']
 
 def readfile(input_file):
 
@@ -29,53 +32,162 @@ def readfile(input_file):
      lines = f.readlines()
   return lines
 
-def draw(x_vals, y_vals, texts, obj, rawtype):
+def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, events=0):
 
-  fig = plt.figure(figsize=(8,6))
+  input = f'/scratch/nandan/{dirname}_barycenter_{bary_bit}bit_width_8bit_avgCharge_{chrg_bit}bit/'
+  input_file = os.path.join(input, 'size.log')
+  lines = readfile(input_file)
+
+  for idx, line in enumerate(lines):
+
+     if 'SiStripApproximateClusterCollection_hltSiStripClusters2ApproxClusters__HLTX' in line:
+         sizes[ver].append(float(line.split(' ')[-1]))
+
+  input_file = os.path.join(input, 'object.log' if not events else 'object_study.root')
+  if not events:
+   lines = readfile(input_file)
+   for idx, line in enumerate(lines):
+      if f'not matched {obj}' in line and  f'{rawtype} ' in line:
+            val = float(line.split(f'in {rawtype} ')[-1].split('%')[0])
+            yvals[ver].append(val)
+  else:
+    f = TFile(input_file, 'r')
+    yvals[ver].append(f.Get(f'{rawtype}_trk_cutflow').GetBinContent(1,1))
+
+  #print(sizes)
+  #print(yvals)
+  texts[ver].append((f'{bary_bit}', f'{chrg_bit}'))
+
+def draw(x_vals, y_vals, texts, ytitle, obj, rawtype):
+
+  fig = plt.figure(figsize=(8,7))
   ax = fig.add_subplot(111)
-  plt.scatter(x_vals, y_vals)
-  print(obj)
-  print(x_vals)
-  print(y_vals)
-  print(texts)
-  sorted_xvals = sorted(x_vals)
-  plt.text(sorted_xvals[len(x_vals)-3], max(y_vals), '(barycenter,avgCharge)')
-  plt.title(f'size vs unmatched {obj} in % for {rawtype}', fontsize=20)
-  plt.xlabel('size', fontsize=20)
-  plt.ylabel('unmatched in %', fontsize=20)
-  for i, text in enumerate(texts):
-    ax.text(x_vals[i], y_vals[i], text)
+  plt.title(r'CMS Preliminary   2024 pp Data $\sqrt{s_{NN}} = 13.6$ TeV', fontsize=15)
+  for idx, key in enumerate(texts.keys()):
+    plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
+    for i, text in enumerate(texts[key]):
+      ax.text(x_vals[key][i], y_vals[key][i], text, fontsize=12)#, color=colors[idx])
+  #plt.title(f'size vs {obj}', fontsize=20)
+  #plt.margins(x=0.80)
+  plt.xlabel('size of approx cluster in Byte', fontsize=20, labelpad=15)
+  plt.ylabel(ytitle, fontsize=20, labelpad=15)
+  plt.xticks(fontsize=14)
+  plt.yticks(fontsize=14)
+  plt.legend(fontsize=15)
   ax.grid(True)
+  plt.subplots_adjust(bottom=0.2, top=0.90, left=0.15)
   plt.savefig(f'singleplot_{obj}_{rawtype}.png')
   plt.close('all')
 
+def draw_trackno(x_vals, y_vals, texts, ytitle, obj, rawtype):
+
+      fig = plt.figure(figsize=(8,7))
+      ax = fig.add_subplot(111)
+      for idx, key in enumerate(texts.keys()):
+          plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
+          for i, text in enumerate(texts[key]):
+                ax.text(x_vals[key][i], y_vals[key][i], text, fontsize=12)
+      plt.xlabel('size of approx cluster in Byte', fontsize=15)
+      plt.ylabel(ytitle, fontsize=15)
+      #plt.xticks(fontsize=15)
+      #plt.yticks(fontsize=15)
+      plt.legend(fontsize=15, loc='best')
+      ax.grid(True)
+      plt.savefig('charge_cut.png')
+      plt.close('all')
+                                
 def build_array(obj, rawtype):
 
-  texts = []
-  sizes = []
-  unmatched = []
+  texts = {}
+  sizes = {}
+  yvals = {}
+
+  texts["raw'"] = []
+  yvals["raw'"] = []
+  sizes["raw'"] = []
 
   for avgCharge in avgCharges:
     for bit in x:
-      texts.append((bit, avgCharge))
-      input = f'/scratch/nandan/{output}_barycenter_{bit}bit_width_8bit_avgCharge_{avgCharge}bit'
-      input_file = os.path.join(input, 'size.log')
-      lines = readfile(input_file)
+      update_list(output, bit, avgCharge, rawtype, sizes, yvals, texts, "raw'", options.events)
+  
+  texts["HI_raw'"] = []
+  yvals["HI_raw'"] = []
+  sizes["HI_raw'"] = []
+  
+  update_list('default_10_compression_LZMA', 16, 8, rawtype, sizes, yvals, texts, "HI_raw'", options.events)
+  if options.version == 'v2':
+    texts['v2'] = []
+    yvals['v2'] = []
+    sizes['v2'] = []
+    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 8, rawtype, sizes, yvals, texts, 'v2')
+    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 5, rawtype, sizes, yvals, texts, 'v2')
+    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 4, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 7, rawtype, sizes, yvals, texts, 'v2')
+    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 15, 6, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 5, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 4, rawtype, sizes, yvals, texts, 'v2')
+    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 8, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 7, rawtype, sizes, yvals, texts, 'v2')
+    update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 14, 6, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('flatdistribution_comparison_with_16bit_keep_detid_diff_compression_LZMA', 13, 8, rawtype, sizes, yvals, texts, 'v2')'''
+  elif options.version == 'v1':
+    texts['v1'] = []
+    yvals['v1'] = []
+    sizes['v1'] = []
+    update_list('remove_beginindices_v1_compression_LZMA', 14, 8, rawtype, sizes, yvals, texts, 'v1')
+    update_list('remove_beginindices_v1_compression_LZMA', 14, 5, rawtype, sizes, yvals, texts, 'v1')
+    update_list('remove_beginindices_v1_compression_LZMA', 14, 6, rawtype, sizes, yvals, texts, 'v1')
+    update_list('remove_beginindices_v1_compression_LZMA', 14, 7, rawtype, sizes, yvals, texts, 'v1')
+    update_list('remove_beginindices_v1_compression_LZMA', 14, 4, rawtype, sizes, yvals, texts, 'v1')
+    update_list('remove_beginindices_v1_compression_LZMA', 14, 3, rawtype, sizes, yvals, texts, 'v1')
+  elif options.version == 'v1.1':
+    texts['v1.1'] = []
+    yvals['v1.1'] = []
+    sizes['v1.1'] = []
+    update_list('HI_wchargecut_v1p1', 14, 8, rawtype, sizes, yvals, texts, 'v1.1')
+    update_list('HI_wchargecut_v1p1', 14, 5, rawtype, sizes, yvals, texts, 'v1.1')
+    update_list('HI_wchargecut_v1p1', 14, 6, rawtype, sizes, yvals, texts, 'v1.1')
+    update_list('HI_wchargecut_v1p1', 14, 7, rawtype, sizes, yvals, texts, 'v1.1')
+    update_list('HI_wchargecut_v1p1', 13, 7, rawtype, sizes, yvals, texts, 'v1.1')
+    update_list('HI_wchargecut_v1p1', 13, 5, rawtype, sizes, yvals, texts, 'v1.1')
+    update_list('HI_wchargecut_v1p1', 13, 6, rawtype, sizes, yvals, texts, 'v1.1')
 
-      for idx, line in enumerate(lines):
+  pt = obj.split('_')[1].split('pt')[0]
+  ylabel = obj.split('_')[0]
+  draw(sizes, yvals, texts, f'unmatched {pt} pt {ylabel} in %', obj, rawtype)
 
-         if 'SiStripApproximateClusterCollection_hltSiStripClusters2ApproxClusters__HLTX' in line:
-             sizes.append(float(line.split(' ')[-1]))
-      
-      input_file = os.path.join(input, 'object.log')
-      lines = readfile(input_file)
-      for idx, line in enumerate(lines):
-         if f'not matched {obj}' in line and  f'{rawtype} ' in line:
-            val = float(line.split(f'in {rawtype} ')[-1].split('%')[0])
-            unmatched.append(val)
+if not options.events:
+  for raw in ['raw', "rawp"]:
+     for obj in ['tracks_lowpt', 'tracks_highpt']:#, 'jet']:
+        build_array(obj, raw)
+else:
 
-  draw(sizes, unmatched, texts, obj, rawtype)
+  texts = {}
+  sizes = {}
+  yvals = {}
 
-for raw in ['raw', 'rawp']:
-  for obj in ['tracks_lowpt', 'tracks_highpt', 'jet']:
-     build_array(obj, raw)
+  texts["raw':chargecut"] = []
+  yvals["raw':chargecut"] = []
+  sizes["raw':chargecut"] = []
+
+  update_list('HI_wchargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "raw':chargecut", options.events)
+
+  texts["raw':no chargecut"] = []
+  yvals["raw':no chargecut"] = []
+  sizes["raw':no chargecut"] = []
+
+  update_list('HI_wochargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "raw':no chargecut", options.events)
+
+  texts["HI_raw':chargecut"] = []
+  yvals["HI_raw':chargecut"] = []
+  sizes["HI_raw':chargecut"] = []
+
+  update_list('HI_wchargecut', 16, 8, "rawp", sizes, yvals, texts, "HI_raw':chargecut", options.events)
+
+  texts["HI_raw':no chargecut"] = []
+  yvals["HI_raw':no chargecut"] = []
+  sizes["HI_raw':no chargecut"] = []
+
+  update_list('HI_wochargecut', 16, 8, 'rawp', sizes, yvals, texts, "HI_raw':no chargecut", options.events)
+
+  draw_trackno(sizes, yvals, texts, '# of tracks', 'tracks', 'rawp')
