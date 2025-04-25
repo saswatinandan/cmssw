@@ -37,6 +37,7 @@
 #include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit1D.h"
+#include "DataFormats/SiStripCluster/interface/SiStripClusterTools.h"
 
 #include "assert.h"
 //ROOT inclusion
@@ -91,8 +92,10 @@ private:
   uint16_t    firstStrip;
   uint16_t    endStrip;
   float       barycenter;
+  UShort_t    falling_barycenter;
   uint16_t    size;
   int         charge;
+  float       chargePerCM;
   bool        low_pt_trk_cluster;
   bool        high_pt_trk_cluster;
   int         trk_algo;
@@ -139,8 +142,10 @@ sep19_2_1_dump_rawprime::sep19_2_1_dump_rawprime(const edm::ParameterSet& conf) 
   onlineClusterTree->Branch("firstStrip", &firstStrip, "firstStrip/s");
   onlineClusterTree->Branch("endStrip", &endStrip, "endStrip/s");
   onlineClusterTree->Branch("barycenter", &barycenter, "barycenter/F");
+  onlineClusterTree->Branch("falling_barycenter", &falling_barycenter, "falling_barycenter/s");
   onlineClusterTree->Branch("size", &size, "size/s");
   onlineClusterTree->Branch("charge", &charge, "charge/I");
+  onlineClusterTree->Branch("chargePerCM", &chargePerCM, "chargePerCM/F");
   onlineClusterTree->Branch("low_pt_trk_cluster", &low_pt_trk_cluster, "low_pt_trk_cluster/b");
   onlineClusterTree->Branch("high_pt_trk_cluster", &high_pt_trk_cluster, "high_pt_trk_cluster/b");
   onlineClusterTree->Branch("trk_algo", &trk_algo, "trk_algo/I");
@@ -225,11 +230,10 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
     runN   = (int) event.id().run();
     lumi   = (int) event.id().luminosityBlock();
     detId  = detApproxClusters.id();
-    //if (event.id().event() != 8180236 ||  event.id().run() != 382216 || event.id().luminosityBlock() !=99) continue;
-    //std::cout << eventN << "\t" <<  runN << "\t" << lumi << std::endl; 
+   //  if (event.id().event() != 8180236 ||  event.id().run() != 382216 || event.id().luminosityBlock() !=99) continue;
+   //  std::cout << eventN << "\t" <<  runN << "\t" << lumi << std::endl; 
     //std::cout << "detId " << detId << std::endl;
     for (const auto& approxCluster : detApproxClusters) {
-
       ///// 1. converting approxCluster to stripCluster: for the estimation of firstStrip, endStrip, adc info
       uint16_t nStrips{0};
       const auto& _detId = detId; // for the capture clause in the lambda function
@@ -243,8 +247,10 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
       firstStrip = convertedCluster.firstStrip();
       endStrip   = convertedCluster.endStrip();
       barycenter = convertedCluster.barycenter();
+      falling_barycenter = approxCluster.barycenter();
       size       = convertedCluster.size();
       charge     = convertedCluster.charge();
+      chargePerCM = siStripClusterTools::chargePerCM(detId,convertedCluster);
 
       for (int strip = firstStrip; strip < endStrip+1; ++strip)
       {
