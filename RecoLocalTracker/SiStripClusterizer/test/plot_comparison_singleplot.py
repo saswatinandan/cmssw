@@ -83,6 +83,7 @@ def draw_trackno(x_vals, y_vals, texts, ytitle, obj, rawtype):
 
       fig = plt.figure(figsize=(8,7))
       ax = fig.add_subplot(111)
+      plt.title(r'CMS Preliminary   2024 pp Data $\sqrt{s_{NN}} = 13.6$ TeV', fontsize=15)
       for idx, key in enumerate(texts.keys()):
           plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
           for i, text in enumerate(texts[key]):
@@ -170,24 +171,24 @@ else:
   yvals["raw':chargecut"] = []
   sizes["raw':chargecut"] = []
 
-  update_list('HI_wchargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "raw':chargecut", options.events)
+  update_list('test_compression_LZMA', 15, 6, "rawp", sizes, yvals, texts, "raw':chargecut", options.events)
 
   texts["raw':no chargecut"] = []
   yvals["raw':no chargecut"] = []
   sizes["raw':no chargecut"] = []
 
-  update_list('HI_wochargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "raw':no chargecut", options.events)
+  update_list('test_wochargecut_compression_LZMA', 15, 6, "rawp", sizes, yvals, texts, "raw':no chargecut", options.events)
 
   texts["HI_raw':chargecut"] = []
   yvals["HI_raw':chargecut"] = []
   sizes["HI_raw':chargecut"] = []
 
-  update_list('HI_wchargecut', 16, 8, "rawp", sizes, yvals, texts, "HI_raw':chargecut", options.events)
+  update_list('default_10_compression_LZMA', 16, 8, "rawp", sizes, yvals, texts, "HI_raw':chargecut", options.events)
 
   texts["HI_raw':no chargecut"] = []
   yvals["HI_raw':no chargecut"] = []
   sizes["HI_raw':no chargecut"] = []
 
-  update_list('HI_wochargecut', 16, 8, 'rawp', sizes, yvals, texts, "HI_raw':no chargecut", options.events)
+  update_list('default_10_wochargcut_compression_LZMA', 16, 8, 'rawp', sizes, yvals, texts, "HI_raw':no chargecut", options.events)
 
   draw_trackno(sizes, yvals, texts, '# of tracks', 'tracks', 'rawp')
