@@ -72,7 +72,7 @@ public:
      latex.DrawLatexNDC(0.21,0.80,"Preliminary");
      latex.SetTextFont(43);
      latex.SetTextSize(24);
-     latex.DrawLatexNDC(0.33,0.945,"2024 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
+     latex.DrawLatexNDC(0.33,0.945,"2024 pp Data #sqrt{s_{NN}} = 13.6 TeV");
      latex.SetTextFont(43);
      latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", hist->GetMean()));
      latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", hist->GetStdDev()));
