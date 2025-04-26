@@ -62,6 +62,7 @@ def draw(x_vals, y_vals, texts, ytitle, obj, rawtype):
 
   fig = plt.figure(figsize=(8,7))
   ax = fig.add_subplot(111)
+  plt.title(r'CMS Preliminary   2024 PbPb Data $\sqrt{s_{NN}} = 5.36$ TeV', fontsize=15)
   for idx, key in enumerate(texts.keys()):
     plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
     for i, text in enumerate(texts[key]):
@@ -70,8 +71,8 @@ def draw(x_vals, y_vals, texts, ytitle, obj, rawtype):
   #plt.margins(x=0.80)
   plt.xlabel('size of approx cluster in Byte', fontsize=20, labelpad=15)
   plt.ylabel(ytitle, fontsize=20, labelpad=15)
-  plt.xticks(fontsize=20)
-  plt.yticks(fontsize=20)
+  plt.xticks(fontsize=14)
+  plt.yticks(fontsize=14)
   plt.legend(fontsize=15)
   ax.grid(True)
   plt.subplots_adjust(bottom=0.2, top=0.90, left=0.15)
@@ -82,6 +83,7 @@ def draw_trackno(x_vals, y_vals, texts, ytitle, obj, rawtype):
 
       fig = plt.figure(figsize=(8,7))
       ax = fig.add_subplot(111)
+      plt.title(r'CMS Preliminary   2024 PbPb Data $\sqrt{s_{NN}} = 5.36$ TeV', fontsize=15)
       for idx, key in enumerate(texts.keys()):
           plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
           for i, text in enumerate(texts[key]):
@@ -100,8 +102,6 @@ def build_array(obj, rawtype):
   texts = {}
   sizes = {}
   yvals = {}
-
-  compare = 'cutflow'
 
   texts["raw'"] = []
   yvals["raw'"] = []
