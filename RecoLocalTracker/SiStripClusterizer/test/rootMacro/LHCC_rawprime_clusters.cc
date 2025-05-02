@@ -699,6 +699,16 @@ int main(int argc, char const *argv[])
 		h_size_res     ->Fill( ( rp_size - r_size )/((float) r_size) );
 		int charge_withovrflow = fillWithOverFlow(h_charge_res, ( rp_charge - r_charge )/((float) r_charge), 1 );
 		int bary = fillWithOverFlow(h_barycenter_res, (rp_barycenter - r_barycenter)/r_barycenter,1);
+		if (h_barycenter_res->FindBin((rp_barycenter - r_barycenter)/r_barycenter) ==22) {
+			std::cout << "rval " << r_barycenter << "\t" << rp_barycenter << std::endl;
+			std::cout << r_event << "\t" << r_detId << std::endl;
+		}
+		if (h_barycenter_res->FindBin((rp_barycenter - r_barycenter)/r_barycenter) ==29) {
+			std::cout << "29 rval " << r_barycenter << "\t" << rp_barycenter << std::endl;
+			std::cout << r_event << "\t" << r_detId << std::endl;
+		}
+
+		//if(((rp_barycenter - r_barycenter)/r_barycenter) <0 && ((rp_barycenter - r_barycenter)/r_barycenter) > -0.012) std::cout << rp_barycenter << "\t" << r_barycenter << std::endl;
 		matched_sc2ac_txt << r_event << " " << r_detId << " " 
 						  << idx_pair.first << " " << r_barycenter << " " << r_size << " " << r_charge << " " << r_firstStrip << " " << r_endStrip << " "
 						  << idx_pair.second << " " << rp_barycenter << " " << rp_size << " " << rp_charge << " " << rp_firstStrip << " " << rp_endStrip << "\n";
@@ -853,7 +863,7 @@ int main(int argc, char const *argv[])
 	std::cout << "not present " << not_present << std::endl;
 	}
 
-	f->Close();
+	//f->Close();
 	TCanvas *canv = new TCanvas("canv", "canv", 700*4, 600*2);
 
 
@@ -937,7 +947,10 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_barycenter_res->GetMean()));
 	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_barycenter_res->GetStdDev()));
 	canvSingle->SaveAs((expTag+"_MatchedClusters_barycenter_res.png").c_str());
-
+	for (unsigned int i=1; i<=h_barycenter_res->GetNbinsX(); i++)
+		if(h_barycenter_res->GetBinContent(i)) std::cout << "bin " << i << "\t" << h_barycenter_res->GetBinLowEdge(i) << "\t" <<  h_barycenter_res->GetBinCenter(i) << "\t" << (h_barycenter_res->GetBinLowEdge(i) + h_barycenter_res->GetBinWidth(i) ) << "\t" << h_barycenter_res->GetBinContent(i) << std::endl;
+	h_barycenter_res->Write();
+        f->Close();
 	ofstream unmatched_scs_txt;
 	unmatched_scs_txt.open(Form("log/%s_unmatched_scs.txt",expTag.c_str()));
 	unmatched_scs_txt << "event detId sc_idx barycenter size charge firstStrip endStrip\n";

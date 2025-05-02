@@ -32,7 +32,7 @@ def readfile(input_file):
      lines = f.readlines()
   return lines
 
-def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, events=0):
+def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, events=0, yerrs={}):
 
   input = f'/scratch/nandan/{dirname}_barycenter_{bary_bit}bit_width_8bit_avgCharge_{chrg_bit}bit/'
   input_file = os.path.join(input, 'size.log')
@@ -53,6 +53,7 @@ def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, 
   else:
     f = TFile(input_file, 'r')
     yvals[ver].append(f.Get(f'{rawtype}_trk_cutflow').GetBinContent(1,1))
+    yerrs[ver].append(f.Get(f'{rawtype}_trk_cutflow').GetBinError(1,1))
 
   #print(sizes)
   #print(yvals)
@@ -62,7 +63,7 @@ def draw(x_vals, y_vals, texts, ytitle, obj, rawtype):
 
   fig = plt.figure(figsize=(8,7))
   ax = fig.add_subplot(111)
-  plt.title(r'CMS Preliminary   2024 PbPb Data $\sqrt{s_{NN}} = 5.36$ TeV', fontsize=15)
+  plt.title(r'CMS Preliminary   2024 PbPb Data $\sqrt{s_{NN}} = 5.36$ TeV', loc='left', fontsize=15)
   for idx, key in enumerate(texts.keys()):
     plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
     for i, text in enumerate(texts[key]):
@@ -79,20 +80,21 @@ def draw(x_vals, y_vals, texts, ytitle, obj, rawtype):
   plt.savefig(f'singleplot_{obj}_{rawtype}.png')
   plt.close('all')
 
-def draw_trackno(x_vals, y_vals, texts, ytitle, obj, rawtype):
+def draw_trackno(x_vals, y_vals, y_errs, texts, ytitle, obj, rawtype):
 
       fig = plt.figure(figsize=(8,7))
       ax = fig.add_subplot(111)
-      plt.title(r'CMS Preliminary   2024 PbPb Data $\sqrt{s_{NN}} = 5.36$ TeV', fontsize=15)
+      plt.title(r'CMS Preliminary   2024 PbPb Data $\sqrt{s_{NN}} = 5.36$ TeV', loc='left', fontsize=15)
+      x_err = []
       for idx, key in enumerate(texts.keys()):
-          plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
+          plt.errorbar(x_vals[key], y_vals[key], yerr=y_errs[key], color=colors[idx], label=key)
           for i, text in enumerate(texts[key]):
                 ax.text(x_vals[key][i], y_vals[key][i], text, fontsize=12)
       plt.xlabel('size of approx cluster in Byte', fontsize=15)
       plt.ylabel(ytitle, fontsize=15)
       #plt.xticks(fontsize=15)
       #plt.yticks(fontsize=15)
-      plt.legend(fontsize=15, loc='best')
+      plt.legend(fontsize=15, loc='upper left')
       ax.grid(True)
       plt.savefig('charge_cut.png')
       plt.close('all')
@@ -166,29 +168,37 @@ else:
   texts = {}
   sizes = {}
   yvals = {}
+  yerrs = {}
 
   texts["raw':chargecut"] = []
   yvals["raw':chargecut"] = []
   sizes["raw':chargecut"] = []
+  yerrs["raw':chargecut"] = []
 
-  update_list('HI_wchargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "raw':chargecut", options.events)
+  update_list('HI_wchargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "raw':chargecut", options.events, yerrs)
 
   texts["raw':no chargecut"] = []
   yvals["raw':no chargecut"] = []
+  yerrs["raw':no chargecut"] = []
   sizes["raw':no chargecut"] = []
-
-  update_list('HI_wochargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "raw':no chargecut", options.events)
-
+  
+  update_list('HI_wochargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "raw':no chargecut", options.events, yerrs)
+  sizes["raw':chargecut"] = [(s1 -s2)*100/s1 for s1, s2 in zip(sizes["raw':no chargecut"], sizes["raw':chargecut"])]
+  sizes["raw':no chargecut"] = [1]#[(s1 -s2)*100/s1 for s1, s2 in zip(sizes["raw':chargecut"], sizes["raw':chargecut"])]
+  
   texts["HI_raw':chargecut"] = []
   yvals["HI_raw':chargecut"] = []
+  yerrs["HI_raw':chargecut"] = []
   sizes["HI_raw':chargecut"] = []
 
-  update_list('HI_wchargecut', 16, 8, "rawp", sizes, yvals, texts, "HI_raw':chargecut", options.events)
+  update_list('HI_wchargecut', 16, 8, "rawp", sizes, yvals, texts, "HI_raw':chargecut", options.events, yerrs)
 
   texts["HI_raw':no chargecut"] = []
   yvals["HI_raw':no chargecut"] = []
+  yerrs["HI_raw':no chargecut"] = []
   sizes["HI_raw':no chargecut"] = []
 
-  update_list('HI_wochargecut', 16, 8, 'rawp', sizes, yvals, texts, "HI_raw':no chargecut", options.events)
-
-  draw_trackno(sizes, yvals, texts, '# of tracks', 'tracks', 'rawp')
+  update_list('HI_wochargecut', 16, 8, 'rawp', sizes, yvals, texts, "HI_raw':no chargecut", options.events, yerrs)
+  sizes["HI_raw':chargecut"] = [(s1 -s2)*100/s1 for s1, s2 in zip(sizes["HI_raw':no chargecut"], sizes["HI_raw':chargecut"])]
+  sizes["HI_raw':no chargecut"] = [1]
+  draw_trackno(sizes, yvals, yerrs, texts, '# of tracks', 'tracks', 'rawp')

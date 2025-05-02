@@ -107,6 +107,7 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
     auto ff = result->beginDet(detClusters.id());
 
     unsigned int detId = detClusters.id();
+    if(event.id().event() == 13605301 && detId == 470132809) std::cout << "event " << std::endl;
     const GeomDet* det = tkGeom->idToDet(detId);
     double nApvs = detInfo_.getNumberOfApvsAndStripLength(detId).first;
     double stripLength = detInfo_.getNumberOfApvsAndStripLength(detId).second;

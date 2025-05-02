@@ -226,6 +226,7 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
     lumi   = (int) event.id().luminosityBlock();
     detId  = detApproxClusters.id();
     //if (event.id().event() != 8180236 ||  event.id().run() != 382216 || event.id().luminosityBlock() !=99) continue;
+    //if (event.id().event() != 12674523) continue;
     //std::cout << eventN << "\t" <<  runN << "\t" << lumi << std::endl; 
     //std::cout << "detId " << detId << std::endl;
     for (const auto& approxCluster : detApproxClusters) {
@@ -243,6 +244,8 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
       firstStrip = convertedCluster.firstStrip();
       endStrip   = convertedCluster.endStrip();
       barycenter = convertedCluster.barycenter();
+      if (eventN == 13616033 && detId == 470307365) std::cout << barycenter << std::endl;
+      if(barycenter >=0.49 && barycenter < 0.50) std::cout << barycenter << "\t" <<eventN << "\t" << detId << std::endl; 
       size       = convertedCluster.size();
       charge     = convertedCluster.charge();
 

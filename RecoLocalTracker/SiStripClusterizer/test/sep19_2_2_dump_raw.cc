@@ -193,6 +193,7 @@ void sep19_2_2_dump_raw::analyze(const edm::Event& event, const edm::EventSetup&
       firstStrip  = stripCluster.firstStrip();
       endStrip    = stripCluster.endStrip();
       barycenter  = stripCluster.barycenter();
+      //if (barycenter == 0.5) std::cout << "event " << eventN << "\t" << detId << std::endl;
       size        = stripCluster.size();
       charge      = stripCluster.charge();
       const auto& _detId = detId; // for the capture clause in the lambda function

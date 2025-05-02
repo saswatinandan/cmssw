@@ -59,6 +59,7 @@ float SiStripCluster::barycenter() const {
   // strip centers are offcet by half pitch w.r.t. strip numbers,
   // so one has to add 0.5 to get the correct barycenter position.
   // Need to mask off the high bit of firstStrip_, which contains the merged status.
+  //std::cout << (float((firstStrip_ & stripIndexMask)) + float(sumx) / float(suma) + 0.5f) << "\t" << firstStrip_ << "\t" << stripIndexMask << "\t" << float(sumx) << "\t" << float(suma) << std::endl;
   return float((firstStrip_ & stripIndexMask)) + float(sumx) / float(suma) + 0.5f;
 }
 bool SiStripCluster::filter() const {
