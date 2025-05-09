@@ -44,10 +44,14 @@ def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, 
          sizes[ver].append(float(line.split(' ')[-1]))
 
   input_file = os.path.join(input, 'object.log' if not events else 'object_study.root')
-  if not events:
-   lines = readfile(input_file)
-   for idx, line in enumerate(lines):
-      if f'not matched {obj}' in line and  f'{rawtype} ' in line:
+  #if not events:
+  lines = readfile(input_file)
+  for idx, line in enumerate(lines):
+      if events:
+          if f'{obj}' in line and  f'Mean: ' in line:
+              val = float(line.split(f'Mean:')[-1])#.split('%')[0])
+              yvals[ver].append(val)
+      elif f'not matched {obj}' in line and  f'{rawtype} ' in line:
             val = float(line.split(f'in {rawtype} ')[-1].split('%')[0])
             yvals[ver].append(val)
   else:
