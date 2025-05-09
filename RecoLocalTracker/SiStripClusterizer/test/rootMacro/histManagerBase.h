@@ -74,8 +74,8 @@ public:
      latex.SetTextSize(24);
      latex.DrawLatexNDC(0.33,0.945,"2024 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
      latex.SetTextFont(43);
-     latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", hist->GetMean()));
-     latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", hist->GetStdDev()));
+     latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.3f", hist->GetMean()));
+     latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.3f", hist->GetStdDev()));
    
      canv->SaveAs(Form("%s_%s.png", base_name.c_str(), histname.c_str()));
      delete canv;
