@@ -47,8 +47,11 @@ def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, 
   if not events:
     lines = readfile(input_file)
     for idx, line in enumerate(lines):
-          if f'{obj}' in line and  f'Mean: ' in line:
-              val = float(line.split(f'Mean:')[-1])#.split('%')[0])
+          print(line, obj)
+          if f'{obj}' in line and  f'Std:' in line and 'ratio' not in line:
+              print('found', '\t', input_file)
+              val = float(line.split(f'Std:')[-1])#.split('%')[0])
+              print(val)
               yvals[ver].append(val)
           '''elif f'not matched {obj}' in line and  f'{rawtype} ' in line:
             val = float(line.split(f'in {rawtype} ')[-1].split('%')[0])
@@ -57,8 +60,8 @@ def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, 
     f = TFile(input_file, 'r')
     yvals[ver].append(f.Get(f'{rawtype}_trk_cutflow').GetBinContent(1,1))
 
-  #print(sizes)
-  #print(yvals)
+  print(sizes)
+  print(yvals)
   texts[ver].append((f'{bary_bit}', f'{chrg_bit}'))
 
 def draw(x_vals, y_vals, texts, ytitle, obj, rawtype):
@@ -118,22 +121,22 @@ def build_array(obj, rawtype):
   yvals["HI_raw'"] = []
   sizes["HI_raw'"] = []
   
-  update_list('HI_wchargecut', 16, 8, rawtype, sizes, yvals, texts, "HI_raw'", options.events)
+  #update_list('HI_wchargecut', 16, 8, rawtype, sizes, yvals, texts, "HI_raw'", options.events)
   if options.version == 'v2':
     texts['v2'] = []
     yvals['v2'] = []
     sizes['v2'] = []
-    update_list('HI_wchargecut_v2', 15, 8, rawtype, sizes, yvals, texts, 'v2')
-    update_list('HI_wchargecut_v2', 15, 5, rawtype, sizes, yvals, texts, 'v2')
-    update_list('HI_wchargecut_v2', 15, 4, rawtype, sizes, yvals, texts, 'v2')
-    #update_list('HI_wchargecut_v2', 15, 7, rawtype, sizes, yvals, texts, 'v2')
-    update_list('HI_wchargecut_v2', 15, 6, rawtype, sizes, yvals, texts, 'v2')
-    #update_list('HI_wchargecut_v2', 14, 5, rawtype, sizes, yvals, texts, 'v2')
-    #update_list('HI_wchargecut_v2', 14, 4, rawtype, sizes, yvals, texts, 'v2')
-    update_list('HI_wchargecut_v2', 14, 8, rawtype, sizes, yvals, texts, 'v2')
-    #update_list('HI_wchargecut_v2', 14, 7, rawtype, sizes, yvals, texts, 'v2')
-    update_list('HI_wchargecut_v2', 14, 6, rawtype, sizes, yvals, texts, 'v2')
-    #update_list('HI_wchargecut_v2', 13, 8, rawtype, sizes, yvals, texts, 'v2')'''
+    update_list('HI_data_v2_cmssw_14_1_5_avgcharge', 15, 8, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('HI_data_v2_cmssw_14_1_5_avgcharge', 15, 5, rawtype, sizes, yvals, texts, 'v2')
+    update_list('HI_data_v2_cmssw_14_1_5_avgcharge', 15, 4, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('HI_data_v2_cmssw_14_1_5_avgcharge', 15, 7, rawtype, sizes, yvals, texts, 'v2')
+    update_list('HI_data_v2_cmssw_14_1_5_avgcharge', 15, 6, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('HI_data_v2_cmssw_14_1_5_avgcharge', 14, 5, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('HI_data_v2_cmssw_14_1_5_avgcharge', 14, 4, rawtype, sizes, yvals, texts, 'v2')
+    update_list('HI_data_v2_cmssw_14_1_5_avgcharge', 14, 8, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('HI_data_v2_cmssw_14_1_5_avgcharge', 14, 7, rawtype, sizes, yvals, texts, 'v2')
+    update_list('HI_data_v2_cmssw_14_1_5_avgcharge', 14, 6, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('HI_data_v2_cmssw_14_1_5_avgcharge', 13, 8, rawtype, sizes, yvals, texts, 'v2')'''
   elif options.version == 'v1':
     texts['v1'] = []
     yvals['v1'] = []
