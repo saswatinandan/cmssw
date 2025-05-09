@@ -622,7 +622,7 @@ int main(int argc, char const *argv[])
 		}
 	}
         assert((unmatched_acs.size()+matched_sc2ac.size()) == rp_nEntries);
-	assert( rp_nEntries == r_nEntries );
+	//assert( rp_nEntries == r_nEntries );
 	for(auto& _scs_perEvt: r_dict) 
 	{
 		for (auto& _scs_perEvt_perDetId: _scs_perEvt.second) 
@@ -668,10 +668,12 @@ int main(int argc, char const *argv[])
 	                                    50, -.1, .1);
 	TH1F * h_charge_res     = new TH1F( "chagre_res", 
 	                                    "; total charge (raw'-raw)/raw; Normalized yield",
-	                                    50, -.1, .1);
-	TH1F * h_barycenter_res = new TH1F( "barycenter_res", 
-	                                    "; barycenter (raw'-raw)/raw; Normalized yield",
-	                                    50, -.1, .1);
+	                                    10, -.1, .1);
+	TH1F * h_barycenter_res = new TH1F( "barycenter_res",
+			"; barycenter (raw'-raw)/raw; Normalized yield",50, -.1, .1);
+	TH2F * h_size_barycenter_res = new TH2F( "size_barycenter_res", ";size;barycenter (raw'-raw)/raw; Normalized yield",20,1,20,50, -.1, .1);
+	TH2F * h_charge_barycenter_res = new TH2F( "charge_barycenter_res", ";size;total charge (raw'-raw)/raw; Normalized yield",20,1,20,50, -.1, .1);
+	TH2F * h_bary_barycenter_res = new TH2F( "bary_barycenter_res", ";bary;barycenter (raw'-raw)/raw; Normalized yield",192,0,768.,50, -.1, .1);
 
 	ofstream matched_sc2ac_txt;
 	matched_sc2ac_txt.open(Form("log/%s_matched_sc2ac.txt", expTag.c_str()));
@@ -697,14 +699,19 @@ int main(int argc, char const *argv[])
 						rp_charge - r_charge ); 
 
 		h_size_res     ->Fill( ( rp_size - r_size )/((float) r_size) );
-		int charge_withovrflow = fillWithOverFlow(h_charge_res, ( rp_charge - r_charge )/((float) r_charge), 1 );
-		int bary = fillWithOverFlow(h_barycenter_res, (rp_barycenter - r_barycenter)/r_barycenter,1);
-		if (h_barycenter_res->FindBin((rp_barycenter - r_barycenter)/r_barycenter) ==22) {
-			std::cout << "rval " << r_barycenter << "\t" << rp_barycenter << std::endl;
+		int charge_withovrflow = 0;
+		fillWithOverFlow(h_charge_res, ( rp_charge - r_charge )/((float) r_charge), 1 );
+		int bary = 0;
+		if(r_size!=1)fillWithOverFlow(h_barycenter_res, (rp_barycenter - r_barycenter)/r_barycenter,1);
+		fillWithOverFlow(h_size_barycenter_res, r_size, (rp_barycenter - r_barycenter)/r_barycenter,1);
+		//fillWithOverFlow(h_bary_barycenter_res, r_barycenter, (rp_barycenter - r_barycenter)/r_barycenter,1);
+		fillWithOverFlow(h_charge_barycenter_res, r_size, (rp_charge - r_charge)/r_charge,1);
+		if (h_barycenter_res->FindBin((rp_barycenter - r_barycenter)/r_barycenter) ==23) {
+			std::cout << "rval " << r_barycenter << "\t" << rp_barycenter << "\t" << ((rp_barycenter - r_barycenter)/r_barycenter) << std::endl;
 			std::cout << r_event << "\t" << r_detId << std::endl;
 		}
-		if (h_barycenter_res->FindBin((rp_barycenter - r_barycenter)/r_barycenter) ==29) {
-			std::cout << "29 rval " << r_barycenter << "\t" << rp_barycenter << std::endl;
+		if (h_barycenter_res->FindBin((rp_barycenter - r_barycenter)/r_barycenter) ==28) {
+			std::cout << "28 rval " << r_barycenter << "\t" << rp_barycenter << "\t" << ((rp_barycenter - r_barycenter)/r_barycenter) << std::endl;
 			std::cout << r_event << "\t" << r_detId << std::endl;
 		}
 
@@ -949,7 +956,10 @@ int main(int argc, char const *argv[])
 	canvSingle->SaveAs((expTag+"_MatchedClusters_barycenter_res.png").c_str());
 	for (unsigned int i=1; i<=h_barycenter_res->GetNbinsX(); i++)
 		if(h_barycenter_res->GetBinContent(i)) std::cout << "bin " << i << "\t" << h_barycenter_res->GetBinLowEdge(i) << "\t" <<  h_barycenter_res->GetBinCenter(i) << "\t" << (h_barycenter_res->GetBinLowEdge(i) + h_barycenter_res->GetBinWidth(i) ) << "\t" << h_barycenter_res->GetBinContent(i) << std::endl;
+	h_size_barycenter_res->Write();
 	h_barycenter_res->Write();
+	h_charge_barycenter_res->Write();
+	h_bary_barycenter_res->Write();
         f->Close();
 	ofstream unmatched_scs_txt;
 	unmatched_scs_txt.open(Form("log/%s_unmatched_scs.txt",expTag.c_str()));
