@@ -4,6 +4,7 @@ import os
 import sys
 import argparse
 from ROOT import TFile, TH1
+from matplotlib.ticker import ScalarFormatter
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-b", type=int, dest="bits", nargs='+', default=[], help="bit to be studied for barycenter")
@@ -44,16 +45,12 @@ def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, 
          sizes[ver].append(float(line.split(' ')[-1]))
 
   input_file = os.path.join(input, 'object.log' if not events else 'object_study.root')
-  #if not events:
-  lines = readfile(input_file)
-  for idx, line in enumerate(lines):
-      if events:
-          if f'{obj}' in line and  f'Mean: ' in line:
-              val = float(line.split(f'Mean:')[-1])#.split('%')[0])
+  if not events:
+    lines = readfile(input_file)
+    for idx, line in enumerate(lines):
+      if f'{obj}' in line and  f'Std:' in line and 'ratio' in line:
+              val = float(line.split(f'Std:')[-1])#.split('%')[0])
               yvals[ver].append(val)
-      elif f'not matched {obj}' in line and  f'{rawtype} ' in line:
-            val = float(line.split(f'in {rawtype} ')[-1].split('%')[0])
-            yvals[ver].append(val)
   else:
     f = TFile(input_file, 'r')
     yvals[ver].append(f.Get(f'{rawtype}_trk_cutflow').GetBinContent(1,1))
@@ -71,6 +68,12 @@ def draw(x_vals, y_vals, texts, ytitle, obj, rawtype):
     plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
     for i, text in enumerate(texts[key]):
       ax.text(x_vals[key][i], y_vals[key][i], text, fontsize=12)#, color=colors[idx])
+
+  formatter = ScalarFormatter(useMathText=True)
+  formatter.set_scientific(True)
+  formatter.set_powerlimits((-3, 3))  # controls the range that triggers sci notation
+
+  ax.yaxis.set_major_formatter(formatter)
   #plt.title(f'size vs {obj}', fontsize=20)
   #plt.margins(x=0.80)
   plt.xlabel('size of approx cluster in Byte', fontsize=20, labelpad=15)
@@ -119,7 +122,7 @@ def build_array(obj, rawtype):
   yvals["HI_raw'"] = []
   sizes["HI_raw'"] = []
   
-  update_list('HI_wchargecut', 16, 8, rawtype, sizes, yvals, texts, "HI_raw'", options.events)
+  #update_list('HI_wchargecut', 16, 8, rawtype, sizes, yvals, texts, "HI_raw'", options.events)
   if options.version == 'v2':
     texts['v2'] = []
     yvals['v2'] = []
