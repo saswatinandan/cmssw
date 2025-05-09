@@ -45,23 +45,27 @@ def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, 
 
   input_file = os.path.join(input, 'object.log' if not events else 'object_study.root')
   if not events:
-   lines = readfile(input_file)
-   for idx, line in enumerate(lines):
-      if f'not matched {obj}' in line and  f'{rawtype} ' in line:
+    lines = readfile(input_file)
+    for idx, line in enumerate(lines):
+          if f'{obj}' in line and  f'Mean: ' in line:
+              val = float(line.split(f'Mean:')[-1])#.split('%')[0])
+              yvals[ver].append(val)
+          '''elif f'not matched {obj}' in line and  f'{rawtype} ' in line:
             val = float(line.split(f'in {rawtype} ')[-1].split('%')[0])
-            yvals[ver].append(val)
+            yvals[ver].append(val)'''
   else:
     f = TFile(input_file, 'r')
-    yvals[ver].append(f.Get(f'{rawtype}_trk_cutflow_z4').GetBinContent(1,1))
+    yvals[ver].append(f.Get(f'{rawtype}_trk_cutflow').GetBinContent(1,1))
 
   #print(sizes)
   #print(yvals)
   texts[ver].append((f'{bary_bit}', f'{chrg_bit}'))
 
-def draw(x_vals, y_vals, texts, ytitle, obj, rawtype, filename=''):
+def draw(x_vals, y_vals, texts, ytitle, obj, rawtype):
 
   fig = plt.figure(figsize=(8,7))
   ax = fig.add_subplot(111)
+  plt.title(r'CMS Preliminary   2024 PbPb Data $\sqrt{s_{NN}} = 5.36$ TeV', fontsize=15)
   for idx, key in enumerate(texts.keys()):
     plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
     for i, text in enumerate(texts[key]):
@@ -70,21 +74,37 @@ def draw(x_vals, y_vals, texts, ytitle, obj, rawtype, filename=''):
   #plt.margins(x=0.80)
   plt.xlabel('size of approx cluster in Byte', fontsize=20, labelpad=15)
   plt.ylabel(ytitle, fontsize=20, labelpad=15)
-  plt.xticks(fontsize=20)
-  plt.yticks(fontsize=20)
+  plt.xticks(fontsize=14)
+  plt.yticks(fontsize=14)
   plt.legend(fontsize=15)
   ax.grid(True)
   plt.subplots_adjust(bottom=0.2, top=0.90, left=0.15)
-  plt.savefig(f'singleplot_{obj}_{rawtype}.png' if filename=='' else f'{filename}.png')
+  plt.savefig(f'singleplot_{obj}_{rawtype}.png')
   plt.close('all')
 
+def draw_trackno(x_vals, y_vals, texts, ytitle, obj, rawtype):
+
+      fig = plt.figure(figsize=(8,7))
+      ax = fig.add_subplot(111)
+      plt.title(r'CMS Preliminary   2024 PbPb Data $\sqrt{s_{NN}} = 5.36$ TeV', fontsize=15)
+      for idx, key in enumerate(texts.keys()):
+          plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
+          for i, text in enumerate(texts[key]):
+                ax.text(x_vals[key][i], y_vals[key][i], text, fontsize=12)
+      plt.xlabel('size of approx cluster in Byte', fontsize=15)
+      plt.ylabel(ytitle, fontsize=15)
+      #plt.xticks(fontsize=15)
+      #plt.yticks(fontsize=15)
+      plt.legend(fontsize=15, loc='best')
+      ax.grid(True)
+      plt.savefig('charge_cut.png')
+      plt.close('all')
+                                
 def build_array(obj, rawtype):
 
   texts = {}
   sizes = {}
   yvals = {}
-
-  compare = 'cutflow'
 
   texts["raw'"] = []
   yvals["raw'"] = []
@@ -150,28 +170,28 @@ else:
   sizes = {}
   yvals = {}
 
-  texts["wchargecut_raw'"] = []
-  yvals["wchargecut_raw'"] = []
-  sizes["wchargecut_rawp'"] = []
+  texts["raw':chargecut"] = []
+  yvals["raw':chargecut"] = []
+  sizes["raw':chargecut"] = []
 
-  update_list('test_compression_LZMA', 16, 8, 'rawp', sizes, yvals, texts, 'wchargecut_rawp', options.events)
+  update_list('HI_wchargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "raw':chargecut", options.events)
 
-  texts["wochargecut_rawp'"] = []
-  yvals['wochargecut_rawp'] = []
-  sizes['wochargecut_rawp'] = []
+  texts["raw':no chargecut"] = []
+  yvals["raw':no chargecut"] = []
+  sizes["raw':no chargecut"] = []
 
-  update_list('test_wochargecut_compression_LZMA', 16, 8, 'rawp', sizes, yvals, texts, 'wochargecut_rawp', options.events)
+  update_list('HI_wochargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "raw':no chargecut", options.events)
 
-  texts['wchargecut_HI_rawp'] = []
-  yvals['wchargecut_HI_rawp'] = []
-  sizes['wchargecut_HI_rawp'] = []
+  texts["HI_raw':chargecut"] = []
+  yvals["HI_raw':chargecut"] = []
+  sizes["HI_raw':chargecut"] = []
 
-  update_list('default_10_compression_LZMA', 16, 8, 'rawp', sizes, yvals, texts, 'wchargecut_HI_rawp', options.events)
+  update_list('HI_wchargecut', 16, 8, "rawp", sizes, yvals, texts, "HI_raw':chargecut", options.events)
 
-  texts['wochargecut_HI_rawp'] = []
-  yvals['wochargecut_HI_rawp'] = []
-  sizes['wochargecut_HI_rawp'] = []
+  texts["HI_raw':no chargecut"] = []
+  yvals["HI_raw':no chargecut"] = []
+  sizes["HI_raw':no chargecut"] = []
 
-  update_list('default_10_wochargcut_compression_LZMA', 16, 8, 'rawp', sizes, yvals, texts, 'wochargecut_HI_rawp', options.events)
+  update_list('HI_wochargecut', 16, 8, 'rawp', sizes, yvals, texts, "HI_raw':no chargecut", options.events)
 
-  draw(sizes, yvals, texts, '# of tracks', 'tracks', 'rawp', 'chargecut')
+  draw_trackno(sizes, yvals, texts, '# of tracks', 'tracks', 'rawp')
