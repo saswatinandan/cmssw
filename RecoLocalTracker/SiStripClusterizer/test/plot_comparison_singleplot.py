@@ -47,11 +47,8 @@ def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, 
   if not events:
     lines = readfile(input_file)
     for idx, line in enumerate(lines):
-          print(line, obj)
           if f'{obj}' in line and  f'Std:' in line and 'ratio' not in line:
-              print('found', '\t', input_file)
               val = float(line.split(f'Std:')[-1])#.split('%')[0])
-              print(val)
               yvals[ver].append(val)
           '''elif f'not matched {obj}' in line and  f'{rawtype} ' in line:
             val = float(line.split(f'in {rawtype} ')[-1].split('%')[0])
@@ -60,8 +57,8 @@ def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, 
     f = TFile(input_file, 'r')
     yvals[ver].append(f.Get(f'{rawtype}_trk_cutflow').GetBinContent(1,1))
 
-  print(sizes)
-  print(yvals)
+  #print(sizes)
+  #print(yvals)
   texts[ver].append((f'{bary_bit}', f'{chrg_bit}'))
 
 def draw(x_vals, y_vals, texts, ytitle, obj, rawtype):
