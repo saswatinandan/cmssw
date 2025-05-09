@@ -47,7 +47,7 @@ public:
     assert(_barycenter <= maxBarycenter_ && "Returning barycenter > maxBarycenter");
     return _barycenter; }
   cms_uint8_t width() const {return width_; }
-  cms_uint8_t avgCharge() const { 
+  float avgCharge() const { 
      float avgCharge_ = compavgCharge_ * maxavgCharge_/maxavgChargeRange_ ;
     assert(avgCharge_ <= maxavgCharge_ && "Returning avgCharge > maxavgCharge");
      return avgCharge_; }
