@@ -32,17 +32,6 @@
 
 using namespace std;
 
-int W = 800;
-int H = 600;
-int H_ref = 600; 
-int W_ref = 800; 
-
-// references for T, B, L, R
-float T = 0.08*H_ref;
-float B = 0.12*H_ref; 
-float L = 0.12*W_ref;
-float R = 0.04*W_ref;
-  //
 void formatLegend(TLegend* leg, double textsize=27)
 {
         leg->SetBorderSize(0);
@@ -148,7 +137,6 @@ int main(int argc, char const *argv[])
 	uint16_t    rp_firstStrip;
 	uint16_t    rp_endStrip;
 	float       rp_barycenter;
-        UShort_t    rp_falling_barycenter;
 	uint16_t    rp_size;
 	int         rp_charge;
         UChar_t        rp_low_pt_trk_cluster;
@@ -218,7 +206,6 @@ int main(int argc, char const *argv[])
 	onlineClusterTree->SetBranchAddress("firstStrip", &rp_firstStrip);
 	onlineClusterTree->SetBranchAddress("endStrip", &rp_endStrip);
 	onlineClusterTree->SetBranchAddress("barycenter", &rp_barycenter);
-        onlineClusterTree->SetBranchAddress("falling_barycenter", &rp_falling_barycenter);
 	onlineClusterTree->SetBranchAddress("size", &rp_size);
 	onlineClusterTree->SetBranchAddress("charge", &rp_charge);
         onlineClusterTree->SetBranchAddress("low_pt_trk_cluster", &rp_low_pt_trk_cluster);
@@ -294,7 +281,6 @@ int main(int argc, char const *argv[])
 	                                    88, 0., 704. );
 	TH1F * h_barycenter_tot_sc = new TH1F( "RAW_offline_barrycenter", "(offline) raw cluster barycenter; yield",  
 	                                    950, 0., 950. );
-        TH1F* h_falling_barycenter_tot_ac = new TH1F("falling_barycenter", ";compressed #Delta barycenter;yield", 328, 0, 32800.); 
 
 	TH1F * h_size_tot_ac      = new TH1F( "RAW'_online_size", "(online) raw' cluster; size; yield",  
 	                                    50, 0., 50. );
@@ -412,7 +398,6 @@ int main(int argc, char const *argv[])
 		h_size_tot_ac->Fill( rp_size );
 		h_charge_tot_ac->Fill( rp_charge );
 		h_barycenter_tot_ac->Fill( rp_barycenter );
-                h_falling_barycenter_tot_ac->Fill( rp_falling_barycenter );
 	}
 
 	const Int_t r_d_nEntries = offlineDeadStripTree->GetEntries();
@@ -488,6 +473,9 @@ int main(int argc, char const *argv[])
 	TLatex latex;
 
 	TCanvas *canvSingle0 = new TCanvas("canvSingle0", "canvSingle0", 700, 600);
+	gStyle->SetOptTitle(0);
+	gErrorIgnoreLevel = kWarning;
+	canvSingle0->GetPad(0)->SetMargin (0.18, 0.20, 0.12, 0.07);
 	
 	h_size_tot_ac->GetYaxis()->SetRangeUser(
 		h_size_tot_ac->GetYaxis()->GetXmin(),
@@ -943,24 +931,12 @@ int main(int argc, char const *argv[])
         h_barycenter_res->Scale(1/h_barycenter_res->Integral());
 	h_barycenter_res->Draw("");
 	latex.DrawLatexNDC(0.21,0.84,"CMS");
-        latex.DrawLatexNDC(0.21,0.80,"Preliminary");
+	latex.DrawLatexNDC(0.21,0.80,"Preliminary");
 	latex.DrawLatexNDC(0.33,0.945,"2024 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
 	latex.SetTextFont(43);
 	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_barycenter_res->GetMean()));
 	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_barycenter_res->GetStdDev()));
 	canvSingle->SaveAs((expTag+"_MatchedClusters_barycenter_res.png").c_str());
-
-        PlotStyle(h_falling_barycenter_tot_ac);
-        h_falling_barycenter_tot_ac->GetXaxis()->SetNdivisions(606);
-        //h_falling_barycenter_tot_ac->Scale(1/h_falling_barycenter_tot_ac->Integral());
-        canvSingle->SetLogy(true);
-        h_falling_barycenter_tot_ac->Draw("HIST");
-        latex.DrawLatexNDC(0.31,0.84,"CMS");
-        latex.DrawLatexNDC(0.31,0.80, "Preliminary");
-        latex.DrawLatexNDC(0.33,0.945,"2024 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
-        latex.SetTextFont(43);
-        canvSingle->SaveAs((expTag+"falling_barycenter.png").c_str());
-        delete h_falling_barycenter_tot_ac;
 
 	ofstream unmatched_scs_txt;
 	unmatched_scs_txt.open(Form("log/%s_unmatched_scs.txt",expTag.c_str()));
