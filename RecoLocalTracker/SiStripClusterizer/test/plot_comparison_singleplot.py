@@ -4,6 +4,7 @@ import os
 import sys
 import argparse
 from ROOT import TFile, TH1
+from matplotlib.ticker import ScalarFormatter
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-b", type=int, dest="bits", nargs='+', default=[], help="bit to be studied for barycenter")
@@ -47,12 +48,17 @@ def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, 
   if not events:
    lines = readfile(input_file)
    for idx, line in enumerate(lines):
-      if f'not matched {obj}' in line and  f'{rawtype} ' in line:
+      if optimizer == 'Std':
+         if f'{obj}' in line and  f'Std:' in line and 'ratio' in line:
+            val = float(line.split(f'Std:')[-1])#.split('%')[0])
+            yvals[ver].append(val)
+      else:
+         if f'not matched {obj}' in line and  f'{rawtype} ' in line:
             val = float(line.split(f'in {rawtype} ')[-1].split('%')[0])
             yvals[ver].append(val)
   else:
     f = TFile(input_file, 'r')
-    yvals[ver].append(f.Get(f'{rawtype}_trk_cutflow').GetBinContent(1,1))
+    yvals[ver].append(f.Get(f'{rawtype}_trk_cutflow').GetBinContent(4))
 
   #print(sizes)
   #print(yvals)
@@ -62,15 +68,20 @@ def draw(x_vals, y_vals, texts, ytitle, obj, rawtype):
 
   fig = plt.figure(figsize=(8,7))
   ax = fig.add_subplot(111)
-  plt.title(r'CMS Preliminary   2024 pp Data $\sqrt{s_{NN}} = 13.6$ TeV', fontsize=15)
+  plt.title(r'CMS Preliminary', fontsize=15, loc='left')
+  plt.title('pp collisions, 2024 (13.6 TeV)', fontsize=15, loc='left')
   for idx, key in enumerate(texts.keys()):
     plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
     for i, text in enumerate(texts[key]):
       ax.text(x_vals[key][i], y_vals[key][i], text, fontsize=12)#, color=colors[idx])
-  #plt.title(f'size vs {obj}', fontsize=20)
-  #plt.margins(x=0.80)
-  plt.xlabel('size of approx cluster in Byte', fontsize=20, labelpad=15)
-  plt.ylabel(ytitle, fontsize=20, labelpad=15)
+
+  formatter = ScalarFormatter(useMathText=True)
+  formatter.set_scientific(True)
+  formatter.set_powerlimits((-1, 1))  # controls the range that triggers sci notation
+  ax.yaxis.set_major_formatter(formatter)
+
+  plt.xlabel('$\Delta(size)/size$ in %', fontsize=16, labelpad=15)
+  plt.ylabel("$\sigma(\Delta p_{T}/p_T)$ "+ ytitle, fontsize=16, labelpad=15)
   plt.xticks(fontsize=14)
   plt.yticks(fontsize=14)
   plt.legend(fontsize=15)
@@ -83,14 +94,17 @@ def draw_trackno(x_vals, y_vals, texts, ytitle, obj, rawtype):
 
       fig = plt.figure(figsize=(8,7))
       ax = fig.add_subplot(111)
-      plt.title(r'CMS Preliminary   2024 pp Data $\sqrt{s_{NN}} = 13.6$ TeV', fontsize=15)
+      plt.title(r'CMS Preliminary', fontsize=15, loc='left')
+      plt.title('pp collisions, 2024 (13.6 TeV)', fontsize=15, loc='right')
       for idx, key in enumerate(texts.keys()):
           plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
           for i, text in enumerate(texts[key]):
-                ax.text(x_vals[key][i], y_vals[key][i], text, fontsize=12)
-      plt.xlabel('size of approx cluster in Byte', fontsize=15)
+                ax.text(x_vals[key][i], y_vals[key][i]-18, text, fontsize=12)
+      plt.annotate('', xy=(x_vals["raw':chargecut"][0], y_vals["raw':chargecut"][0]), xytext=(x_vals["raw':no chargecut"][0], y_vals["raw':no chargecut"][0]),arrowprops=dict(arrowstyle='->', linestyle='dotted', color='black', lw=2))
+      plt.annotate('', xy=(x_vals["HI_raw':chargecut"][0], y_vals["HI_raw':chargecut"][0]), xytext=(x_vals["HI_raw':no chargecut"][0], y_vals["HI_raw':no chargecut"][0]),arrowprops=dict(arrowstyle='->', linestyle='dotted', color='black', lw=2))
+      plt.xlabel('size of approx cluster collection in Byte', fontsize=15)
       plt.ylabel(ytitle, fontsize=15)
-      #plt.xticks(fontsize=15)
+      plt.xticks(fontsize=12)
       #plt.yticks(fontsize=15)
       plt.legend(fontsize=15, loc='best')
       ax.grid(True)
@@ -116,21 +130,23 @@ def build_array(obj, rawtype):
   sizes["HI_raw'"] = []
   
   update_list('pp_wchargecut', 16, 8, rawtype, sizes, yvals, texts, "HI_raw'", options.events)
+  sizes["raw'"] = [(s1 -sizes["HI_raw'"][0])*100/sizes["HI_raw'"][0] for s1 in sizes["raw'"]]
   if options.version == 'v2':
     texts['v2'] = []
     yvals['v2'] = []
     sizes['v2'] = []
-    update_list('pp_wchargecut_v2', 15, 8, rawtype, sizes, yvals, texts, 'v2')
-    update_list('pp_wchargecut_v2', 15, 5, rawtype, sizes, yvals, texts, 'v2')
-    update_list('pp_wchargecut_v2', 15, 4, rawtype, sizes, yvals, texts, 'v2')
-    #update_list('pp_wchargecut_v2', 15, 7, rawtype, sizes, yvals, texts, 'v2')
-    update_list('pp_wchargecut_v2', 15, 6, rawtype, sizes, yvals, texts, 'v2')
-    #update_list('pp_wchargecut_v2', 14, 5, rawtype, sizes, yvals, texts, 'v2')
-    #update_list('pp_wchargecut_v2', 14, 4, rawtype, sizes, yvals, texts, 'v2')
-    update_list('pp_wchargecut_v2', 14, 8, rawtype, sizes, yvals, texts, 'v2')
-    #update_list('pp_wchargecut_v2', 14, 7, rawtype, sizes, yvals, texts, 'v2')
-    update_list('pp_wchargecut_v2', 14, 6, rawtype, sizes, yvals, texts, 'v2')
-    #update_list('pp_wchargecut_v2', 13, 8, rawtype, sizes, yvals, texts, 'v2')'''
+    update_list('pp_wchargecut_avgcharge_avgcharge', 15, 8, rawtype, sizes, yvals, texts, 'v2')
+    update_list('pp_wchargecut_avgcharge_avgcharge', 15, 5, rawtype, sizes, yvals, texts, 'v2')
+    update_list('pp_wchargecut_avgcharge_avgcharge', 15, 4, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('pp_wchargecut_avgcharge_avgcharge', 15, 7, rawtype, sizes, yvals, texts, 'v2')
+    update_list('pp_wchargecut_avgcharge_avgcharge', 15, 6, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('pp_wchargecut_avgcharge_avgcharge', 14, 5, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('pp_wchargecut_avgcharge_avgcharge', 14, 4, rawtype, sizes, yvals, texts, 'v2')
+    update_list('pp_wchargecut_avgcharge_avgcharge', 14, 8, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('pp_wchargecut_avgcharge_avgcharge', 14, 7, rawtype, sizes, yvals, texts, 'v2')
+    update_list('pp_wchargecut_avgcharge_avgcharge', 14, 6, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('pp_wchargecut_avgcharge_avgcharge', 13, 8, rawtype, sizes, yvals, texts, 'v2')'''
+    sizes["v2"] = [(s1 -sizes["HI_raw'"][0])*100/sizes["HI_raw'"][0] for s1 in sizes["v2"]]
   elif options.version == 'v1':
     texts['v1'] = []
     yvals['v1'] = []
@@ -152,10 +168,11 @@ def build_array(obj, rawtype):
     update_list('HI_wchargecut_v1p1', 13, 7, rawtype, sizes, yvals, texts, 'v1.1')
     update_list('HI_wchargecut_v1p1', 13, 5, rawtype, sizes, yvals, texts, 'v1.1')
     update_list('HI_wchargecut_v1p1', 13, 6, rawtype, sizes, yvals, texts, 'v1.1')
-
+  
+  sizes["HI_raw'"] = [1]
   pt = obj.split('_')[1].split('pt')[0]
   ylabel = obj.split('_')[0]
-  draw(sizes, yvals, texts, f'unmatched {pt} pt {ylabel} in %', obj, rawtype)
+  draw(sizes, yvals, texts, f'for {pt} pt {ylabel}', obj, rawtype)
 
 if not options.events:
   for raw in ['raw', "rawp"]:
@@ -191,4 +208,4 @@ else:
 
   update_list('pp_wochargecut', 16, 8, 'rawp', sizes, yvals, texts, "HI_raw':no chargecut", options.events)
 
-  draw_trackno(sizes, yvals, texts, '# of tracks', 'tracks', 'rawp')
+  draw_trackno(sizes, yvals, texts, 'number of tracks', 'tracks', 'rawp')
