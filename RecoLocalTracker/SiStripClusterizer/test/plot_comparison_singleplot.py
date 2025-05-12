@@ -33,7 +33,7 @@ def readfile(input_file):
      lines = f.readlines()
   return lines
 
-def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, events=0):
+def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, events=0, optimizer='Std'):
 
   input = f'/scratch/nandan/{dirname}_barycenter_{bary_bit}bit_width_8bit_avgCharge_{chrg_bit}bit/'
   input_file = os.path.join(input, 'size.log')
@@ -129,22 +129,22 @@ def build_array(obj, rawtype):
   yvals["HI_raw'"] = []
   sizes["HI_raw'"] = []
   
-  update_list('pp_wchargecut', 16, 8, rawtype, sizes, yvals, texts, "HI_raw'", options.events)
+  update_list('pp_wchargecut_avgcharge', 16, 8, rawtype, sizes, yvals, texts, "HI_raw'", options.events)
   sizes["raw'"] = [(s1 -sizes["HI_raw'"][0])*100/sizes["HI_raw'"][0] for s1 in sizes["raw'"]]
   if options.version == 'v2':
     texts['v2'] = []
     yvals['v2'] = []
     sizes['v2'] = []
-    update_list('pp_wchargecut_avgcharge_avgcharge', 15, 8, rawtype, sizes, yvals, texts, 'v2')
-    update_list('pp_wchargecut_avgcharge_avgcharge', 15, 5, rawtype, sizes, yvals, texts, 'v2')
-    update_list('pp_wchargecut_avgcharge_avgcharge', 15, 4, rawtype, sizes, yvals, texts, 'v2')
+    update_list('pp_wchargecut_v2_avgcharge', 15, 8, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
+    update_list('pp_wchargecut_v2_avgcharge', 15, 5, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
+    update_list('pp_wchargecut_v2_avgcharge', 15, 4, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
     #update_list('pp_wchargecut_avgcharge_avgcharge', 15, 7, rawtype, sizes, yvals, texts, 'v2')
-    update_list('pp_wchargecut_avgcharge_avgcharge', 15, 6, rawtype, sizes, yvals, texts, 'v2')
+    update_list('pp_wchargecut_v2_avgcharge', 15, 6, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
     #update_list('pp_wchargecut_avgcharge_avgcharge', 14, 5, rawtype, sizes, yvals, texts, 'v2')
     #update_list('pp_wchargecut_avgcharge_avgcharge', 14, 4, rawtype, sizes, yvals, texts, 'v2')
-    update_list('pp_wchargecut_avgcharge_avgcharge', 14, 8, rawtype, sizes, yvals, texts, 'v2')
+    update_list('pp_wchargecut_v2_avgcharge', 14, 8, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
     #update_list('pp_wchargecut_avgcharge_avgcharge', 14, 7, rawtype, sizes, yvals, texts, 'v2')
-    update_list('pp_wchargecut_avgcharge_avgcharge', 14, 6, rawtype, sizes, yvals, texts, 'v2')
+    update_list('pp_wchargecut_v2_avgcharge', 14, 6, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
     #update_list('pp_wchargecut_avgcharge_avgcharge', 13, 8, rawtype, sizes, yvals, texts, 'v2')'''
     sizes["v2"] = [(s1 -sizes["HI_raw'"][0])*100/sizes["HI_raw'"][0] for s1 in sizes["v2"]]
   elif options.version == 'v1':
