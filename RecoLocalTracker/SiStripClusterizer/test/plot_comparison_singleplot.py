@@ -60,8 +60,8 @@ def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, 
     f = TFile(input_file, 'r')
     yvals[ver].append(f.Get(f'{rawtype}_trk_cutflow').GetBinContent(4))
 
-  #print(sizes)
-  #print(yvals)
+  print(sizes)
+  print(yvals)
   texts[ver].append((f'{bary_bit}', f'{chrg_bit}'))
 
 def draw(x_vals, y_vals, texts, ytitle, obj, rawtype):
@@ -69,7 +69,7 @@ def draw(x_vals, y_vals, texts, ytitle, obj, rawtype):
   fig = plt.figure(figsize=(8,7))
   ax = fig.add_subplot(111)
   plt.title(r'CMS Preliminary', fontsize=15, loc='left')
-  plt.title('pp collisions, 2024 (13.6 TeV)', fontsize=15, loc='left')
+  plt.title('pp collisions, 2024 (13.6 TeV)', fontsize=15, loc='right')
   for idx, key in enumerate(texts.keys()):
     plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
     for i, text in enumerate(texts[key]):
