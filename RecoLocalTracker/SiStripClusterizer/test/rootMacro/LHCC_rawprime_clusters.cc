@@ -893,7 +893,7 @@ int main(int argc, char const *argv[])
 	delete canv;
 
 
-	TCanvas *canvSingle = new TCanvas("canvSingle", "canvSingle", 700, 600);
+	TCanvas *canvSingle = new TCanvas("canvSingle", "canvSingle", 800, 700);
 	gStyle->SetOptTitle(0);
 	gErrorIgnoreLevel = kWarning;
 	canvSingle->GetPad(0)->SetMargin (0.18, 0.20, 0.12, 0.07);
@@ -955,9 +955,8 @@ int main(int argc, char const *argv[])
         //h_falling_barycenter_tot_ac->Scale(1/h_falling_barycenter_tot_ac->Integral());
         canvSingle->SetLogy(true);
         h_falling_barycenter_tot_ac->Draw("HIST");
-        latex.DrawLatexNDC(0.31,0.84,"CMS");
-        latex.DrawLatexNDC(0.31,0.80, "Preliminary");
-        latex.DrawLatexNDC(0.33,0.945,"2024 pp Data #sqrt{s_{NN}} = 13.6 TeV");
+	latex.DrawLatexNDC(0.18,0.945,"CMS Preliminary");
+	latex.DrawLatexNDC(0.44,0.945,"pp collisions, 2024 (13.6 TeV)");
         latex.SetTextFont(43);
         canvSingle->SaveAs((expTag+"falling_barycenter.png").c_str());
         delete h_falling_barycenter_tot_ac;
