@@ -680,10 +680,10 @@ int main(int argc, char const *argv[])
 	                                    "; size (RAW'-RAW)/RAW; yield",
 	                                    50, -.1, .1);
 	TH1F * h_charge_res     = new TH1F( "chagre_res", 
-	                                    "; charge (RAW'-RAW)/RAW; yield",
+	                                    "; total charge (raw'-raw)/raw; yield",
 	                                    50, -.1, .1);
 	TH1F * h_barycenter_res = new TH1F( "barycenter_res", 
-	                                    "; barycenter (RAW'-RAW)/RAW; yield",
+	                                    "; barycenter (raw'-raw)/raw; yield",
 	                                    50, -.1, .1);
 
 	ofstream matched_sc2ac_txt;
@@ -894,7 +894,7 @@ int main(int argc, char const *argv[])
 	delete canv;
 
 
-	TCanvas *canvSingle = new TCanvas("canvSingle", "canvSingle", 700, 600);
+	TCanvas *canvSingle = new TCanvas("canvSingle", "canvSingle", 800, 700);
 	gStyle->SetOptTitle(0);
 	gErrorIgnoreLevel = kWarning;
 	canvSingle->GetPad(0)->SetMargin (0.18, 0.20, 0.12, 0.07);
@@ -932,9 +932,8 @@ int main(int argc, char const *argv[])
 
         h_charge_res->Scale(1/h_charge_res->Integral());
 	h_charge_res->Draw("");
-	latex.DrawLatexNDC(0.21,0.84,"CMS");
-	latex.DrawLatexNDC(0.21,0.80,"Preliminary");
-	latex.DrawLatexNDC(0.33,0.945,"2024 pp Data #sqrt{s_{NN}} = 13.6 TeV");
+	latex.DrawLatexNDC(0.18,0.945,"CMS Preliminary");
+	latex.DrawLatexNDC(0.44,0.945,"pp collisions, 2024 (13.6 TeV)");
 	latex.SetTextFont(43);
 	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_charge_res->GetMean()));
 	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_charge_res->GetStdDev()));
@@ -943,9 +942,8 @@ int main(int argc, char const *argv[])
 
         h_barycenter_res->Scale(1/h_barycenter_res->Integral());
 	h_barycenter_res->Draw("");
-	latex.DrawLatexNDC(0.21,0.84,"CMS");
-        latex.DrawLatexNDC(0.21,0.80,"Preliminary");
-	latex.DrawLatexNDC(0.33,0.945,"2024 pp Data #sqrt{s_{NN}} = 13.6 TeV");
+	latex.DrawLatexNDC(0.18,0.945,"CMS Preliminary");
+	latex.DrawLatexNDC(0.44,0.945,"pp collisions, 2024 (13.6 TeV)");
 	latex.SetTextFont(43);
 	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_barycenter_res->GetMean()));
 	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_barycenter_res->GetStdDev()));
@@ -955,9 +953,8 @@ int main(int argc, char const *argv[])
         h_falling_barycenter_tot_ac->GetXaxis()->SetNdivisions(606);
         canvSingle->SetLogy(true);
         h_falling_barycenter_tot_ac->Draw("HIST");
-        latex.DrawLatexNDC(0.31,0.84,"CMS");
-        latex.DrawLatexNDC(0.31,0.80,"Preliminary");
-        latex.DrawLatexNDC(0.33,0.945,"2024 pp Data #sqrt{s_{NN}} = 13.6 TeV");
+	latex.DrawLatexNDC(0.18,0.945,"CMS Preliminary");
+	latex.DrawLatexNDC(0.44,0.945,"pp collisions, 2024 (13.6 TeV)");
         latex.SetTextFont(43);
         canvSingle->SaveAs((expTag+"falling_barycenter.png").c_str());
         delete h_falling_barycenter_tot_ac;
