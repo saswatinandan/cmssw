@@ -680,10 +680,10 @@ int main(int argc, char const *argv[])
 	                                    "; size (RAW'-RAW)/RAW; yield",
 	                                    50, -.1, .1);
 	TH1F * h_charge_res     = new TH1F( "chagre_res", 
-	                                    "; total charge (raw'-raw)/raw; yield",
+	                                    "; total charge (raw'-raw)/raw; Normalized yield",
 	                                    50, -.1, .1);
 	TH1F * h_barycenter_res = new TH1F( "barycenter_res", 
-	                                    "; barycenter (raw'-raw)/raw; yield",
+	                                    "; barycenter (raw'-raw)/raw; Normalized yield",
 	                                    50, -.1, .1);
 
 	ofstream matched_sc2ac_txt;
@@ -935,8 +935,8 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.18,0.945,"CMS Preliminary");
 	latex.DrawLatexNDC(0.44,0.945,"pp collisions, 2024 (13.6 TeV)");
 	latex.SetTextFont(43);
-	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_charge_res->GetMean()));
-	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_charge_res->GetStdDev()));
+	latex.DrawLatexNDC(0.63,0.85,Form("Mean=%.2f", h_charge_res->GetMean()));
+	latex.DrawLatexNDC(0.63,0.80,Form("Std Dev=%.2f", h_charge_res->GetStdDev()));
 	canvSingle->SetLogy(true);
 	canvSingle->SaveAs((expTag+"_MatchedClusters_charge_res.png").c_str());
 

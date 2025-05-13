@@ -66,16 +66,16 @@ public:
 
      latex.SetTextFont(43);
      latex.SetTextSize(24);
-     latex.DrawLatexNDC(0.18,0.945,"CMS Preliminary");
+     latex.DrawLatexNDC(0.39,0.970,"CMS Preliminary");
      latex.SetTextFont(43);
      latex.SetTextSize(24);
      latex.SetTextFont(43);
      latex.SetTextSize(24);
      latex.SetTextAlign(33);
-     latex.DrawLatexNDC(0.44,0.945,"pp collisions, 2024 (13.6 TeV");
+     latex.DrawLatexNDC(0.80,0.970,"pp collisions, 2024 (13.6 TeV)");
      latex.SetTextFont(43);
-     latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.4f", hist->GetMean()));
-     latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.4f", hist->GetStdDev()));
+     latex.DrawLatexNDC(0.78,0.85,Form("Mean=%.4f", hist->GetMean()));
+     latex.DrawLatexNDC(0.78,0.80,Form("Std Dev=%.4f", hist->GetStdDev()));
      std::ostringstream mean, std;
      mean << std::fixed << std::setprecision(4) << hist->GetMean(); // 5 digits after decimal
      std << std::fixed << std::setprecision(4) << hist->GetStdDev();
