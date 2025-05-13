@@ -72,11 +72,11 @@ def draw(x_vals, y_vals, texts, ytitle, obj, rawtype):
 
   formatter = ScalarFormatter(useMathText=True)
   formatter.set_scientific(True)
-  formatter.set_powerlimits((-3, 3))  # controls the range that triggers sci notation
+  formatter.set_powerlimits((-1, 1))  # controls the range that triggers sci notation
   ax.yaxis.set_major_formatter(formatter)
   
-  plt.xlabel("$\Delta(size)/size$", fontsize=16, labelpad=15)
-  plt.ylabel("$\sigma(p_{T_{method}}/p_{raw})$ "+ ytitle, fontsize=16, labelpad=15)
+  plt.xlabel("$\Delta(size)/size$ in %", fontsize=16, labelpad=15)
+  plt.ylabel("$\sigma(\Delta p_{T}/p_T)$ "+ ytitle, fontsize=16, labelpad=15)
   plt.xticks(fontsize=14)
   plt.yticks(fontsize=14)
   plt.legend(fontsize=15)
@@ -96,7 +96,7 @@ def draw_trackno(x_vals, y_vals, texts, ytitle, obj, rawtype):
                 ax.text(x_vals[key][i], y_vals[key][i], text, fontsize=12)
       plt.annotate('', xy=(x_vals["raw':chargecut"][0], y_vals["raw':chargecut"][0]), xytext=(x_vals["raw':no chargecut"][0], y_vals["raw':no chargecut"][0]),arrowprops=dict(arrowstyle='->', linestyle='dotted', color='black', lw=2))
       plt.annotate('', xy=(x_vals["HI_raw':chargecut"][0], y_vals["HI_raw':chargecut"][0]), xytext=(x_vals["HI_raw':no chargecut"][0], y_vals["HI_raw':no chargecut"][0]),arrowprops=dict(arrowstyle='->', linestyle='dotted', color='black', lw=2))
-      plt.xlabel('size of approx cluster in Byte', fontsize=15)
+      plt.xlabel('size of approx cluster collection in Byte', fontsize=15)
       plt.ylabel(ytitle, fontsize=15)
       plt.legend(fontsize=15, loc='best')
       ax.grid(True)

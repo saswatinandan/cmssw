@@ -9,7 +9,7 @@
 
 TCanvas * create_canvas(bool setOptStat=0)
 {
- TCanvas* canv = new TCanvas("", "", 700, 600);
+ TCanvas* canv = new TCanvas("", "", 800, 700);
  gStyle->SetOptTitle(0);
  //gROOT->SetBatch( 1 );
  gStyle->SetOptStat(setOptStat);
