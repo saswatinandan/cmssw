@@ -99,7 +99,7 @@ def draw_trackno(x_vals, y_vals, texts, ytitle, obj, rawtype):
       for idx, key in enumerate(texts.keys()):
           plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
           for i, text in enumerate(texts[key]):
-                ax.text(x_vals[key][i], y_vals[key][i]-18, text, fontsize=12)
+                ax.text(x_vals[key][i], y_vals[key][i]-30, text, fontsize=12)
       plt.annotate('', xy=(x_vals["raw':chargecut"][0], y_vals["raw':chargecut"][0]), xytext=(x_vals["raw':no chargecut"][0], y_vals["raw':no chargecut"][0]),arrowprops=dict(arrowstyle='->', linestyle='dotted', color='black', lw=2))
       plt.annotate('', xy=(x_vals["HI_raw':chargecut"][0], y_vals["HI_raw':chargecut"][0]), xytext=(x_vals["HI_raw':no chargecut"][0], y_vals["HI_raw':no chargecut"][0]),arrowprops=dict(arrowstyle='->', linestyle='dotted', color='black', lw=2))
       plt.xlabel('size of approx cluster collection in Byte', fontsize=15)
@@ -188,24 +188,24 @@ else:
   yvals["raw':chargecut"] = []
   sizes["raw':chargecut"] = []
 
-  update_list('pp_wchargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "raw':chargecut", options.events)
+  update_list('pp_wchargecut_saswati_avgcharge', 15, 6, "rawp", sizes, yvals, texts, "raw':chargecut", options.events)
 
   texts["raw':no chargecut"] = []
   yvals["raw':no chargecut"] = []
   sizes["raw':no chargecut"] = []
 
-  update_list('pp_wochargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "raw':no chargecut", options.events)
+  update_list('pp_wochargecut_saswati_avgcharge', 15, 6, "rawp", sizes, yvals, texts, "raw':no chargecut", options.events)
 
   texts["HI_raw':chargecut"] = []
   yvals["HI_raw':chargecut"] = []
   sizes["HI_raw':chargecut"] = []
 
-  update_list('pp_wchargecut', 16, 8, "rawp", sizes, yvals, texts, "HI_raw':chargecut", options.events)
+  update_list('pp_wchargecut_avgcharge', 16, 8, "rawp", sizes, yvals, texts, "HI_raw':chargecut", options.events)
 
   texts["HI_raw':no chargecut"] = []
   yvals["HI_raw':no chargecut"] = []
   sizes["HI_raw':no chargecut"] = []
 
-  update_list('pp_wochargecut', 16, 8, 'rawp', sizes, yvals, texts, "HI_raw':no chargecut", options.events)
+  update_list('pp_wochargecut_avgcharge', 16, 8, 'rawp', sizes, yvals, texts, "HI_raw':no chargecut", options.events)
 
   draw_trackno(sizes, yvals, texts, 'number of tracks', 'tracks', 'rawp')
