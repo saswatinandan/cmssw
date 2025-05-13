@@ -33,7 +33,7 @@ def readfile(input_file):
      lines = f.readlines()
   return lines
 
-def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, events=0):
+def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, events=0, optimizer='Std'):
 
   input = f'/scratch/nandan/{dirname}_barycenter_{bary_bit}bit_width_8bit_avgCharge_{chrg_bit}bit/'
   input_file = os.path.join(input, 'size.log')
@@ -48,8 +48,13 @@ def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, 
   if not events:
     lines = readfile(input_file)
     for idx, line in enumerate(lines):
-      if f'{obj}' in line and  f'Std:' in line and 'ratio' in line:
+      if optimizer=='Std':
+        if f'{obj}' in line and  f'Std:' in line and 'ratio' in line:
               val = float(line.split(f'Std:')[-1])#.split('%')[0])
+              yvals[ver].append(val)
+      else:
+            if f'not matched {obj}' in line and  f'{rawtype} ' in line:
+              val = float(line.split(f'in {rawtype} ')[-1].split('%')[0])
               yvals[ver].append(val)
   else:
     f = TFile(input_file, 'r')
@@ -89,7 +94,8 @@ def draw_trackno(x_vals, y_vals, texts, ytitle, obj, rawtype):
 
       fig = plt.figure(figsize=(8,7))
       ax = fig.add_subplot(111)
-      plt.title(r'CMS Preliminary   2024 PbPb Data $\sqrt{s_{NN}} = 5.36$ TeV', fontsize=15)
+      plt.title('CMS Preliminary', fontsize=15, loc='left')
+      plt.title('PbPb collisions, 2024 (5.36 TeV)', fontsize=15, loc='right')
       for idx, key in enumerate(texts.keys()):
           plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
           for i, text in enumerate(texts[key]):
@@ -115,29 +121,29 @@ def build_array(obj, rawtype):
 
   for avgCharge in avgCharges:
     for bit in x:
-      update_list(output, bit, avgCharge, rawtype, sizes, yvals, texts, "raw'", options.events)
+      update_list(output, bit, avgCharge, rawtype, sizes, yvals, texts, "raw'", options.events, 'Std')
   
   texts["HI_raw'"] = []
   yvals["HI_raw'"] = []
   sizes["HI_raw'"] = []
   
-  update_list('HI_wchargecut_avgcharge', 16, 8, rawtype, sizes, yvals, texts, "HI_raw'", options.events)
+  update_list('HI_wchargecut_avgcharge', 16, 8, rawtype, sizes, yvals, texts, "HI_raw'", options.events, 'Std')
   sizes["raw'"] = [(s1 -sizes["HI_raw'"][0])*100/sizes["HI_raw'"][0] for s1 in sizes["raw'"]]
   
   if options.version == 'v2':
     texts['v2'] = []
     yvals['v2'] = []
     sizes['v2'] = []
-    update_list('HI_wchargecut_v2_avgcharge', 15, 8, rawtype, sizes, yvals, texts, 'v2')
-    update_list('HI_wchargecut_v2_avgcharge', 15, 5, rawtype, sizes, yvals, texts, 'v2')
-    update_list('HI_wchargecut_v2_avgcharge', 15, 4, rawtype, sizes, yvals, texts, 'v2')
+    update_list('HI_wchargecut_v2_avgcharge', 15, 8, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
+    update_list('HI_wchargecut_v2_avgcharge', 15, 5, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
+    update_list('HI_wchargecut_v2_avgcharge', 15, 4, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
     #update_list('HI_wchargecut_v2_avgcharge', 15, 7, rawtype, sizes, yvals, texts, 'v2')
-    update_list('HI_wchargecut_v2_avgcharge', 15, 6, rawtype, sizes, yvals, texts, 'v2')
+    update_list('HI_wchargecut_v2_avgcharge', 15, 6, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
     #update_list('HI_wchargecut_v2_avgcharge', 14, 5, rawtype, sizes, yvals, texts, 'v2')
     #update_list('HI_wchargecut_v2_avgcharge', 14, 4, rawtype, sizes, yvals, texts, 'v2')
-    update_list('HI_wchargecut_v2_avgcharge', 14, 8, rawtype, sizes, yvals, texts, 'v2')
+    update_list('HI_wchargecut_v2_avgcharge', 14, 8, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
     #update_list('HI_wchargecut_v2_avgcharge', 14, 7, rawtype, sizes, yvals, texts, 'v2')
-    update_list('HI_wchargecut_v2_avgcharge', 14, 6, rawtype, sizes, yvals, texts, 'v2')
+    update_list('HI_wchargecut_v2_avgcharge', 14, 6, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
     #update_list('HI_wchargecut_v2_avgcharge', 13, 8, rawtype, sizes, yvals, texts, 'v2')'''
     sizes["v2"] = [(s1 -sizes["HI_raw'"][0])*100/sizes["HI_raw'"][0] for s1 in sizes["v2"]]
   elif options.version == 'v1':
@@ -201,4 +207,4 @@ else:
 
   update_list('HI_wochargecut_avgcharge', 16, 8, 'rawp', sizes, yvals, texts, "HI_raw':no chargecut", options.events)
 
-  draw_trackno(sizes, yvals, texts, '# of tracks', 'tracks', 'rawp')
+  draw_trackno(sizes, yvals, texts, 'number of tracks', 'tracks', 'rawp')
