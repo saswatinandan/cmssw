@@ -108,16 +108,10 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
   unsigned int previous_module_length = 0;
   const auto tkDets = tkGeom->dets();
 
-  //std::cout << "event " << event.id().event() << "\t" <<  event.id().run() << "\t" << event.id().luminosityBlock() << std::endl;
-  std::set<uint16_t> s_strip;
   std::vector<uint16_t> v_strip;
-  nlohmann::json data;
   for (const auto& detClusters : clusterCollection) {
-  //if (event.id().event() != 8168080) continue; 
     auto ff = result->beginDet(detClusters.id());
-    //float previous_cluster = -999.;
     unsigned int detId = detClusters.id();
-    //std::cout << "detId " << detId << std::endl;
     const GeomDet* det = tkGeom->idToDet(detId);
     double nApvs = detInfo_.getNumberOfApvsAndStripLength(detId).first;
     double stripLength = detInfo_.getNumberOfApvsAndStripLength(detId).second;
@@ -133,15 +127,12 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
       });
     const StripTopology& p = dynamic_cast<const StripGeomDetUnit*>(*_det)->specificTopology();
     nStrips = p.nstrips();
-    s_strip.insert(nStrips);
     v_strip.push_back(nStrips);
 
     previous_module_length += (v_strip.size() <3) ? 0 : v_strip[v_strip.size()-3];
     module_length += (v_strip.size() <2) ? 0 : v_strip[v_strip.size()-2];
-    data[std::to_string(detId)+"_"+std::to_string(event.id().event())] = nStrips;
     assert(detClusters.size());
     bool first_cluster = true;
-    //std::cout << "changing detId " << detId << std::endl;
     for (const auto& cluster : detClusters) {
       const LocalPoint& lp = LocalPoint(((cluster.barycenter() * 10 / (sistrip::STRIPS_PER_APV * nApvs)) -
                                          ((stripDet->surface().bounds().width()) * 0.5f)),
@@ -157,7 +148,6 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
       bool usable = theFilter->getSizes(detId, cluster, lp, ldir, hitStrips, hitPredPos);
       // (almost) same logic as in StripSubClusterShapeTrajectoryFilter
       bool isTrivial = (std::abs(hitPredPos) < 2.f && hitStrips <= 2);
-      //std::cout << "previous_cluster " << previous_cluster << std::endl;
       if (!usable || isTrivial) {
         ff.push_back(SiStripApproximateCluster(cluster, maxNSat, hitPredPos, previous_cluster, module_length, first_cluster ? previous_module_length : module_length, true));
       } else {
@@ -180,15 +170,6 @@ void SiStripClusters2ApproxClusters::produce(edm::Event& event, edm::EventSetup 
     }
   }
 
-    std::ofstream output_file("settings_example_output.json");
-    if (!output_file.is_open())  {
-        std::cout << "\n Failed to open output file";
-    } else {
-        output_file << data;
-        output_file.close();
-    }
-  //std::cout << "new event " << std::endl;
-  //for(auto const & v : s_strip) std::cout << "nStrips " << v << " is in " << std::count(v_strip.begin(), v_strip.end(), v) << " detIds " << std::endl;
   event.put(std::move(result));
 }
 
