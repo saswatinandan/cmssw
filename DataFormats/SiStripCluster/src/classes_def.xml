@@ -1,19 +1,12 @@
 <lcgdict>
 
- <class name="SiStripCluster" ClassVersion="14">
-  <version ClassVersion="14" checksum="1374720584"/>
+ <class name="SiStripCluster" ClassVersion="13">
   <version ClassVersion="13" checksum="1374720584"/>
   <version ClassVersion="12" checksum="2984011925"/>
   <version ClassVersion="11" checksum="3702468681"/>
   <version ClassVersion="10" checksum="3791198690"/>
   <field name="error_x" transient="true"/>
  </class>
- <ioread sourceClass="SiStripCluster" version="[10-11]" targetClass="SiStripCluster" source="std::vector<uint8_t> amplitudes_; uint16_t firstStrip_;" target="amplitudes_,firstStrip_,barycenter_,charge_" >
-   <![CDATA[amplitudes_ = onfile.amplitudes_; firstStrip_ = onfile.firstStrip_; newObj->initQB();]]>
- </ioread>
- <ioread sourceClass="SiStripCluster" version="[12-13]" targetClass="SiStripCluster" source="std::vector<uint8_t> amplitudes_; uint16_t firstStrip_; float barycenter_; int charge_;" target="amplitudes_,firstStrip_,barycenter_,charge_" >
-   <![CDATA[amplitudes_ = onfile.amplitudes_; firstStrip_ = onfile.firstStrip_; barycenter_ = onfile.barycenter_; charge_ = onfile.charge_; if (onfile.barycenter_ == 0) { newObj->initQB(); } else { firstStrip_ |= SiStripCluster::approximateMask; }]]>
- </ioread>
  <class name="std::vector<SiStripCluster>"/>
 
  <class name="edmNew::DetSetVector<SiStripCluster>"/>
@@ -32,7 +25,8 @@
  <class name="edm::Wrapper<edmNew::DetSetVector<edm::Ref<edmNew::DetSetVector<SiStripCluster>,SiStripCluster,edmNew::DetSetVector<SiStripCluster>::FindForDetSetVector> > >" />
 
 
- <class name="SiStripApproximateCluster" ClassVersion="6">
+					 <class name="SiStripApproximateCluster" ClassVersion="7">
+  <version ClassVersion="7" checksum="3973657242"/>
   <version ClassVersion="6" checksum="132211472"/>
   <version ClassVersion="5" checksum="3495825183"/>
   <version ClassVersion="4" checksum="2854791577"/>
@@ -58,6 +52,14 @@
  <class name="std::vector<edm::Ref<edmNew::DetSetVector<SiStripApproximateCluster>,SiStripApproximateCluster,edmNew::DetSetVector<SiStripApproximateCluster>::FindForDetSetVector> >" />
  <class name="edmNew::DetSetVector<edm::Ref<edmNew::DetSetVector<SiStripApproximateCluster>,SiStripApproximateCluster,edmNew::DetSetVector<SiStripApproximateCluster>::FindForDetSetVector> >" />
  <class name="edm::Wrapper<edmNew::DetSetVector<edm::Ref<edmNew::DetSetVector<SiStripApproximateCluster>,SiStripApproximateCluster,edmNew::DetSetVector<SiStripApproximateCluster>::FindForDetSetVector> > >" />
+
+  <class name="v1::SiStripApproximateClusterCollection" ClassVersion="6">
+  <version ClassVersion="6" checksum="1698009625"/>
+  <version ClassVersion="5" checksum="2723004116"/>
+  <version ClassVersion="4" checksum="3101417750"/>
+  <version ClassVersion="3" checksum="2723004116"/>
+ </class>
+ <class name="edm::Wrapper<v1::SiStripApproximateClusterCollection>"/>
 
  <class name="SiStripClustersSOA" ClassVersion="3">
   <version ClassVersion="3" checksum="2739562998"/>
