@@ -100,7 +100,7 @@ def draw_trackno(x_vals, y_vals, texts, ytitle, obj, rawtype):
           plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
           for i, text in enumerate(texts[key]):
                 ax.text(x_vals[key][i], y_vals[key][i], text, fontsize=12)
-      plt.annotate('', xy=(x_vals["raw':chargecut"][0], y_vals["raw':chargecut"][0]), xytext=(x_vals["raw':no chargecut"][0], y_vals["raw':no chargecut"][0]),arrowprops=dict(arrowstyle='->', linestyle='dotted', color='black', lw=2))
+      plt.annotate('', xy=(x_vals["raw':chargecut"][0]-40, y_vals["raw':chargecut"][0]), xytext=(x_vals["raw':no chargecut"][0], y_vals["raw':no chargecut"][0]),arrowprops=dict(arrowstyle='->', linestyle='dotted', color='black', lw=2))
       plt.annotate('', xy=(x_vals["HI_raw':chargecut"][0], y_vals["HI_raw':chargecut"][0]), xytext=(x_vals["HI_raw':no chargecut"][0], y_vals["HI_raw':no chargecut"][0]),arrowprops=dict(arrowstyle='->', linestyle='dotted', color='black', lw=2))
       plt.xlabel('size of approx cluster collection in Byte', fontsize=15)
       plt.ylabel(ytitle, fontsize=15)
