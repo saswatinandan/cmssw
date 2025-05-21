@@ -72,7 +72,7 @@ public:
      latex.SetTextFont(43);
      latex.SetTextSize(24);
      latex.SetTextAlign(33);
-     latex.DrawLatexNDC(0.80,0.970,"PbPb collisions, 2024 (5.6 TeV)");
+     latex.DrawLatexNDC(0.80,0.970,"PbPb collisions, 2024 (5.36 TeV)");
      latex.SetTextFont(43);
      latex.DrawLatexNDC(0.78,0.85,Form("Mean=%.4f", hist->GetMean()));
      latex.DrawLatexNDC(0.78,0.80,Form("Std Dev=%.4f", hist->GetStdDev()));
