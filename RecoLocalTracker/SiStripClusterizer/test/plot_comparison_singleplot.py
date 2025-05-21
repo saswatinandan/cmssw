@@ -127,7 +127,7 @@ def build_array(obj, rawtype):
   yvals["HI_raw'"] = []
   sizes["HI_raw'"] = []
   
-  update_list('HI_wchargecut_avgcharge', 16, 8, rawtype, sizes, yvals, texts, "HI_raw'", options.events, 'Std')
+  update_list('HI_wchargecut', 16, 8, rawtype, sizes, yvals, texts, "HI_raw'", options.events, 'Std')
   sizes["raw'"] = [(s1 -sizes["HI_raw'"][0])*100/sizes["HI_raw'"][0] for s1 in sizes["raw'"]]
   
   if options.version == 'v2':
