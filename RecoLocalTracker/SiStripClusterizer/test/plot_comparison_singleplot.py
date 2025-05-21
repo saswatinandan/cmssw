@@ -129,23 +129,23 @@ def build_array(obj, rawtype):
   yvals["HI_raw'"] = []
   sizes["HI_raw'"] = []
   
-  update_list('pp_wchargecut_avgcharge', 16, 8, rawtype, sizes, yvals, texts, "HI_raw'", options.events)
+  update_list('pp_wchargecut', 16, 8, rawtype, sizes, yvals, texts, "HI_raw'", options.events)
   sizes["raw'"] = [(s1 -sizes["HI_raw'"][0])*100/sizes["HI_raw'"][0] for s1 in sizes["raw'"]]
   if options.version == 'v2':
     texts['v2'] = []
     yvals['v2'] = []
     sizes['v2'] = []
-    update_list('pp_wchargecut_v2_avgcharge', 15, 8, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
-    update_list('pp_wchargecut_v2_avgcharge', 15, 5, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
-    update_list('pp_wchargecut_v2_avgcharge', 15, 4, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
-    #update_list('pp_wchargecut_avgcharge_avgcharge', 15, 7, rawtype, sizes, yvals, texts, 'v2')
-    update_list('pp_wchargecut_v2_avgcharge', 15, 6, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
-    #update_list('pp_wchargecut_avgcharge_avgcharge', 14, 5, rawtype, sizes, yvals, texts, 'v2')
-    #update_list('pp_wchargecut_avgcharge_avgcharge', 14, 4, rawtype, sizes, yvals, texts, 'v2')
-    update_list('pp_wchargecut_v2_avgcharge', 14, 8, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
-    #update_list('pp_wchargecut_avgcharge_avgcharge', 14, 7, rawtype, sizes, yvals, texts, 'v2')
-    update_list('pp_wchargecut_v2_avgcharge', 14, 6, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
-    #update_list('pp_wchargecut_avgcharge_avgcharge', 13, 8, rawtype, sizes, yvals, texts, 'v2')'''
+    update_list('pp_wchargecut_v2', 15, 8, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
+    update_list('pp_wchargecut_v2', 15, 5, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
+    update_list('pp_wchargecut_v2', 15, 4, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
+    #update_list('pp_wchargecut', 15, 7, rawtype, sizes, yvals, texts, 'v2')
+    update_list('pp_wchargecut_v2', 15, 6, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
+    #update_list('pp_wchargecut', 14, 5, rawtype, sizes, yvals, texts, 'v2')
+    #update_list('pp_wchargecut', 14, 4, rawtype, sizes, yvals, texts, 'v2')
+    update_list('pp_wchargecut_v2', 14, 8, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
+    #update_list('pp_wchargecut', 14, 7, rawtype, sizes, yvals, texts, 'v2')
+    update_list('pp_wchargecut_v2', 14, 6, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
+    #update_list('pp_wchargecut', 13, 8, rawtype, sizes, yvals, texts, 'v2')'''
     sizes["v2"] = [(s1 -sizes["HI_raw'"][0])*100/sizes["HI_raw'"][0] for s1 in sizes["v2"]]
   elif options.version == 'v1':
     texts['v1'] = []
@@ -188,24 +188,24 @@ else:
   yvals["raw':chargecut"] = []
   sizes["raw':chargecut"] = []
 
-  update_list('pp_wchargecut_saswati_avgcharge', 15, 6, "rawp", sizes, yvals, texts, "raw':chargecut", options.events)
+  update_list('pp_wchargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "raw':chargecut", options.events)
 
   texts["raw':no chargecut"] = []
   yvals["raw':no chargecut"] = []
   sizes["raw':no chargecut"] = []
 
-  update_list('pp_wochargecut_saswati_avgcharge', 15, 6, "rawp", sizes, yvals, texts, "raw':no chargecut", options.events)
+  update_list('pp_wochargecut_saswati', 15, 6, "rawp", sizes, yvals, texts, "raw':no chargecut", options.events)
 
   texts["HI_raw':chargecut"] = []
   yvals["HI_raw':chargecut"] = []
   sizes["HI_raw':chargecut"] = []
 
-  update_list('pp_wchargecut_avgcharge', 16, 8, "rawp", sizes, yvals, texts, "HI_raw':chargecut", options.events)
+  update_list('pp_wchargecut', 16, 8, "rawp", sizes, yvals, texts, "HI_raw':chargecut", options.events)
 
   texts["HI_raw':no chargecut"] = []
   yvals["HI_raw':no chargecut"] = []
   sizes["HI_raw':no chargecut"] = []
 
-  update_list('pp_wochargecut_avgcharge', 16, 8, 'rawp', sizes, yvals, texts, "HI_raw':no chargecut", options.events)
+  update_list('pp_wochargecut', 16, 8, 'rawp', sizes, yvals, texts, "HI_raw':no chargecut", options.events)
 
   draw_trackno(sizes, yvals, texts, 'number of tracks', 'tracks', 'rawp')
