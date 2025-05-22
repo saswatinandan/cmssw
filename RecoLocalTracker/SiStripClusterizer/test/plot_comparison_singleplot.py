@@ -169,7 +169,7 @@ def build_array(obj, rawtype):
     update_list('HI_wchargecut_v1p1', 13, 5, rawtype, sizes, yvals, texts, 'v1.1')
     update_list('HI_wchargecut_v1p1', 13, 6, rawtype, sizes, yvals, texts, 'v1.1')
   
-  sizes["HI_raw'"] = [1]
+  sizes["HI_raw'"] = [(s1 - s1)*100/sizes["HI_raw'"][0] for s1 in sizes["HI_raw'"]] 
   pt = obj.split('_')[1].split('pt')[0]
   ylabel = obj.split('_')[0]
   draw(sizes, yvals, texts, f'for {pt} pt {ylabel}', obj, rawtype)
