@@ -679,9 +679,17 @@ int main(int argc, char const *argv[])
 	TH1F * h_size_res      = new TH1F( "size_res", 
 	                                    "; size (RAW'-RAW)/RAW; yield",
 	                                    50, -.1, .1);
+	const int nBins = 50;
+	const double xmin = -0.1;
+	const double xmax = 0.1;
+	const double binWidth = (xmax - xmin) / nBins;
+        double edges[nBins + 1];
+        double start = xmin;
+	for (int i = 0; i <= nBins; ++i) 
+           edges[i] = start + (i * binWidth) + (binWidth/2);
 	TH1F * h_charge_res     = new TH1F( "chagre_res", 
 	                                    "; total charge (raw'-raw)/raw; Normalized yield",
-	                                    50, -.1, .1);
+	                                    nBins, edges);
 	TH1F * h_barycenter_res = new TH1F( "barycenter_res", 
 	                                    "; barycenter (raw'-raw)/raw; Normalized yield",
 	                                    50, -.1, .1);
