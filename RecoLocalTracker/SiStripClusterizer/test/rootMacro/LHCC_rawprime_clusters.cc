@@ -688,10 +688,10 @@ int main(int argc, char const *argv[])
 	for (int i = 0; i <= nBins; ++i) 
            edges[i] = start + (i * binWidth) + (binWidth/2);
 	TH1F * h_charge_res     = new TH1F( "chagre_res", 
-	                                    "; total charge (raw'-raw)/raw; Normalized yield",
+	                                    "; #Delta total charge/total charge; Normalized yield",
 	                                    nBins, edges);
 	TH1F * h_barycenter_res = new TH1F( "barycenter_res", 
-	                                    "; barycenter (raw'-raw)/raw; Normalized yield",
+	                                    "; #Delta barycenter/barycenter; Normalized yield",
 	                                    50, -.1, .1);
 
 	ofstream matched_sc2ac_txt;
