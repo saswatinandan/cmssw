@@ -71,19 +71,19 @@ def draw(x_vals, y_vals, texts, ytitle, obj, rawtype):
   max_ = max(max(y_vals.values()))*(1.10)
   min_ = min(min(y_vals.values()))*(0.80)
   plt.ylim(top=max_,bottom=min_)
-  plt.text(0.15, 0.98, 'CMS Preliminary',
+  plt.text(0.15, 0.98, r'CMS $\it{Preliminary}$',
         horizontalalignment='center',
         verticalalignment='top',
         transform=plt.gca().transAxes,
-        fontsize=15,
-        fontstyle='italic')
+        fontsize=15
+        )
   #plt.title(r'CMS Preliminary', fontsize=15, loc='left', fontstyle='italic')
   plt.title('pp collisions, 2024 (13.6 TeV)', fontsize=15, loc='right')
   for idx, key in enumerate(texts.keys()):
     plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
     for i, text in enumerate(texts[key]):
-      if text[0] == 15 and text[1] == 8:
-          x_vals[key][i] -= 1.05
+      if text[0] == 15 and text[1] == 8 and key=="raw'":
+          x_vals[key][i] -= 1.5
       ax.text(x_vals[key][i], y_vals[key][i], text, fontsize=12)#, color=colors[idx])
 
   formatter = ScalarFormatter(useMathText=True)
