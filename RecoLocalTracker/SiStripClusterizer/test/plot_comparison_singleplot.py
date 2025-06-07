@@ -62,17 +62,28 @@ def update_list(dirname, bary_bit, chrg_bit, rawtype, sizes, yvals, texts, ver, 
 
   #print(sizes)
   #print(yvals)
-  texts[ver].append((f'{bary_bit}', f'{chrg_bit}'))
+  texts[ver].append((int(f'{bary_bit}'), int(f'{chrg_bit}')))
 
 def draw(x_vals, y_vals, texts, ytitle, obj, rawtype):
 
   fig = plt.figure(figsize=(8,7))
   ax = fig.add_subplot(111)
-  plt.title('CMS Preliminary', fontsize=15, loc='left')
+  max_ = max(max(y_vals.values()))*(1.10)
+  min_ = min(min(y_vals.values()))*(0.80)
+  plt.ylim(top=max_,bottom=min_)
+  plt.text(0.15, 0.98, r'CMS $\it{Preliminary}$',
+     horizontalalignment='center',
+     verticalalignment='top',
+     transform=plt.gca().transAxes,
+     fontsize=15
+  )
+  #plt.title('CMS Preliminary', fontsize=15, loc='left')
   plt.title('PbPb collisions, 2024 (5.36 TeV)', fontsize=15, loc='right')
   for idx, key in enumerate(texts.keys()):
     plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
     for i, text in enumerate(texts[key]):
+      if text[0] == 15 and text[1] == 8 and key=="raw'":
+            x_vals[key][i] -= 1.8
       ax.text(x_vals[key][i], y_vals[key][i], text, fontsize=12)#, color=colors[idx])
 
   formatter = ScalarFormatter(useMathText=True)
