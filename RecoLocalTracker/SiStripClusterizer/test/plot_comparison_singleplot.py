@@ -105,12 +105,16 @@ def draw_trackno(x_vals, y_vals, texts, ytitle, obj, rawtype):
 
       fig = plt.figure(figsize=(8,7))
       ax = fig.add_subplot(111)
-      plt.title(r'CMS Preliminary', fontsize=15, loc='left')
+      plt.title(r'CMS $\it{Preliminary}$', fontsize=15, loc='left')
       plt.title('pp collisions, 2024 (13.6 TeV)', fontsize=15, loc='right')
       for idx, key in enumerate(texts.keys()):
           plt.scatter(x_vals[key], y_vals[key], color=colors[idx], label=key)
           for i, text in enumerate(texts[key]):
-                ax.text(x_vals[key][i], y_vals[key][i]-30, text, fontsize=12)
+                if x_vals[key][i] > 295000:
+                    x = x_vals[key][i] - 2000
+                else:
+                   x = x_vals[key][i] 
+                ax.text(x, y_vals[key][i]-30, text, fontsize=12)
       plt.annotate('', xy=(x_vals["raw':chargecut"][0], y_vals["raw':chargecut"][0]), xytext=(x_vals["raw':no chargecut"][0], y_vals["raw':no chargecut"][0]),arrowprops=dict(arrowstyle='->', linestyle='dotted', color='black', lw=2))
       plt.annotate('', xy=(x_vals["HI_raw':chargecut"][0], y_vals["HI_raw':chargecut"][0]), xytext=(x_vals["HI_raw':no chargecut"][0], y_vals["HI_raw':no chargecut"][0]),arrowprops=dict(arrowstyle='->', linestyle='dotted', color='black', lw=2))
       plt.xlabel('size of approx cluster collection in Byte', fontsize=15)
