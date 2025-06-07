@@ -507,7 +507,7 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.22,0.84,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.32,0.84,"Preliminary");
+	latex.DrawLatexNDC(0.32,0.84,"#it{Preliminary}");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2024 pp Data #sqrt{s_{NN}} = 13.6 TeV");
@@ -688,10 +688,10 @@ int main(int argc, char const *argv[])
 	for (int i = 0; i <= nBins; ++i) 
            edges[i] = start + (i * binWidth) + (binWidth/2);
 	TH1F * h_charge_res     = new TH1F( "chagre_res", 
-	                                    "; #Delta total charge/total charge; Normalized yield",
+	                                    "; #Delta total charge(raw',raw)/total charge; Normalized yield",
 	                                    nBins, edges);
 	TH1F * h_barycenter_res = new TH1F( "barycenter_res", 
-	                                    "; #Delta barycenter/barycenter; Normalized yield",
+	                                    "; #Delta barycenter(raw',raw)/barycenter; Normalized yield",
 	                                    50, -.1, .1);
 
 	ofstream matched_sc2ac_txt;
@@ -940,7 +940,7 @@ int main(int argc, char const *argv[])
 
         h_charge_res->Scale(1/h_charge_res->Integral());
 	h_charge_res->Draw("");
-	latex.DrawLatexNDC(0.18,0.945,"CMS Preliminary");
+	latex.DrawLatexNDC(0.18,0.945,"CMS #it{Preliminary}");
 	latex.DrawLatexNDC(0.44,0.945,"pp collisions, 2024 (13.6 TeV)");
 	latex.SetTextFont(43);
 	latex.DrawLatexNDC(0.63,0.85,Form("Mean=%.2f", h_charge_res->GetMean()));
@@ -950,18 +950,18 @@ int main(int argc, char const *argv[])
 
         h_barycenter_res->Scale(1/h_barycenter_res->Integral());
 	h_barycenter_res->Draw("");
-	latex.DrawLatexNDC(0.18,0.945,"CMS Preliminary");
+	latex.DrawLatexNDC(0.18,0.945,"CMS #it{Preliminary}");
 	latex.DrawLatexNDC(0.44,0.945,"pp collisions, 2024 (13.6 TeV)");
 	latex.SetTextFont(43);
 	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_barycenter_res->GetMean()));
-	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_barycenter_res->GetStdDev()));
+	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.4f", h_barycenter_res->GetStdDev()));
 	canvSingle->SaveAs((expTag+"_MatchedClusters_barycenter_res.png").c_str());
 
         PlotStyle(h_falling_barycenter_tot_ac);
         h_falling_barycenter_tot_ac->GetXaxis()->SetNdivisions(606);
         canvSingle->SetLogy(true);
         h_falling_barycenter_tot_ac->Draw("HIST");
-	latex.DrawLatexNDC(0.18,0.945,"CMS Preliminary");
+	latex.DrawLatexNDC(0.18,0.945,"CMS #it{Preliminary}");
 	latex.DrawLatexNDC(0.44,0.945,"pp collisions, 2024 (13.6 TeV)");
         latex.SetTextFont(43);
         canvSingle->SaveAs((expTag+"falling_barycenter.png").c_str());

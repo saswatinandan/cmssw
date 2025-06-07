@@ -66,7 +66,7 @@ public:
 
      latex.SetTextFont(43);
      latex.SetTextSize(24);
-     latex.DrawLatexNDC(0.39,0.970,"CMS Preliminary");
+     latex.DrawLatexNDC(0.39,0.970,"CMS #it{Preliminary}");
      latex.SetTextFont(43);
      latex.SetTextSize(24);
      latex.SetTextFont(43);
