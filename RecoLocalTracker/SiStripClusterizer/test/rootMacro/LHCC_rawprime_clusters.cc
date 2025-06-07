@@ -137,7 +137,7 @@ int main(int argc, char const *argv[])
 	uint16_t    rp_firstStrip;
 	uint16_t    rp_endStrip;
 	float       rp_barycenter;
-        UShort_t    rp_falling_barycenter;
+        UShort_t    rp_falling_barycenter; 
 	uint16_t    rp_size;
 	int         rp_charge;
         UChar_t        rp_low_pt_trk_cluster;
@@ -283,8 +283,7 @@ int main(int argc, char const *argv[])
 	                                    88, 0., 704. );
 	TH1F * h_barycenter_tot_sc = new TH1F( "RAW_offline_barrycenter", "(offline) raw cluster barycenter; yield",  
 	                                    950, 0., 950. );
-        TH1F* h_falling_barycenter_tot_ac = new TH1F("falling_barycenter", ";compressed #Delta barycenter;yield", 328, 0, 32800.); 
-
+        TH1F* h_falling_barycenter_tot_ac = new TH1F("falling_barycenter", ";compressed #Delta barycenter;yield", 328, 0, 32800.);
 	TH1F * h_size_tot_ac      = new TH1F( "RAW'_online_size", "(online) raw' cluster; size; yield",  
 	                                    50, 0., 50. );
 	TH1F * h_charge_tot_ac     = new TH1F( "RAW'_online_charge", "(online) raw' cluster; charge; yield",  
@@ -495,7 +494,7 @@ int main(int argc, char const *argv[])
 	latex.DrawLatexNDC(0.22,0.84,"CMS");
 	latex.SetTextFont(53);
 	latex.SetTextSize(22);
-	latex.DrawLatexNDC(0.32,0.84,"Preliminary");
+	latex.DrawLatexNDC(0.28,0.84,"#it{Preliminary}");
 	latex.SetTextFont(43);
 	latex.SetTextSize(24);
 	latex.DrawLatexNDC(0.33,0.945,"2024 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
@@ -651,10 +650,19 @@ int main(int argc, char const *argv[])
 	                                    "; RAW SiStripCluster size; RAW' ApproxCluster size",  
 	                                    50, 0., 50.,
 	                                    50, 0., 50. );
+	const int nBins = 50;
+	const double xmin = -0.1;
+	const double xmax = 0.1;
+	const double binWidth = (xmax - xmin) / nBins;
+
+        double edges[nBins + 1];
+        double start = xmin;
+	for (int i = 0; i <= nBins; ++i) 
+           edges[i] = start + (i * binWidth) + (binWidth/2);
 	TH2F * h_charge     = new TH2F( "charge", 
 	                                    "; RAW SiStripCluster charge; RAW' ApproxCluster charge",  
 	                                    88, 0., 704.,
-	                                    88, 0., 704. );
+	                                    88, 0., 704.);
 	TH2F * h_barycenter = new TH2F( "barycenter", 
 	                                    "; RAW SiStripCluster barycenter; RAW' ApproxCluster barycenter",  
 	                                    192, 0., 768.,
@@ -667,23 +675,12 @@ int main(int argc, char const *argv[])
 	TH1F * h_size_res      = new TH1F( "size_res", 
 	                                    "; size (RAW'-RAW)/RAW; yield",
 	                                    50, -.1, .1);
-	const int nBins = 50;
-	const double xmin = -0.1;
-	const double xmax = 0.1;
-	const double binWidth = (xmax - xmin) / nBins;
-
-        double edges[nBins + 1];
-	double start = xmin;
-	for (int i = 0; i <= nBins; ++i) {
-           edges[i] = start + (i * binWidth) + (binWidth/2);
-	}
 	TH1F * h_charge_res     = new TH1F( "chagre_res", 
-	                                    "; total charge (raw'-raw)/raw; Normalized yield",
+	                                    "; #Delta total charge(v2,raw)/total charge; Normalized yield",
 	                                    nBins, edges);
 	TH1F * h_barycenter_res = new TH1F( "barycenter_res", 
-	                                    "; barycenter (raw'-raw)/raw; Normalized yield",
-	                                    50, -0.1,0.1);
-	
+	                                    "; #Delta barycenter(v2,raw)/barycenter; Normalized yield",
+	                                    50, -.1, .1);
 
 	ofstream matched_sc2ac_txt;
 	matched_sc2ac_txt.open(Form("log/%s_matched_sc2ac.txt", expTag.c_str()));
@@ -931,32 +928,29 @@ int main(int argc, char const *argv[])
 
         h_charge_res->Scale(1/h_charge_res->Integral());
 	h_charge_res->Draw("");
-	latex.DrawLatexNDC(0.21,0.84,"CMS");
-	latex.DrawLatexNDC(0.21,0.80,"Preliminary");
-	latex.DrawLatexNDC(0.33,0.945,"2024 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.18,0.945,"CMS #it{Preliminary}");
+	latex.DrawLatexNDC(0.40,0.945,"PbPb collisions, 2024 (5.36 TeV)");
 	latex.SetTextFont(43);
-	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_charge_res->GetMean()));
-	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_charge_res->GetStdDev()));
+	latex.DrawLatexNDC(0.63,0.85,Form("Mean=%.2f", h_charge_res->GetMean()));
+	latex.DrawLatexNDC(0.63,0.80,Form("Std Dev=%.2f", h_charge_res->GetStdDev()));
 	canvSingle->SetLogy(true);
 	canvSingle->SaveAs((expTag+"_MatchedClusters_charge_res.png").c_str());
-        for(unsigned int ibin=0; ibin<h_charge_res->GetNbinsX(); ibin++) std::cout << h_charge_res->GetBinLowEdge(ibin) << std::endl;
+
         h_barycenter_res->Scale(1/h_barycenter_res->Integral());
 	h_barycenter_res->Draw("");
-	latex.DrawLatexNDC(0.21,0.84,"CMS");
-        latex.DrawLatexNDC(0.21,0.80,"Preliminary");
-	latex.DrawLatexNDC(0.33,0.945,"2024 PbPb Data #sqrt{s_{NN}} = 5.36 TeV");
+	latex.DrawLatexNDC(0.18,0.945,"CMS #it{Preliminary}");
+	latex.DrawLatexNDC(0.40,0.945,"PbPb collisions, 2024 (5.36 TeV)");
 	latex.SetTextFont(43);
 	latex.DrawLatexNDC(0.60,0.80,Form("Mean=%.2f", h_barycenter_res->GetMean()));
-	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.2f", h_barycenter_res->GetStdDev()));
+	latex.DrawLatexNDC(0.60,0.75,Form("Std Dev=%.4f", h_barycenter_res->GetStdDev()));
 	canvSingle->SaveAs((expTag+"_MatchedClusters_barycenter_res.png").c_str());
 
         PlotStyle(h_falling_barycenter_tot_ac);
         h_falling_barycenter_tot_ac->GetXaxis()->SetNdivisions(606);
-        //h_falling_barycenter_tot_ac->Scale(1/h_falling_barycenter_tot_ac->Integral());
         canvSingle->SetLogy(true);
         h_falling_barycenter_tot_ac->Draw("HIST");
-	latex.DrawLatexNDC(0.18,0.945,"CMS Preliminary");
-	latex.DrawLatexNDC(0.40,0.945,"PbPb collisions, 2024 (5.36 TeV)");
+	latex.DrawLatexNDC(0.18,0.945,"CMS #it{Preliminary}");
+	latex.DrawLatexNDC(0.44,0.945,"PbPb collisions, 2024 (5.36 TeV)");
         latex.SetTextFont(43);
         canvSingle->SaveAs((expTag+"falling_barycenter.png").c_str());
         delete h_falling_barycenter_tot_ac;
