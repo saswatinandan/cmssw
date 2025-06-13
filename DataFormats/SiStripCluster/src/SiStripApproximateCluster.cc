@@ -11,6 +11,8 @@ SiStripApproximateCluster::SiStripApproximateCluster(const SiStripCluster& clust
                                                      unsigned int& module_length,
                                                      unsigned int& previous_module_length,
                                                      bool peakFilter) {
+  bool filter_;
+  bool isSaturated_,peakFilter_;
   if (previous_cluster == -999.)
    compBarycenter_ = std::round(cluster.barycenter() * maxRange_/maxBarycenter_);
   else
@@ -20,7 +22,7 @@ SiStripApproximateCluster::SiStripApproximateCluster(const SiStripCluster& clust
   previous_cluster = barycenter(previous_cluster, module_length, previous_module_length);
   assert(cluster.barycenter() <= maxBarycenter_ && "Got a barycenter > maxBarycenter");
   assert(compBarycenter_ <= maxRange_ && "Filling compBarycenter > maxRange");
-  width_ = std::min(255,(int)cluster.size());
+  width_ = std::min(255,(int)cluster.size());//std::min(255,(int)cluster.size());//std::min(255,(int)cluster.size());
   float avgCharge_ = cluster.charge() / width_;
   assert(avgCharge_ <= maxavgCharge_ && "Got a avgCharge > maxavgCharge");
   compavgCharge_ = std::round(avgCharge_ * maxavgChargeRange_/maxavgCharge_);
@@ -69,4 +71,7 @@ SiStripApproximateCluster::SiStripApproximateCluster(const SiStripCluster& clust
   } else {
     filter_ = peakFilter_;
   }
+  compavgCharge_ = (compavgCharge_ |(filter_<<6));
+  compavgCharge_ = (compavgCharge_ |(peakFilter_<<7));
+  compBarycenter_ = (compBarycenter_ | (isSaturated_<<15));
 }
