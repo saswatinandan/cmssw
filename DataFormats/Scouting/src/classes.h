@@ -6,6 +6,7 @@
 #include "DataFormats/Scouting/interface/ScoutingElectron.h"
 #include "DataFormats/Scouting/interface/ScoutingMuon.h"
 #include "DataFormats/Scouting/interface/ScoutingPhoton.h"
+#include "DataFormats/Scouting/interface/Run3ScoutingCaloRecHit.h"
 #include "DataFormats/Scouting/interface/Run3ScoutingCaloJet.h"
 #include "DataFormats/Scouting/interface/Run3ScoutingHitPatternPOD.h"
 #include "DataFormats/Scouting/interface/Run3ScoutingPFJet.h"
