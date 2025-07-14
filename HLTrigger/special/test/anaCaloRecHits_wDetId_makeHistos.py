@@ -77,6 +77,7 @@ for i, event in enumerate(events):
     # ECAL: EB and EE #
     ###################
     for hit in rechits_ECAL:
+        #if (not (hit.flags()==0 or hit.flags()==1)):
         energy = hit.energy()
         raw_detid = hit.detId()
         detid = ROOT.DetId(raw_detid)
@@ -86,6 +87,8 @@ for i, event in enumerate(events):
 
         subdet = detid.subdetId()
         if subdet == 1:  # EB
+            if (hit.energy()>2 and (not (hit.flags()==1))):
+                print("Flags?? YES = ", hit.flags())
             ebid = ROOT.EBDetId(raw_detid)
             ieta = ebid.ieta()
             iphi = ebid.iphi()

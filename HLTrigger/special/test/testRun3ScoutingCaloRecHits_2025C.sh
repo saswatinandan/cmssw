@@ -41,24 +41,21 @@ for foo in streamPaths:
 cp hlt_baseline.py hlt_caloRecHits.py
 cat <<@EOF >> hlt_caloRecHits.py
 
-process.hltScoutingCaloRecHitPackerECAL = cms.EDProducer("HLTScoutingCaloRecHitProducer",
-  pfRecHits = cms.InputTag('hltParticleFlowRecHitECALUnseeded'),
-  minEnergy = cms.double(-1),
+process.hltScoutingRecHitPacker = cms.EDProducer("HLTScoutingRecHitProducer",
+  pfRecHitsECAL = cms.InputTag('hltParticleFlowRecHitECALUnseeded'),
+  minEnergyEB = cms.double(-1),
+  minEnergyEE = cms.double(-1),
+  pfRecHitsHBHE = cms.InputTag('hltParticleFlowRecHitHBHE'),
+  minEnergyHBHE = cms.double(1),
   mantissaPrecision = cms.int32(10),
 )
 
-process.hltScoutingCaloRecHitPackerHBHE = cms.EDProducer("HLTScoutingCaloRecHitProducer",
-  pfRecHits = cms.InputTag('hltParticleFlowRecHitHBHE'),
-  minEnergy = cms.double(1),
-  mantissaPrecision = cms.int32(10),
-)
-
-process.HLTPFScoutingPackingSequence.insert(0, process.hltScoutingCaloRecHitPackerECAL)
-process.HLTPFScoutingPackingSequence.insert(1, process.hltScoutingCaloRecHitPackerHBHE)
+process.HLTPFScoutingPackingSequence.insert(0, process.hltScoutingRecHitPacker)
 
 process.hltOutputScoutingPF.outputCommands += [
-    'keep *_hltScoutingCaloRecHitPackerECAL_*_*',
-    'keep *_hltScoutingCaloRecHitPackerHBHE_*_*',
+    'keep *_hltScoutingRecHitPacker_EB_*',
+    'keep *_hltScoutingRecHitPacker_EE_*',
+    'keep *_hltScoutingRecHitPacker_HBHE_*',
 ]
 
 process.hltOutputScoutingPF.fileName = "out_reHLT_CaloRecHits_2025C.root"
