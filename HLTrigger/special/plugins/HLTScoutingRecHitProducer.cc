@@ -55,26 +55,31 @@ void HLTScoutingRecHitProducer::produce(edm::StreamID, edm::Event& iEvent, edm::
   auto run3ScoutEERecHits = std::make_unique<Run3ScoutingEERecHitCollection>();
   run3ScoutEERecHits->reserve(recoPFRecHitsECAL.size());
 
+  unsigned int previous_detId_ECAL_BARREL(0), previous_detId_ECAL_ENDCAP(0), previous_detId_HBHE(0);
   for (auto const& rh : recoPFRecHitsECAL) {
     if (rh.layer() == PFLayer::ECAL_BARREL) {
       if (rh.energy() < minEnergyEB_) {
         continue;
       }
 
+      unsigned int diff_detId = (previous_detId_ECAL_BARREL == 0) ? rh.detId() : rh.detId() - previous_detId_ECAL_BARREL;
       run3ScoutEBRecHits->emplace_back(
           MiniFloatConverter::reduceMantissaToNbitsRounding(rh.energy(), mantissaPrecision_),
           MiniFloatConverter::reduceMantissaToNbitsRounding(rh.time(), mantissaPrecision_),
-          rh.detId(),
+          diff_detId,
           rh.flags());
+      previous_detId_ECAL_BARREL += diff_detId;
     } else if (rh.layer() == PFLayer::ECAL_ENDCAP) {
       if (rh.energy() < minEnergyEE_) {
         continue;
       }
 
+      unsigned int diff_detId = (previous_detId_ECAL_ENDCAP == 0) ? rh.detId() : rh.detId() - previous_detId_ECAL_ENDCAP;
       run3ScoutEERecHits->emplace_back(
           MiniFloatConverter::reduceMantissaToNbitsRounding(rh.energy(), mantissaPrecision_),
           MiniFloatConverter::reduceMantissaToNbitsRounding(rh.time(), mantissaPrecision_),
-          rh.detId());
+          diff_detId);
+      previous_detId_ECAL_ENDCAP += diff_detId;
     } else {
       edm::LogWarning("HLTScoutingRecHitProducer")
           << "Skipping PFRecHit because of unexpected PFLayer value (" << rh.layer() << ").";
@@ -94,10 +99,12 @@ void HLTScoutingRecHitProducer::produce(edm::StreamID, edm::Event& iEvent, edm::
     if (rh.energy() < minEnergyHBHE_) {
       continue;
     }
-
+    if ( previous_detId_HBHE != 0 && rh.detId() < previous_detId_HBHE ) previous_detId_HBHE = 0;
+    unsigned int diff_detId = (previous_detId_HBHE == 0) ? rh.detId() : rh.detId() - previous_detId_HBHE;
     run3ScoutHBHERecHits->emplace_back(
         MiniFloatConverter::reduceMantissaToNbitsRounding(rh.energy(), mantissaPrecision_),
-        rh.detId());
+        diff_detId);
+    previous_detId_HBHE += diff_detId;
   }
 
   iEvent.put(std::move(run3ScoutHBHERecHits), "HBHE");
