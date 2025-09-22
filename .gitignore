@@ -8,6 +8,7 @@ __init__.py
 *.png
 *.root
 *#
+*.o
 # ignore partially applied patches and their backup
 *.rej
 *.orig
