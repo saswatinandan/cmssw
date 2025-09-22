@@ -393,10 +393,32 @@ void CaloTowersCreationAlgo::process(const HFRecHitCollection& hf) {
     assignHitHcal(&(*hfItr));
 }
 
+void CaloTowersCreationAlgo::process(const Run3ScoutingHBHERecHitCollection& hbhe) {
+  for (Run3ScoutingHBHERecHitCollection::const_iterator hbheItr = hbhe.begin(); hbheItr != hbhe.end(); ++hbheItr) {
+	  CaloRecHit* hbherechit = new CaloRecHit((*hbheItr).detId(), (*hbheItr).energy(), 1,1);
+          assignHitHcal(hbherechit);
+  }
+}
+
 void CaloTowersCreationAlgo::process(const EcalRecHitCollection& ec) {
   for (EcalRecHitCollection::const_iterator ecItr = ec.begin(); ecItr != ec.end(); ++ecItr)
     assignHitEcal(&(*ecItr));
 }
+
+void CaloTowersCreationAlgo::process(const Run3ScoutingEBRecHitCollection& eb) {
+  for (Run3ScoutingEBRecHitCollection::const_iterator ebItr = eb.begin(); ebItr != eb.end(); ++ebItr) {
+     EcalRecHit* ebrechit = new EcalRecHit((*ebItr).detId(), (*ebItr).energy(), (*ebItr).time(), 0, (*ebItr).flags());
+     assignHitEcal(ebrechit);
+  }
+}
+
+void CaloTowersCreationAlgo::process(const Run3ScoutingEERecHitCollection& ee) {
+  for (Run3ScoutingEERecHitCollection::const_iterator eeItr = ee.begin(); eeItr != ee.end(); ++eeItr) {
+     EcalRecHit* eerechit = new EcalRecHit((*eeItr).detId(), (*eeItr).energy(), (*eeItr).time(), 0, 1);
+     assignHitEcal(eerechit);
+  }
+}
+
 
 // this method should not be used any more as the towers in the changed format
 // can not be properly rescaled with the "rescale" method.
@@ -802,7 +824,6 @@ void CaloTowersCreationAlgo::assignHitEcal(const EcalRecHit* recHit) {
   // for ECAL RecHits
 
   bool passEmThreshold = false;
-
   if (detId.subdetId() == EcalBarrel) {
     if (theUseEtEBTresholdFlag)
       energy /= cosh((theGeometry->getGeometry(detId)->getPosition()).eta());
@@ -970,7 +991,6 @@ void CaloTowersCreationAlgo::convert(const CaloTowerDetId& id, const MetaTower& 
         metaContains_nohcal.push_back(*i);
     metaContains.swap(metaContains_nohcal);
   }
-
   if (metaContains.empty())
     return;
 
@@ -1265,7 +1285,7 @@ void CaloTowersCreationAlgo::getThresholdAndWeight(const DetId& detId, double& t
       if (weight <= 0.) {
         ROOT::Math::Interpolator my(theEBGrid, theEBWeights, ROOT::Math::Interpolation::kAKIMA);
         weight = my.Eval(theEBEScale);
-      }
+     }
     } else if (subdet == EcalEndcap) {
       if (ecalCuts == nullptr) {
         threshold = theEEthreshold;

@@ -44,10 +44,13 @@ private:
 
   CaloTowersCreationAlgo algo_;
   edm::EDGetTokenT<HBHERecHitCollection> tok_hbhe_;
+  edm::EDGetTokenT<Run3ScoutingHBHERecHitCollection> tok_hbhe_s;
   edm::EDGetTokenT<HORecHitCollection> tok_ho_;
   edm::EDGetTokenT<HFRecHitCollection> tok_hf_;
   std::vector<edm::InputTag> ecalLabels_;
   std::vector<edm::EDGetTokenT<EcalRecHitCollection> > toks_ecal_;
+  edm::EDGetTokenT<Run3ScoutingEBRecHitCollection> tok_ecal_EB_;
+  edm::EDGetTokenT<Run3ScoutingEERecHitCollection> tok_ecal_EE_;
   bool allowMissingInputs_;
 
   edm::ESGetToken<CaloGeometry, CaloGeometryRecord> tok_geom_;
@@ -96,6 +99,7 @@ private:
   // Ecal noise thresholds
   edm::ESGetToken<EcalPFRecHitThresholds, EcalPFRecHitThresholdsRcd> ecalPFRechitThresholdsToken_;
   bool ecalRecHitThresh_;
+  bool UseScouting_;
   EcalPFRecHitThresholds const* ecalThresholds = nullptr;
 };
 
@@ -180,11 +184,13 @@ CaloTowersCreator::CaloTowersCreator(const edm::ParameterSet& conf)
       useRejectedRecoveredHcalHits_(conf.getParameter<bool>("UseRejectedRecoveredHcalHits")),
       useRejectedRecoveredEcalHits_(conf.getParameter<bool>("UseRejectedRecoveredEcalHits")),
       cutsFromDB(conf.getParameter<bool>("usePFThresholdsFromDB")),
-      ecalRecHitThresh_(conf.getParameter<bool>("EcalRecHitThresh")) {
+      ecalRecHitThresh_(conf.getParameter<bool>("EcalRecHitThresh")),
+      UseScouting_(conf.getParameter<bool>("UseScouting")) {
   algo_.setMissingHcalRescaleFactorForEcal(conf.getParameter<double>("missingHcalRescaleFactorForEcal"));
 
   // register for data access
   tok_hbhe_ = consumes<HBHERecHitCollection>(conf.getParameter<edm::InputTag>("hbheInput"));
+  tok_hbhe_s = consumes<Run3ScoutingHBHERecHitCollection>(conf.getParameter<edm::InputTag>("hbheInput_s"));
   tok_ho_ = consumes<HORecHitCollection>(conf.getParameter<edm::InputTag>("hoInput"));
   tok_hf_ = consumes<HFRecHitCollection>(conf.getParameter<edm::InputTag>("hfInput"));
   tok_geom_ = esConsumes<CaloGeometry, CaloGeometryRecord>();
@@ -207,7 +213,9 @@ CaloTowersCreator::CaloTowersCreator(const edm::ParameterSet& conf)
 
   const unsigned nLabels = ecalLabels_.size();
   for (unsigned i = 0; i != nLabels; i++)
-    toks_ecal_.push_back(consumes<EcalRecHitCollection>(ecalLabels_[i]));
+  toks_ecal_.push_back(consumes<EcalRecHitCollection>(ecalLabels_[i]));
+  tok_ecal_EB_ = consumes<Run3ScoutingEBRecHitCollection>(conf.getParameter<edm::InputTag>("ebInput"));
+  tok_ecal_EE_ = consumes<Run3ScoutingEERecHitCollection>(conf.getParameter<edm::InputTag>("eeInput"));
 
   EBEScale = eScales_.EBScale;
   EEEScale = eScales_.EEScale;
@@ -217,7 +225,6 @@ CaloTowersCreator::CaloTowersCreator(const edm::ParameterSet& conf)
   HOEScale = eScales_.HOScale;
   HF1EScale = eScales_.HF1Scale;
   HF2EScale = eScales_.HF2Scale;
-
   // get the Ecal severities to be excluded
   const std::vector<std::string> severitynames =
       conf.getParameter<std::vector<std::string> >("EcalRecHitSeveritiesToBeExcluded");
@@ -227,7 +234,6 @@ CaloTowersCreator::CaloTowersCreator(const edm::ParameterSet& conf)
   // get the Ecal severities to be used for bad towers
   theEcalSeveritiesToBeUsedInBadTowers_ = StringToEnumValue<EcalSeverityLevel::SeverityLevel>(
       conf.getParameter<std::vector<std::string> >("EcalSeveritiesToBeUsedInBadTowers"));
-
   if (eScales_.instanceLabel.empty())
     produces<CaloTowerCollection>();
   else
@@ -273,7 +279,6 @@ void CaloTowersCreator::produce(edm::Event& e, const edm::EventSetup& c) {
 
   edm::ESHandle<EcalSeverityLevelAlgo> ecalSevLvlAlgoHndl = c.getHandle(tok_ecalSevAlgo_);
   const EcalSeverityLevelAlgo* ecalSevLvlAlgo = ecalSevLvlAlgoHndl.product();
-
   algo_.setEBEScale(EBEScale);
   algo_.setEEEScale(EEEScale);
   algo_.setHBEScale(HBEScale);
@@ -305,7 +310,7 @@ void CaloTowersCreator::produce(edm::Event& e, const edm::EventSetup& c) {
 
   algo_.setUseRejectedRecoveredHcalHits(useRejectedRecoveredHcalHits_);
   algo_.setUseRejectedRecoveredEcalHits(useRejectedRecoveredEcalHits_);
-
+/*
 #ifdef EDM_ML_DEBUG
   std::cout << "VI Produce: " << (useRejectedHitsOnly_ ? "use rejectOnly " : " ")
             << (allowMissingInputs_ ? "allowMissing " : " ")
@@ -313,7 +318,7 @@ void CaloTowersCreator::produce(edm::Event& e, const edm::EventSetup& c) {
             << theEcalSeveritiesToBeExcluded_.size() << ' ' << theEcalSeveritiesToBeUsedInBadTowers_.size()
             << std::endl;
 #endif
-
+*/
   algo_.begin();  // clear the internal buffer
 
   // can't chain these in a big OR statement, or else it'll
@@ -336,17 +341,16 @@ void CaloTowersCreator::produce(edm::Event& e, const edm::EventSetup& c) {
 
   edm::Handle<EcalRecHitCollection> ebHandle;
   edm::Handle<EcalRecHitCollection> eeHandle;
-
+  
   for (std::vector<edm::EDGetTokenT<EcalRecHitCollection> >::const_iterator i = toks_ecal_.begin();
        i != toks_ecal_.end();
        i++) {
     edm::Handle<EcalRecHitCollection> ec_tmp;
-
+  
     if (!e.getByToken(*i, ec_tmp))
       continue;
     if (ec_tmp->empty())
       continue;
-
     // check if this is EB or EE
     if ((ec_tmp->begin()->detid()).subdetId() == EcalBarrel) {
       ebHandle = ec_tmp;
@@ -363,10 +367,18 @@ void CaloTowersCreator::produce(edm::Event& e, const edm::EventSetup& c) {
   bool present;
 
   // Step A/C: Get Inputs and process (repeatedly)
-  edm::Handle<HBHERecHitCollection> hbhe;
-  present = e.getByToken(tok_hbhe_, hbhe);
-  if (present || !allowMissingInputs_)
-    algo_.process(*hbhe);
+  if( !UseScouting_ ) {
+     edm::Handle<HBHERecHitCollection> hbhe;
+     present = e.getByToken(tok_hbhe_, hbhe);
+     if (present || !allowMissingInputs_)
+       algo_.process(*hbhe);
+  }
+  else {
+   edm::Handle<Run3ScoutingHBHERecHitCollection> hbhe_s;
+   present = e.getByToken(tok_hbhe_s, hbhe_s);
+   if (present || !allowMissingInputs_)
+    algo_.process(*hbhe_s);
+  }
 
   edm::Handle<HORecHitCollection> ho;
   present = e.getByToken(tok_ho_, ho);
@@ -378,14 +390,26 @@ void CaloTowersCreator::produce(edm::Event& e, const edm::EventSetup& c) {
   if (present || !allowMissingInputs_)
     algo_.process(*hf);
 
-  std::vector<edm::EDGetTokenT<EcalRecHitCollection> >::const_iterator i;
-  for (i = toks_ecal_.begin(); i != toks_ecal_.end(); i++) {
-    edm::Handle<EcalRecHitCollection> ec;
-    present = e.getByToken(*i, ec);
-    if (present || !allowMissingInputs_)
-      algo_.process(*ec);
+  if ( !UseScouting_ ) {
+    std::vector<edm::EDGetTokenT<EcalRecHitCollection> >::const_iterator i;
+    for (i = toks_ecal_.begin(); i != toks_ecal_.end(); i++) {
+       edm::Handle<EcalRecHitCollection> ec;
+       present = e.getByToken(*i, ec);
+       if (present || !allowMissingInputs_)
+         algo_.process(*ec);
+     }
   }
+  else {
+   edm::Handle<Run3ScoutingEBRecHitCollection> eb;
+   present = e.getByToken(tok_ecal_EB_, eb);
+   if (present || !allowMissingInputs_)
+   algo_.process(*eb);
 
+   edm::Handle<Run3ScoutingEERecHitCollection> ee;
+   present = e.getByToken(tok_ecal_EE_, ee);
+   if (present || !allowMissingInputs_)
+   algo_.process(*ee);
+  }
   // Step B: Create empty output
   auto prod = std::make_unique<CaloTowerCollection>();
 
@@ -448,6 +472,7 @@ void CaloTowersCreator::fillDescriptions(edm::ConfigurationDescriptions& descrip
   desc.add<double>("MomEBDepth", 0.3);
   desc.add<double>("MomEEDepth", 0.0);
   desc.add<bool>("UseHO", true);
+  desc.add<bool>("UseScouting", true);
   desc.add<bool>("UseEtEBTreshold", false);
   desc.add<bool>("UseSymEBTreshold", true);
   desc.add<bool>("UseEtEETreshold", false);
@@ -477,6 +502,9 @@ void CaloTowersCreator::fillDescriptions(edm::ConfigurationDescriptions& descrip
   desc.add<std::vector<double> >("EBGrid", {-1.0, 1.0, 10.0, 100.0, 1000.0});
   desc.add<edm::InputTag>("hfInput", edm::InputTag("hfreco"));
   desc.add<edm::InputTag>("hbheInput", edm::InputTag("hbhereco"));
+  desc.add<edm::InputTag>("hbheInput_s", edm::InputTag("hbhereco_s"));
+  desc.add<edm::InputTag>("ebInput", edm::InputTag("ebreco"));
+  desc.add<edm::InputTag>("eeInput", edm::InputTag("eereco"));
   desc.add<edm::InputTag>("hoInput", edm::InputTag("horeco"));
   desc.add<std::vector<edm::InputTag> >(
       "ecalInputs", {edm::InputTag("ecalRecHit", "EcalRecHitsEB"), edm::InputTag("ecalRecHit", "EcalRecHitsEE")});

@@ -7,6 +7,10 @@
 #include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 
+#include "DataFormats/Scouting/interface/Run3ScoutingEBRecHit.h"
+#include "DataFormats/Scouting/interface/Run3ScoutingEERecHit.h"
+#include "DataFormats/Scouting/interface/Run3ScoutingHBHERecHit.h"
+
 // channel status
 #include "CondFormats/EcalObjects/interface/EcalChannelStatus.h"
 #include "CondFormats/DataRecord/interface/EcalChannelStatusRcd.h"
@@ -181,6 +185,10 @@ public:
   void process(const HORecHitCollection& ho);
   void process(const HFRecHitCollection& hf);
   void process(const EcalRecHitCollection& ecal);
+
+  void process(const Run3ScoutingHBHERecHitCollection& hbhe);
+  void process(const Run3ScoutingEBRecHitCollection& ecal_EB);
+  void process(const Run3ScoutingEERecHitCollection& ecal_EE);
 
   void process(const CaloTowerCollection& ctc);
 
