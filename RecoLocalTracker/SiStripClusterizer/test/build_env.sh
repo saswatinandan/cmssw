@@ -27,7 +27,7 @@ eval "cd ${tmp}"
 
 eval ". /cvmfs/cms.cern.ch/cmsset_default.sh"
 eval "cmsrel CMSSW_15_0_10"
-eval "cd CMSSW_14_1_5/src/"
+eval "cd CMSSW_15_0_10/src/"
 eval "cmsenv"
 eval "git cms-init"
 eval "git checkout -b ${git_branch}"
