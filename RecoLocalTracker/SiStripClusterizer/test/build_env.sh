@@ -26,7 +26,7 @@ eval "mkdir -p ${tmp}"
 eval "cd ${tmp}"
 
 eval ". /cvmfs/cms.cern.ch/cmsset_default.sh"
-eval "cmsrel CMSSW_14_1_5"
+eval "cmsrel CMSSW_15_0_10"
 eval "cd CMSSW_14_1_5/src/"
 eval "cmsenv"
 eval "git cms-init"
