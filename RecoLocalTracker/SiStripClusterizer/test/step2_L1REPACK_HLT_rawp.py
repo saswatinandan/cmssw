@@ -22,13 +22,13 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1),
+    input = cms.untracked.int32(500),
     output = cms.optional.untracked.allowed(cms.int32,cms.PSet)
 )
 
 # Input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('file:/afs/cern.ch/work/s/snandan/public/hackathon/CMSSW_14_1_5/src/RecoLocalTracker/SiStripClusterizer/test/e1f7f325-4ca8-4fea-8d27-06b33862cf11.root'),
+    fileNames = cms.untracked.vstring('file:/scratch/nandan/inputfile_for_prehlt/HIEphemeralHLTPhysics_RAW/e1f7f325-4ca8-4fea-8d27-06b33862cf11.root'),
     secondaryFileNames = cms.untracked.vstring()
 )
 
@@ -78,7 +78,7 @@ process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
         dataTier = cms.untracked.string('FEVTDEBUGHLT'),
         filterName = cms.untracked.string('')
     ),
-    fileName = cms.untracked.string('step2_L1REPACK_HLT_rawp.root'),
+    fileName = cms.untracked.string('step2_L1REPACK_HLT.root'),
     compressionAlgorithm = cms.untracked.string( "LZMA" ),
     compressionLevel = cms.untracked.int32( 4 ),
     SelectEvents = cms.untracked.PSet(  SelectEvents = cms.vstring( 'Dataset_HIPhysicsRawPrime4' ) ),
@@ -89,7 +89,6 @@ process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
       'keep GlobalObjectMapRecord_hltGtStage2ObjectMap_*_reHLT',
       'keep edmTriggerResults_*_*_reHLT'),
     #splitLevel = cms.untracked.int32(0)
-
 )
 process.HLTSiStripClusterChargeCutTight = cms.PSet(  value = cms.double( 1945.0 ) )
 process.HLTSiStripClusterChargeCutNone = cms.PSet(  value = cms.double( -1.0 ) )
@@ -98,14 +97,14 @@ process.ClusterShapeHitFilterESProducer.clusterChargeCut.refToPSet_='HLTSiStripC
 # Additional output definition
 
 process.streams = cms.PSet(  PhysicsHIPhysicsRawPrime4 = cms.vstring( 'HIPhysicsRawPrime4' ) )
-process.datasets = cms.PSet(  HIPhysicsRawPrime4 = cms.vstring( 'HLT_HIZeroBias_HighRate_v8' ) )
+process.datasets = cms.PSet(  HIPhysicsRawPrime4 = cms.vstring( 'HLT_HIZeroBias_HighRate_v7' ) )
 process.hltDatasetHIPhysicsRawPrime = cms.EDFilter("TriggerResultsFilter",
     hltResults = cms.InputTag(""),
     l1tIgnoreMaskAndPrescale = cms.bool(False),
     l1tResults = cms.InputTag(""),
     throw = cms.bool(True),
     triggerConditions = cms.vstring(
-      'HLT_HIZeroBias_HighRate_v8'
+      'HLT_HIZeroBias_HighRate_v7'
       ),
     usePathStatus = cms.bool(True)
 )
@@ -114,13 +113,13 @@ from HLTrigger.Configuration.CustomConfigs import ProcessName
 process = ProcessName(process)
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '150X_dataRun3_Prompt_v1', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '141X_dataRun3_Prompt_v3', '')
 
 # Path and EndPath definitions
 process.L1RePack_step = cms.Path(process.SimL1Emulator)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
-process.schedule = cms.Schedule(*[ process.L1RePack_step, process.HLTriggerFirstPath, process.Status_OnCPU, process.Status_OnGPU,process.HLT_HIZeroBias_HighRate_v8,process.Dataset_HIPhysicsRawPrime4,process.FEVTDEBUGHLToutput_step])
+process.schedule = cms.Schedule(*[ process.L1RePack_step, process.HLTriggerFirstPath, process.Status_OnCPU, process.Status_OnGPU,process.HLT_HIZeroBias_HighRate_v7,process.Dataset_HIPhysicsRawPrime4,process.FEVTDEBUGHLToutput_step])
 # Schedule definition
 # process.schedule imported from cff in HLTrigger.Configuration
 #process.schedule.insert(0, process.L1RePack_step)
