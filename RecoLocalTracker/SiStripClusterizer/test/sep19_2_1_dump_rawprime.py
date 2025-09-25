@@ -1,11 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
-from Configuration.StandardSequences.Eras import eras
 
 import os
 import glob as glob
 
-process = cms.Process('Rawp',eras.Run3_2023)
+process = cms.Process('Rawp')
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
