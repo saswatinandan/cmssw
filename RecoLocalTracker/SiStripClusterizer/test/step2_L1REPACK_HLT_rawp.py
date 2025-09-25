@@ -113,7 +113,7 @@ from HLTrigger.Configuration.CustomConfigs import ProcessName
 process = ProcessName(process)
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '150X_dataRun3_Prompt_v1', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '150X_dataRun3_HLT_v1', '')
 
 # Path and EndPath definitions
 process.L1RePack_step = cms.Path(process.SimL1Emulator)

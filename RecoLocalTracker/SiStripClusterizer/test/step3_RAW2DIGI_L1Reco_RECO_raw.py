@@ -4,9 +4,9 @@
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
 # with command line options: step3 --conditions auto:run3_data_HIon -s RAW2DIGI,L1Reco,RECO --datatier RECO --eventcontent RECO --data --process reRECO --scenario pp --era Run3_pp_on_PbPb_approxSiStripClusters_2023 --customise Configuration/DataProcessing/RecoTLR.customisePostEra_Run3 --hltProcess reHLT -n 100 --no_exec --repacked
 import FWCore.ParameterSet.Config as cms
-from Configuration.Eras.Era_Run3_pp_on_PbPb_approxSiStripClusters_2025_cff import Run3_pp_on_PbPb_approxSiStripClusters_2025
+from Configuration.Eras.Era_Run3_pp_on_PbPb_2025_cff import Run3_pp_on_PbPb_2025
 
-process = cms.Process('reRECO',Run3_pp_on_PbPb_approxSiStripClusters_2025)
+process = cms.Process('reRECO',Run3_pp_on_PbPb_2025)
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
@@ -21,7 +21,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(500),
+    input = cms.untracked.int32(-1),
     output = cms.optional.untracked.allowed(cms.int32,cms.PSet)
 )
 
@@ -93,7 +93,7 @@ process.siStripClusters.Clusterizer.clusterChargeCut.refToPSet_ = cms.string('Si
 
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '141X_dataRun3_Prompt_v3', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '150X_dataRun3_Prompt_v1', '')
 process.siStripZeroSuppression = cms.EDProducer("SiStripZeroSuppression",
     Algorithms = cms.PSet(
         APVInspectMode = cms.string('Hybrid'),

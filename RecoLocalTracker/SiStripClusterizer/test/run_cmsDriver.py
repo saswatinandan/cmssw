@@ -9,7 +9,7 @@ parser.add_argument("-n", dest="number", default='500', help="how many numbers o
 parser.add_argument("-t", dest="threads", default='20', help="how many threads")
 parser.add_argument("-c", type=int, dest="cluster", default=1, help="want flatntuple for cluster")
 parser.add_argument("-s", type=int, dest="strip_charge_cut", default=1, help="want charge cut")
-parser.add_argument("-r", dest="raw_file", default='/scratch/nandan/inputfile_for_prehlt/HIEphemeralHLTPhysics_RAW/flatntuple_step3_RAW2DIGI_L1Reco_RECO_raw_wchargecut.root', help="file for raw data")
+parser.add_argument("-r", dest="raw_file", default='/scratch/nandan/inputfile_for_prehlt/HIEphemeralHLTPhysics_RAW/flatntuple_step3_RAW2DIGI_L1Reco_RECO_raw_fullevent_cmssw15010.root', help="file for raw data")
 
 options = parser.parse_args()
 barycenter_bit = options.barycenter_bit

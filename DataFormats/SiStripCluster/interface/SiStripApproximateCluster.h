@@ -58,9 +58,9 @@ private:
   cms_uint16_t compBarycenter_ = 0;
   cms_uint8_t width_ = 0;
   cms_uint8_t compavgCharge_ = 0;
-  static constexpr double maxRange_ = 32767;
+  static constexpr double maxRange_ = 32767; //32767;
   static constexpr double maxBarycenter_ = 1536.;
-  static constexpr double maxavgChargeRange_ = 63;
+  static constexpr double maxavgChargeRange_ = 63; //63;
   static constexpr double maxavgCharge_ = 255.;
   static constexpr double trimMaxADC_ = 30.;
   static constexpr double trimMaxFracTotal_ = .15;
