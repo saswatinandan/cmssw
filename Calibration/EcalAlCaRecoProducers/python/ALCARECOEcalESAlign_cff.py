@@ -39,3 +39,14 @@ EcalESAlignTracksSkimSeq = cms.Sequence( esSelectedTracks * ecalAlCaESAlignTrack
 
 seqEcalESAlign = cms.Sequence(ALCARECOEcalESAlignHLT * EcalESAlignTracksSkimSeq)
 
+from Configuration.ProcessModifiers.pp_on_AA_cff import pp_on_AA
+import HLTrigger.HLTfilters.triggerResultsFilterFromDB_cfi
+ALCARECOEcalESAlignTriggerResultsHI = HLTrigger.HLTfilters.triggerResultsFilterFromDB_cfi.triggerResultsFilterFromDB.clone(
+    eventSetupPathsKey = 'EcalESAlign',
+    usePathStatus = False,
+    hltResults = 'TriggerResults::HLT',
+    l1tResults = '', # leaving empty (not interested in L1T results)
+    throw = False # tolerate triggers stated above, but not available
+)
+seqEcalESAlignHI = cms.Sequence(ALCARECOEcalESAlignTriggerResultsHI * EcalESAlignTracksSkimSeq)
+(pp_on_AA).toReplaceWith(seqEcalESAlign,seqEcalESAlignHI)
