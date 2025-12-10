@@ -11,7 +11,7 @@ parser.add_argument("-b", type=int, dest="bits", nargs='+', default=[], help="bi
 parser.add_argument("-w", type=int, dest="widths", nargs='+', default=[], help="bit to be studied for width")
 parser.add_argument("-a", type=int, dest="avgCharges", nargs='+', default=[], help="bit to be studied for avgCharge")
 parser.add_argument("-o", dest="output", default='output', help="directory name where inputs are")
-parser.add_argument("-v", dest="version", default='', help="which version you want to compare")
+parser.add_argument("-v", dest="version", default=[], nargs='+', help="which version you want to compare")
 parser.add_argument("-e", action='store_true', dest="events", default=False, help="want to see # of events")
 
 options = parser.parse_args()
@@ -146,7 +146,7 @@ def build_array(obj, rawtype):
   
   update_list('pp_wchargecut', 16, 8, rawtype, sizes, yvals, texts, "HI_raw'", options.events)
   sizes["raw'"] = [(s1 -sizes["HI_raw'"][0])*100/sizes["HI_raw'"][0] for s1 in sizes["raw'"]]
-  if options.version == 'v2':
+  if 'v2' in options.version:
     texts['v2'] = []
     yvals['v2'] = []
     sizes['v2'] = []
@@ -162,7 +162,13 @@ def build_array(obj, rawtype):
     update_list('pp_wchargecut_v2', 14, 6, rawtype, sizes, yvals, texts, 'v2', options.events, 'Std')
     #update_list('pp_wchargecut', 13, 8, rawtype, sizes, yvals, texts, 'v2')'''
     sizes["v2"] = [(s1 -sizes["HI_raw'"][0])*100/sizes["HI_raw'"][0] for s1 in sizes["v2"]]
-  elif options.version == 'v1':
+  if 'v3' in options.version:
+    texts['v3'] = []
+    yvals['v3'] = []
+    sizes['v3'] = []
+    update_list('pp_wchargecut_v3', 15, 6, rawtype, sizes, yvals, texts, 'v3', options.events, 'Std')
+    sizes["v3"] = [(s1 -sizes["HI_raw'"][0])*100/sizes["HI_raw'"][0] for s1 in sizes["v3"]]
+  if 'v1' in options.version:
     texts['v1'] = []
     yvals['v1'] = []
     sizes['v1'] = []
@@ -172,7 +178,7 @@ def build_array(obj, rawtype):
     update_list('remove_beginindices_v1_compression_LZMA', 14, 7, rawtype, sizes, yvals, texts, 'v1')
     update_list('remove_beginindices_v1_compression_LZMA', 14, 4, rawtype, sizes, yvals, texts, 'v1')
     update_list('remove_beginindices_v1_compression_LZMA', 14, 3, rawtype, sizes, yvals, texts, 'v1')
-  elif options.version == 'v1.1':
+  if 'v1.1' in options.version:
     texts['v1.1'] = []
     yvals['v1.1'] = []
     sizes['v1.1'] = []
