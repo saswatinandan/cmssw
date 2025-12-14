@@ -43,6 +43,7 @@
 //ROOT inclusion
 #include "TROOT.h"
 #include "TFile.h"
+#include "TH2F.h"
 #include "TNtuple.h"
 #include "TTree.h"
 #include "TMath.h"
@@ -118,6 +119,7 @@ private:
   float       ref_hitY[nMax];
   uint16_t    ref_channel[nMax];
   uint16_t    ref_adc[nMax];
+  TH2F *h_peakfilter_filter, *h_peakfilter_saturated, *h_filter_saturated;
 };
 
 sep19_2_1_dump_rawprime::sep19_2_1_dump_rawprime(const edm::ParameterSet& conf) {
@@ -156,6 +158,9 @@ sep19_2_1_dump_rawprime::sep19_2_1_dump_rawprime(const edm::ParameterSet& conf) 
   onlineClusterTree->Branch("channel", channel, "channel[size]/s");
   onlineClusterTree->Branch("adc", adc, "adc[size]/s");
 
+  h_peakfilter_filter = fs->make<TH2F>("peakfilter_filter", "", 2, -0.5,1.5, 2, -0.5,1.5);
+  h_peakfilter_saturated = fs->make<TH2F>("peakfilter_saturated", "", 2, -0.5,1.5, 2, -0.5,1.5);
+  h_filter_saturated = fs->make<TH2F>("filter_saturated", "",2, -0.5,1.5, 2, -0.5,1.5);
   if (doDumpInputOfSiStripClusters2ApproxClusters) {
     onlineClusterTree->Branch("ref_firstStrip", &ref_firstStrip, "ref_firstStrip/s");
     onlineClusterTree->Branch("ref_endStrip", &ref_endStrip, "ref_endStrip/s");
@@ -167,6 +172,7 @@ sep19_2_1_dump_rawprime::sep19_2_1_dump_rawprime(const edm::ParameterSet& conf) 
     onlineClusterTree->Branch("ref_y", ref_hitY, "ref_y[ref_size]/F");
     onlineClusterTree->Branch("ref_channel", ref_channel, "ref_channel[ref_size]/s");
     onlineClusterTree->Branch("ref_adc", ref_adc, "ref_adc[ref_size]/s");
+
   }
 }
 
@@ -251,7 +257,9 @@ void sep19_2_1_dump_rawprime::analyze(const edm::Event& event, const edm::EventS
       size       = convertedCluster.size();
       charge     = convertedCluster.charge();
       chargePerCM = siStripClusterTools::chargePerCM(detId,convertedCluster);
-
+      h_peakfilter_filter->Fill(approxCluster.peakFilter(), approxCluster.filter());
+      h_peakfilter_saturated->Fill(approxCluster.peakFilter(), approxCluster.isSaturated());
+      h_filter_saturated->Fill(approxCluster.filter(), approxCluster.isSaturated());
       for (int strip = firstStrip; strip < endStrip+1; ++strip)
       {
         GlobalPoint gp = (tkGeom->idToDet(detId))->surface().toGlobal(p.localPosition((float) strip));
