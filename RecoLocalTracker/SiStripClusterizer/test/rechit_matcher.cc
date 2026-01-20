@@ -1,37 +1,5 @@
 #include "rechit_matcher.h"
 
-TH1F* create_hist(TFileDirectory& dir, const std::string& name, const int& nbin, const int& lowbin, const int& highbin) {
-   TH1F* h = dir.make<TH1F>(name.c_str(), name.c_str(), nbin, lowbin, highbin);
-   return h;
-}
-
-template <typename T,
-            typename = typename std::enable_if<std::is_arithmetic<T>::value>>
-T
-constrainValue(T value,
-               T lowerBound,
-               T upperBound)
-  {
-    assert(lowerBound <= upperBound);
-    value = std::max(value, lowerBound);
-    value = std::min(value, upperBound);
-    return value;
-}
-
-void fillWithOverflow(TH1 * histogram,
-      double x,
-      double evtWeight=1.,
-      double evtWeightErr=0.)
-{
-  if(!histogram) assert(0);
-  const TAxis * const xAxis = histogram->GetXaxis();
-  const int bin = constrainValue(xAxis->FindBin(x), 1, xAxis->GetNbins());
-  const double binContent = histogram->GetBinContent(bin);
-  const double binError   = histogram->GetBinError(bin);
-  histogram->SetBinContent(bin, binContent + evtWeight);
-  histogram->SetBinError(bin, std::sqrt(pow(binError,2) + 1));
-}
-
 edm::ParameterSet buildConf(){
       edm::ParameterSet ps;
       ps.addParameter<bool>("associateStrip", true);
@@ -57,49 +25,106 @@ rechit_matcher::rechit_matcher(const edm::ParameterSet& conf):
    edm::InputTag("generalTracks", "")
   );
 
-  edm::Service<TFileService> fs;
-  TFileDirectory matched_dir = fs->mkdir("matched");
-  TFileDirectory unmatched_dir = fs->mkdir("unmatched");
+  clusterToken_ = consumes<edmNew::DetSetVector<SiStripCluster>>(
+   edm::InputTag("siStripClusters", "")
+  );
 
-  h_matched_cluster_pt = create_hist(matched_dir, "matched_cluster_pt", 100, 0, 10);
-  h_unmatched_cluster_pt = create_hist(unmatched_dir, "unmatched_cluster_pt", 100, 0, 10);
-  h_matched_cluster_particle_type = create_hist(matched_dir, "matched_cluster_particle_type", 300, 0, 300);
-  h_unmatched_cluster_particle_type = create_hist(unmatched_dir, "unmatched_cluster_particletype", 300, 0, 300);
+  ptBins_ = conf.getParameter<std::vector<double>>("pt_bins");
+
+  edm::Service<TFileService> fs;
+
+  for (const auto match : {"matched", "unmatched"}) {
+     TFileDirectory matched_dir = fs->mkdir(Form("%s", match));
+     for (const auto hit : {"rphiHit", "stereoHit"}) {
+       TFileDirectory hit_dir = fs->mkdir(Form("%s/%s", match, hit));
+       std::string key = Form("%s_%s", match, hit);
+       hists_2d[key]["pt_vs_particle_type"] = create_hist(hit_dir, "pt_vs_PDGID", Form("Associated PSimHit pt_vs_particle_type for %s %s with tracker hit", hit, match), ptBins_, 250,0,250);
+       hists_1d[key]["dx"] = create_hist(hit_dir, "dx", "|#Delta(hit.x(),PSimHit.x())|", 50, 0., 5.);
+     }
+  }
+  h_count = fs->make<TH1F>("count", "count", 10, 0.5, 10.5);
+  h_pt    = create_hist(fs, "pt", ptBins_);
 }
 
-rechit_matcher::~rechit_matcher() {}  // must define it
+rechit_matcher::~rechit_matcher() {
+     for (int ibin=0; ibin<h_pt->GetNbinsX(); ibin++) std::cout << "ibin: " << ibin << "\t" << h_pt->GetBinLowEdge(ibin) << "\t" << h_pt->GetBinContent(ibin) << std::endl;
+     h_count->Write();
+     delete h_count;
+}
 
-void rechit_matcher::do_matching(const SiStripRecHit2D& hit, const std::vector<const TrackingRecHit*>& tracker_hits, TrackerHitAssociator& hitAssociator) {
+void rechit_matcher::do_matching(const SiStripRecHit2D& hit, const std::vector<const TrackingRecHit*>& tracker_hits, TrackerHitAssociator& hitAssociator, const std::string type) {
 
  bool matched = false;
  for ( const auto & tracker_hit : tracker_hits) {
     if (dynamic_cast<const SiStripRecHit1D *>(&(*tracker_hit))) {
-       if (dynamic_cast<const SiStripRecHit1D *>(&(*tracker_hit))->cluster().get() == hit.cluster().get())
+       auto tracker_cluster = dynamic_cast<const SiStripRecHit1D *>(&(*tracker_hit))->cluster().get();
+       auto hit_cluster     = hit.cluster().get();
+       if (tracker_cluster == hit_cluster) {
+	    assert(tracker_cluster->charge() == hit_cluster->charge()
+	        && tracker_cluster->firstStrip() == hit_cluster->firstStrip()
+	        && tracker_cluster->endStrip() == hit_cluster->endStrip()	
+	    );
 	    matched = true;
        break;
        }
+    } // StripHit1D
     else if (dynamic_cast<const SiStripRecHit2D *>(&(*tracker_hit))) {
-       if (dynamic_cast<const SiStripRecHit2D *>(&(*tracker_hit))->cluster().get() == hit.cluster().get())
-	       matched = true;
+       auto tracker_cluster = dynamic_cast<const SiStripRecHit2D *>(&(*tracker_hit))->cluster().get();
+       auto hit_cluster     = hit.cluster().get();
+       if (tracker_cluster == hit_cluster) {
+            assert(tracker_cluster->charge() == hit_cluster->charge()
+                && tracker_cluster->firstStrip() == hit_cluster->firstStrip()
+                && tracker_cluster->endStrip() == hit_cluster->endStrip()
+            );
+	    matched = true;
         break;
-     }
-  }
+       }
+    } // StripHit2D
+    else if (dynamic_cast<const SiStripMatchedRecHit2D *>(&(*tracker_hit))) {
+      assert(0);
+    }
+  } // tracker_hits
+
   std::vector<PSimHit> simHits =
           hitAssociator.associateHit(hit);
-  //std::cout << "size: " << simHits.size() << std::endl;
+  float min_dx = 99;
+  PSimHit mhit;
   for (const auto& simHit : simHits) {
-        DetId detId(simHit.detUnitId());
-        int trackId = simHit.trackId();
-        //std::cout << "matched: " << matched << "\t" << "p: " << simHit.pabs() << "\t" << simHit.particleType() << std::endl;
-        if ( matched ) {
-             fillWithOverflow(h_matched_cluster_pt, simHit.pabs());
-             fillWithOverflow(h_matched_cluster_particle_type, simHit.particleType());
-        }
-        else {
-             fillWithOverflow(h_unmatched_cluster_pt, simHit.pabs());
-             fillWithOverflow(h_unmatched_cluster_particle_type, simHit.particleType());
-        }
-     }
+	float dx = abs(simHit.localPosition().x() - hit.localPosition().x());
+	if (dx < min_dx) {
+           min_dx = dx;
+           mhit   = simHit;
+	   //std::cout << "particletpe: " << mhit.particleType() << std::endl;
+	}
+  } // simHits
+  
+  if ( matched ) {
+	std::string key = Form("matched_%s", type.c_str());
+	if( simHits.size() ) {
+	  fillWithOverFlow(hists_2d[key]["pt_vs_particle_type"], mhit.pabs(), abs(mhit.particleType()));
+	  fillWithOverFlow(hists_1d[key]["dx"], min_dx);
+	}
+  }
+  else {
+	std::string key = Form("unmatched_%s", type.c_str());
+        if ( simHits.size() ) {
+	  fillWithOverFlow(hists_2d[key]["pt_vs_particle_type"], mhit.pabs(), abs(mhit.particleType()));
+          fillWithOverFlow(hists_1d[key]["dx"], min_dx);
+	}	  
+  }
+
+  if (type=="rphiHit") {
+    h_count->Fill(1);
+    if (matched) h_count->Fill(2);
+    if (simHits.size() == 0) h_count->Fill(3);
+  }
+  else {
+    assert(type=="stereoHit");
+    h_count->Fill(4);
+    if (matched) h_count->Fill(5);
+    if (simHits.size() == 0) h_count->Fill(6);
+  }
+
 }
 
 void rechit_matcher::analyze(const edm::Event& event, const edm::EventSetup& setup) {
@@ -113,7 +138,10 @@ void rechit_matcher::analyze(const edm::Event& event, const edm::EventSetup& set
   edm::Handle<edmNew::DetSetVector<SiStripRecHit2D>> stereoHandle;
   event.getByToken(stereoToken_, stereoHandle);
 
-  if (!rphiHandle.isValid() || !stereoHandle.isValid()) return;
+  edm::Handle<edmNew::DetSetVector<SiStripCluster>> clusterHandle;
+  event.getByToken(clusterToken_, clusterHandle);
+
+  if (!rphiHandle.isValid() || !stereoHandle.isValid() || !clusterHandle.isValid()) return;
 
   const auto& tracksHandle = event.getHandle(tracksToken_);
 
@@ -124,11 +152,10 @@ void rechit_matcher::analyze(const edm::Event& event, const edm::EventSetup& set
   
   const reco::TrackCollection* tracks = tracksHandle.product();
 
-  // Get siStripMatchedRecHits
-  // Loop over all DetIds
   std::map<DetId, std::vector<const TrackingRecHit*>> tracker_hits_detIds;
   for(unsigned int i=0; i<tracks->size(); i++) {
      auto& trk = tracks->at(i);
+     h_pt->Fill(trk.pt());
      for (auto ih = trk.recHitsBegin(); ih != trk.recHitsEnd(); ih++) {
          const TrackingRecHit& hit = **ih;
          const DetId detId((hit).geographicalId());
@@ -137,27 +164,53 @@ void rechit_matcher::analyze(const edm::Event& event, const edm::EventSetup& set
            else {        // should be SiStrip now
                tracker_hits_detIds[detId].push_back(&hit);
            }
-	  }
-	 }
-     }
-  
+	 } // detId
+     } // recHit
+  } // tracks
+
   for (const auto& detSet : *rphiHandle) {
      uint32_t detId  = detSet.id();
      const auto tracker_hits = tracker_hits_detIds[detId];
      for (const auto& rhit : detSet) {
-	 do_matching(rhit, tracker_hits, hitAssociator);
+	 do_matching(rhit, tracker_hits, hitAssociator, "rphiHit");
       // -------------------------------------
-     }
-  }
+     } // detSet
+  } // rphiHandle
 
+  int total_rphi = std::accumulate(
+		      rphiHandle->begin(),
+		      rphiHandle->end(),
+		      size_t(0),
+		      [](size_t sum, const edmNew::DetSet<SiStripRecHit2D>& detSet) {
+                      return sum + detSet.size();
+                      }
+		  );
   for (const auto& detSet : *stereoHandle) {
      uint32_t detId  = detSet.id();
      const auto tracker_hits = tracker_hits_detIds[detId];
      for (const auto& stereohit : detSet) {
-         do_matching(stereohit, tracker_hits, hitAssociator);
+         do_matching(stereohit, tracker_hits, hitAssociator, "stereoHit");
       // -------------------------------------
-     }
-  }
+     } //detSet
+  } // stereohandle
+
+  int total_stereo = std::accumulate(
+                      stereoHandle->begin(),
+                      stereoHandle->end(),
+                      size_t(0),
+                      [](size_t sum, const edmNew::DetSet<SiStripRecHit2D>& detSet) {
+                      return sum + detSet.size();
+                      }
+                  );
+  int total_cluster = std::accumulate(
+                      clusterHandle->begin(),
+                      clusterHandle->end(),
+                      size_t(0),
+                      [](size_t sum, const edmNew::DetSet<SiStripCluster>& detSet) {
+                      return sum + detSet.size();
+                      }
+                  );
+  assert(total_cluster == (total_rphi+total_stereo));
 }
 
 void rechit_matcher::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
