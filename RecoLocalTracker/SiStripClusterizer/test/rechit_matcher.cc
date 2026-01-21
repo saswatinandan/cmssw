@@ -47,7 +47,6 @@ rechit_matcher::rechit_matcher(const edm::ParameterSet& conf):
 }
 
 rechit_matcher::~rechit_matcher() {
-     for (int ibin=0; ibin<h_pt->GetNbinsX(); ibin++) std::cout << "ibin: " << ibin << "\t" << h_pt->GetBinLowEdge(ibin) << "\t" << h_pt->GetBinContent(ibin) << std::endl;
      h_count->Write();
      delete h_count;
 }
@@ -88,29 +87,27 @@ void rechit_matcher::do_matching(const SiStripRecHit2D& hit, const std::vector<c
   std::vector<PSimHit> simHits =
           hitAssociator.associateHit(hit);
   float min_dx = 99;
-  PSimHit mhit;
-  for (const auto& simHit : simHits) {
+  PSimHit* mhit = NULL;
+  for (auto& simHit : simHits) {
 	float dx = abs(simHit.localPosition().x() - hit.localPosition().x());
 	if (dx < min_dx) {
            min_dx = dx;
-           mhit   = simHit;
+           mhit   = &simHit;
 	   //std::cout << "particletpe: " << mhit.particleType() << std::endl;
 	}
   } // simHits
   
-  if ( matched ) {
+  if (mhit) {
+    if ( matched ) {
 	std::string key = Form("matched_%s", type.c_str());
-	if( simHits.size() ) {
-	  fillWithOverFlow(hists_2d[key]["pt_vs_particle_type"], mhit.pabs(), abs(mhit.particleType()));
-	  fillWithOverFlow(hists_1d[key]["dx"], min_dx);
-	}
-  }
-  else {
+	fillWithOverFlow(hists_2d[key]["pt_vs_particle_type"], mhit->energyLoss()*100, abs(mhit->particleType()));
+	fillWithOverFlow(hists_1d[key]["dx"], min_dx);
+    }
+    else {
 	std::string key = Form("unmatched_%s", type.c_str());
-        if ( simHits.size() ) {
-	  fillWithOverFlow(hists_2d[key]["pt_vs_particle_type"], mhit.pabs(), abs(mhit.particleType()));
-          fillWithOverFlow(hists_1d[key]["dx"], min_dx);
-	}	  
+	fillWithOverFlow(hists_2d[key]["pt_vs_particle_type"], mhit->energyLoss()*100, abs(mhit->particleType()));
+        fillWithOverFlow(hists_1d[key]["dx"], min_dx);
+    }
   }
 
   if (type=="rphiHit") {
