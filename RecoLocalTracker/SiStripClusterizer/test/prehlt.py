@@ -370,7 +370,18 @@ process.hltSiStripClusters2ApproxClusters = cms.EDProducer( "SiStripClusters2App
     inputClusters = cms.InputTag( "hltSiStripClusterizerForRawPrime" ),
     maxSaturatedStrips = cms.uint32( 3 ),
     clusterShapeHitFilterLabel = cms.string( "ClusterShapeHitFilter" ),
-    beamSpot = cms.InputTag( "hltOnlineBeamSpot" )
+    beamSpot = cms.InputTag( "hltOnlineBeamSpot" ),
+    dnnvars  = cms.vstring("size",
+        "charge",
+        "mean_x",
+        "mean_y",
+        "mean_z",
+        "adc_at_idx_0", 
+        "adc_at_idx_1",
+        "adc_at_idx_2",
+        "adc_at_idx_3"
+    ),
+    dnncutvalue = cms.double(0.1641376) 
 )
 process.rawDataRepacker = cms.EDProducer( "RawDataCollectorByLabel",
     verbose = cms.untracked.int32( 0 ),
@@ -546,7 +557,7 @@ process.source = cms.Source( "PoolSource",
 
 # limit the number of events to be processed
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32( -1 )
+    input = cms.untracked.int32( 1 )
 )
 
 # enable TrigReport, TimeReport and MultiThreading
@@ -587,7 +598,7 @@ _customInfo['globalTags'][False] = "auto:run3_mc_GRun"
 _customInfo['inputFiles']={}
 _customInfo['inputFiles'][True]  = "file:RelVal_Raw_GRun_DATA.root"
 _customInfo['inputFiles'][False] = "file:RelVal_Raw_GRun_MC.root"
-_customInfo['maxEvents' ]=  -1
+_customInfo['maxEvents' ]=  1
 _customInfo['globalTag' ]= "140X_dataRun3_Prompt_v3"
 _customInfo['inputFile' ]=  ['file:/scratch/nandan/inputfile_for_prehlt/aadd1ab9-4eb8-4fb2-ac62-bdd1bebe882e.root']#'/store/data/Run2024F/Muon0/RAW-RECO/ZMu-PromptReco-v1/000/382/229/00000/0fd42df0-c533-49df-ae69-8a7195b340c3.root']
 _customInfo['realData'  ]=  True
