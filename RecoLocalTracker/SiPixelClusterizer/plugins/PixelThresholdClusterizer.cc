@@ -102,6 +102,7 @@ bool PixelThresholdClusterizer::setup(const PixelGeomDetUnit* pixDet) {
   int nrows = topol.nrows();     // rows in x
   int ncols = topol.ncolumns();  // cols in y
 
+  //std::cout << "nrows: " << nrows << "\t" << ncols << "\t" << theBuffer.rows() << "\t" << theBuffer.columns() << std::endl;
   theNumOfRows = nrows;  // Set new sizes
   theNumOfCols = ncols;
 
@@ -169,6 +170,7 @@ void PixelThresholdClusterizer::copy_to_buffer(DigiIterator begin, DigiIterator 
   int electron[end - begin];  // pixel charge in electrons
   memset(electron, 0, (end - begin) * sizeof(int));
 
+  //std::cout << "Phase2Calibration " << doPhase2Calibration << std::endl;
   if (doPhase2Calibration) {
     int i = 0;
     for (DigiIterator di = begin; di != end; ++di) {
@@ -179,6 +181,7 @@ void PixelThresholdClusterizer::copy_to_buffer(DigiIterator begin, DigiIterator 
   }
 
   else {
+    //std::cout << "doMissCalibrate " << doMissCalibrate << "\t" << theLayer << std::endl;
     if (doMissCalibrate) {
       if (theLayer == 1) {
         (*theSiPixelGainCalibrationService_)
@@ -189,6 +192,7 @@ void PixelThresholdClusterizer::copy_to_buffer(DigiIterator begin, DigiIterator 
     } else {
       int i = 0;
       const float gain = theElectronPerADCGain;  // default: 1 ADC = 135 electrons
+      //std::cout << "theElectronPerADCGain " << theElectronPerADCGain << std::endl;
       for (DigiIterator di = begin; di != end; ++di) {
         auto adc = di->adc();
         const float pedestal = 0.;  //
@@ -206,6 +210,7 @@ void PixelThresholdClusterizer::copy_to_buffer(DigiIterator begin, DigiIterator 
   for (DigiIterator di = begin; di != end; ++di) {
     int row = di->row();
     int col = di->column();
+    //std::cout << "row: " << row << "\t" << col << std::endl;
     // VV: do not calibrate a fake pixel, it already has a unit of 10e-:
     int adc = (di->flag() != 0) ? di->adc() * 10 : electron[i];  // this is in electrons
     i++;
@@ -227,6 +232,7 @@ void PixelThresholdClusterizer::copy_to_buffer(DigiIterator begin, DigiIterator 
     */
 
     thePixelOccurrence[theBuffer.index(row, col)]++;  // increment the occurrence counter
+    //std::cout << "dropDuplicates " << dropDuplicates << "\t" << int(thePixelOccurrence[theBuffer.index(row, col)]) << std::endl;
     uint8_t occurrence =
         (!dropDuplicates) ? 1 : thePixelOccurrence[theBuffer.index(row, col)];  // get the occurrence counter
 
@@ -256,6 +262,7 @@ void PixelThresholdClusterizer::copy_to_buffer(DigiIterator begin, DigiIterator 
 }
 
 void PixelThresholdClusterizer::copy_to_buffer(ClusterIterator begin, ClusterIterator end) {
+  //std::cout << "entering copy_to_buffer(ClusterIterator begin " << std::endl;
   // loop over clusters
   for (ClusterIterator ci = begin; ci != end; ++ci) {
     // loop over pixels
@@ -282,6 +289,7 @@ int PixelThresholdClusterizer::calibrate(int adc, int col, int row) {
 
   if (doPhase2Calibration) {
     const float gain = theElectronPerADCGain;
+    //std::cout << "thePhase2ReadoutMode " << thePhase2ReadoutMode << "\t" << thePhase2KinkADC << std::endl;
     int p2rm = (thePhase2ReadoutMode < -1 ? -1 : thePhase2ReadoutMode);
 
     if (p2rm == -1) {
@@ -304,6 +312,7 @@ int PixelThresholdClusterizer::calibrate(int adc, int col, int row) {
   }
 
   if (doMissCalibrate) {
+	  //std::cout << "2nd doMissCalibrate " << std::endl;
     // do not perform calibration if pixel is dead!
 
     if (!theSiPixelGainCalibrationService_->isDead(theDetid, col, row) &&
@@ -398,6 +407,7 @@ SiPixelCluster PixelThresholdClusterizer::make_cluster(const SiPixelCluster::Pix
     //This is the standard algorithm to find and add a pixel
     auto curInd = acluster.top();
     acluster.pop();
+    //std::cout << "acluster.y[curInd] " << acluster.y[curInd] << "\t" << theBuffer.columns() << "\t" << acluster.x[curInd] << "\t" << theBuffer.rows() << std::endl;
     for (auto c = std::max(0, int(acluster.y[curInd]) - 1);
          c < std::min(int(acluster.y[curInd]) + 2, theBuffer.columns());
          ++c) {
@@ -406,9 +416,12 @@ SiPixelCluster PixelThresholdClusterizer::make_cluster(const SiPixelCluster::Pix
            ++r) {
         if (theBuffer(r, c) >= thePixelThreshold) {
           SiPixelCluster::PixelPos newpix(r, c);
-          auto const newpix_adc = std::min(theBuffer(r, c), int(std::numeric_limits<uint16_t>::max()));
-          if (!acluster.add(newpix, newpix_adc))
+          auto newpix_adc = std::min(theBuffer(r, c), int(std::numeric_limits<uint16_t>::max()));
+	  //auto const newpix_adc = newpix_adc_tmp * int(std::round(32767.000/int(std::numeric_limits<uint16_t>::max())));
+          if (!acluster.add(newpix, newpix_adc)) {
+		  //std::cout << "go to end " << std::endl;
             goto endClus;
+	  }
           // VV: no fake pixels in cluster, leads to non-contiguous clusters
           if (!theFakePixels[r * theNumOfCols + c]) {
             cldata.add(newpix, newpix_adc);
@@ -444,10 +457,12 @@ SiPixelCluster PixelThresholdClusterizer::make_cluster(const SiPixelCluster::Pix
 
   }  // while accretion
 endClus:
+  cldata.sort();
   SiPixelCluster cluster(cldata.isize, cldata.adc, cldata.x, cldata.y, cldata.xmin, cldata.ymin);
   //Here we split the cluster, if the flag to do so is set and we have found a dead or noisy pixel.
 
   if (dead_flag && doSplitClusters) {
+	  //std::cout << "doSplitClusters " << std::endl;
     // Set separate cluster threshold for L1 (needed for phase1)
     auto clusterThreshold = theClusterThreshold;
     if (theLayer == 1)

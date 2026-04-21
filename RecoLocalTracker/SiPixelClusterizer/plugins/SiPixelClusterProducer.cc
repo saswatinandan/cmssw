@@ -172,7 +172,7 @@ void SiPixelClusterProducer::run(const T& input,
 
     std::vector<short> badChannels;
     DetId detIdObject(dsv.detId());
-
+    //if (dsv.detId() != 303042565) return;
     // Comment: At the moment the clusterizer depends on geometry
     // to access information as the pixel topology (number of columns
     // and rows in a detector module).
@@ -189,6 +189,7 @@ void SiPixelClusterProducer::run(const T& input,
       // a DetSet
       edmNew::DetSetVector<SiPixelCluster>::FastFiller spc(output, dsv.detId());
       clusterizer_->clusterizeDetUnit(dsv, pixDet, tTopo_, badChannels, spc);
+      std::cout << "spc: " << spc.size() << std::endl;
       if (spc.empty()) {
         spc.abort();
       } else {

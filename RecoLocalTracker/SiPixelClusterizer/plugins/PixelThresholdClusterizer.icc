@@ -5,6 +5,7 @@
 //!  each seed pixel.
 //!  Input and output data stored in DetSet
 //----------------------------------------------------------------------------
+#include <numeric> // for std::accumulate
 template <typename T>
 void PixelThresholdClusterizer::clusterizeDetUnitT(const T& input,
                                                    const PixelGeomDetUnit* pixDet,
@@ -25,13 +26,14 @@ void PixelThresholdClusterizer::clusterizeDetUnitT(const T& input,
     return;
 
   theDetid = input.detId();
-
+  //if ( theDetid != 303042565) return;
   // Set separate cluster threshold for L1 (needed for phase1)
   auto clusterThreshold = theClusterThreshold;
+  //std::cout << "clusterThreshold " << clusterThreshold << std::endl;
   theLayer = (DetId(theDetid).subdetId() == 1) ? tTopo->pxbLayer(theDetid) : 0;
   if (theLayer == 1)
     clusterThreshold = theClusterThreshold_L1;
-
+  //std::cout << "clusterThreshold " << clusterThreshold << std::endl;
   //  Copy PixelDigis to the buffer array; select the seed pixels
   //  on the way, and store them in theSeeds.
   if (end > begin)
@@ -48,9 +50,13 @@ void PixelThresholdClusterizer::clusterizeDetUnitT(const T& input,
 
       //  Check if the cluster is above threshold
       // (TO DO: one is signed, other unsigned, gcc warns...)
+      //std::cout << "cluster.charge() " << cluster.charge() << std::endl;
       if (cluster.charge() >= clusterThreshold) {
+         //cluster.modify_adc();
         // sort by row (x)
         output.push_back(std::move(cluster));
+        //std::cout << "output.size(): " << output.size() << std::endl;
+        //for(auto c : output) std::cout << "bef c.minPixelRow(): " << c.minPixelRow() << std::endl;
         std::push_heap(output.begin(), output.end(), [](SiPixelCluster const& cl1, SiPixelCluster const& cl2) {
           return cl1.minPixelRow() < cl2.minPixelRow();
         });
@@ -61,7 +67,22 @@ void PixelThresholdClusterizer::clusterizeDetUnitT(const T& input,
   std::sort_heap(output.begin(), output.end(), [](SiPixelCluster const& cl1, SiPixelCluster const& cl2) {
     return cl1.minPixelRow() < cl2.minPixelRow();
   });
-
+  //std::cout << "sort " << std::endl;
+  //for(auto c : output) std::cout << "c.minPixelRow(): " << c.minPixelRow() << std::endl;
+  std::cout << "output: " << output.size() << std::endl;
+  for (size_t i = 1; i < output.size(); ++i) {
+    //std::cout << "min: " << output[i].minPixelRow() << std::endl;
+    output[i].settheMinPixelRow(output[i].minPixelRow() - 
+        std::accumulate(
+        output.begin(),                // start from first element
+        output.begin() + i,            // up to, but not including i-th element
+        0,                             // initial sum
+        [](int acc, const SiPixelCluster& cl) { return acc + cl.minPixelRow(); } // lambda
+    )
+    );
+    //std::cout << "after: " << output[i].minPixelRow() << std::endl;
+  }
+  //for(auto c : output) std::cout << "diff: c.minPixelRow(): " << c.minPixelRow() << std::endl;
   // Erase the seeds.
   theSeeds.clear();
 

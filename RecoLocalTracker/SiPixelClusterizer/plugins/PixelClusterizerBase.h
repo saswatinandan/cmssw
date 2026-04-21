@@ -50,10 +50,29 @@ public:
       xmin = std::min<uint16_t>(xmin, p.row());
       ymin = std::min<uint16_t>(ymin, p.col());
       adc[isize] = iadc;
+      //std::cout << "p.row() " << "\t" << p.col() << std::endl;
       x[isize] = p.row();
       y[isize++] = p.col();
       charge += iadc;
       return true;
+    }
+
+    void sort() {
+     struct Pixel { uint16_t x, y, adc; };
+     std::vector<Pixel> pixels(isize);
+     for (size_t i = 0; i < isize; ++i)
+        pixels[i] = {x[i], y[i], adc[i]};
+    
+     std::sort(pixels.begin(), pixels.end(), [](const Pixel& a, const Pixel& b){
+        if (a.x != b.x) return a.x < b.x;
+        return a.y < b.y;
+     });
+
+     for (size_t i = 0; i < isize; ++i) {
+        x[i] = pixels[i].x;
+        y[i] = pixels[i].y;
+        adc[i] = pixels[i].adc;
+     }
     }
   };
 

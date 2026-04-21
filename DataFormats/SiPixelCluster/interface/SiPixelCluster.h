@@ -1,6 +1,6 @@
 #ifndef DataFormats_SiPixel_Cluster_SiPixelCluster_h
 #define DataFormats_SiPixel_Cluster_SiPixelCluster_h
-
+#include <iostream>
 //---------------------------------------------------------------------------
 //!  \class SiPixelCluster
 //!  \brief Pixel cluster -- collection of neighboring pixels above threshold
@@ -87,18 +87,52 @@ public:
   SiPixelCluster& operator=(SiPixelCluster&&) = default;
 
   SiPixelCluster(unsigned int isize,
-                 uint16_t const* adcs,
+		  uint16_t const* adcs,
                  uint16_t const* xpos,
                  uint16_t const* ypos,
                  uint16_t xmin,
                  uint16_t ymin,
-                 uint16_t id = invalidClusterId)
+                 uint16_t id = invalidClusterId,
+		 bool decompressed = false)
       : thePixelOffset(2 * isize), thePixelADC(adcs, adcs + isize), theOriginalClusterId(id) {
     uint16_t maxCol = 0;
     uint16_t maxRow = 0;
+    uint16_t xoffset, yoffset;
+    if ( decompressed) std::cout << "isize: " << isize << ":" << xmin << std::endl;
+    int prev_xpos(0), prev_ypos(0);
     for (unsigned int i = 0; i < isize; ++i) {
-      uint16_t xoffset = xpos[i] - xmin;
-      uint16_t yoffset = ypos[i] - ymin;
+       if ( decompressed ) {
+	  //std::cout << "yes deco " << std::endl; 
+	  xoffset = xpos[i] - xmin;
+	  yoffset = ypos[i] - ymin;
+	  std::cout << "xoffset: " << xoffset << ":" << yoffset << std::endl;
+       }
+       else {
+	  //std::cout << "not deco " << std::endl;
+	    //   std::cout << "be4: " << xpos[i] << "\t" << prev_xpos << "\t" << xmin << std::endl;
+          xoffset = (i==0) ? xpos[i] - xmin : (xpos[i] - prev_xpos); //(xpos[i] - prev_xpos - xmin);
+	  assert(xoffset <= 1);
+	  //std::cout << "xoffset: " << xoffset << std::endl;
+	  if ( (i == 0) || !(xpos[i] == prev_xpos) ) {
+             yoffset = ypos[i] - ymin;
+	     //prev_ypos = yoffset;
+	     //std::cout << "xpos: " << xpos[i] << "\t" << prev_xpos << "\t" << prev_ypos << std::endl;
+	     //else prev_ypos = 0;
+          }
+          else {
+             yoffset = ypos[i] - prev_ypos; //ypos[i] - prev_ypos - ymin;
+	     //prev_ypos += yoffset;
+	     prev_ypos = ypos[i];
+	     //std::cout << "not xpos: " << xpos[i] << "\t" << prev_xpos << "\t" << prev_ypos << std::endl;
+          }
+	  //prev_xpos += xoffset;
+	  prev_xpos = xpos[i];
+	  prev_ypos = ypos[i];
+         //if (xmin != 0) std::cout << "xmin: " << xmin << std::endl;
+         //if (ymin != 0) std::cout << "ymin: " << ymin << std::endl;
+         //std::cout << "xoffset: " << xoffset << "\t" << prev_xpos << "\t" << xpos[i] << "\t" << xmin << std::endl;
+         //std::cout << "yoffset: " << yoffset << "\t" << prev_ypos << "\t" << ypos[i] << "\t" << ymin << std::endl;
+      }
       thePixelOffset[i * 2] = std::min(uint16_t(MAXSPAN), xoffset);
       thePixelOffset[i * 2 + 1] = std::min(uint16_t(MAXSPAN), yoffset);
       if (xoffset > maxRow)
@@ -108,12 +142,19 @@ public:
     }
     packRow(xmin, maxRow);
     packCol(ymin, maxCol);
+    //std::cout << "minPixelRow: " << minPixelRow() << "\t" << minPixelCol() << std::endl;
   }
 
   // obsolete (only for regression tests)
   SiPixelCluster(const PixelPos& pix, int adc);
   void add(const PixelPos& pix, int adc);
 
+  void modify_adc() {
+   int isize = thePixelADC.size();
+   for (int i = 0; i < isize; ++i) {
+     thePixelADC[i] *= 32767/65535.;
+   }
+  }
   // Analog linear average position (barycenter)
   float x() const {
     float qm = 0.0;
@@ -195,6 +236,9 @@ public:
     thePixelRowSpan = std::min(xspan, uint16_t(MAXSPAN));
   }
 
+  inline void settheMinPixelRow(int val) {theMinPixelRow = val;};
+  inline void settheMinPixelCol(int val) {theMinPixelCol = val;};
+
   // ggiurgiu@fnal.gov, 01/05/12
   // Getters and setters for the newly added data members (err_x and err_y). See below.
   void setSplitClusterErrorX(float errx) { err_x = errx; }
@@ -216,7 +260,6 @@ private:
   uint8_t thePixelColSpan = 0;       // Span pixel index in the y direction (left edge).
 
   uint16_t theOriginalClusterId = invalidClusterId;
-
   float err_x = -99999.9f;
   float err_y = -99999.9f;
 };
