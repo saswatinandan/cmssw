@@ -1,0 +1,180 @@
+////// Saswati Nandan, Inida/INFN,Pisa /////
+#include <string>
+#include <vector>
+#include <map>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <sys/stat.h>
+#include <functional>
+#include <cassert>
+
+#include "TFile.h"
+#include "TDirectoryFile.h"
+#include "TTree.h"
+#include "TChain.h"
+#include "TGraphErrors.h"
+#include "TStopwatch.h"
+
+#include "EvthistManager.h"
+#include "Match_obj_histManager.h"
+#include "object.h"
+
+using namespace std;
+
+auto deltaR(float e1, float e2, float p1, float p2) {
+
+        auto dp = std::abs(p1 -p2);
+        if (dp > float(M_PI))
+           dp -= float(2 * M_PI);
+        return TMath::Sqrt(pow((e1 - e2), 2) + pow(dp, 2));
+}
+
+
+struct TreeReader{
+
+   TTree* tree = NULL;
+
+   long long nentries = 0;
+   unsigned long long event = 0;
+   unsigned int run = 0;
+   unsigned int lumi = 0;
+
+   float trkPt[2] = {0};
+   float trkEta[2] = {0};
+   float trkPhi[2] = {0};
+   int   trkhits[2] = {0};
+   float part_mass = 0;
+
+   TreeReader(TTree* in_tree):
+   tree(in_tree)
+   {
+     nentries = tree->GetEntries();
+     tree->SetBranchAddress("event", &event);
+     tree->SetBranchAddress("run",  &run);
+     tree->SetBranchAddress("lumi", &lumi);
+
+     tree->SetBranchAddress("pt",  trkPt);
+     tree->SetBranchAddress("eta", trkEta);
+     tree->SetBranchAddress("phi", trkPhi);
+     tree->SetBranchAddress("numberOfValidhits", trkhits);
+     tree->SetBranchAddress("part_mass", &part_mass);
+
+ };
+   ~TreeReader()
+   {
+    delete tree;
+   };
+
+};
+
+void event_loop( const TreeReader& treereader,
+                 EvthistManager& evthist,
+                 map<std::tuple<unsigned int, unsigned int, unsigned long long>, vector<Track> >& trks
+	       ){
+       
+	std::cout << "analyzing " << std::endl;
+
+	for (int idx = 0; idx < treereader.nentries; ++idx) {
+
+		if(idx%1000 == 0) cout << "Scanning raw tracks: " << idx << "/" << treereader.nentries << endl;
+
+		treereader.tree->GetEntry(idx);
+
+		for (int trkIdx = 0; trkIdx < 2; ++trkIdx)
+                {
+
+                    trks[{treereader.run, treereader.lumi, treereader.event}].emplace_back(trkIdx, treereader.trkPt[trkIdx],
+                       treereader.trkEta[trkIdx], treereader.trkPhi[trkIdx],
+                       treereader.trkhits[trkIdx]);
+		    trks[{treereader.run, treereader.lumi, treereader.event}].back().set_mass(treereader.part_mass);
+                }
+
+           }
+}
+
+template<class T, class M>
+void do_matching(const map<std::tuple<unsigned int, unsigned int, unsigned long long>, vector<T> > & f_rles_objs, const map<std::tuple<unsigned int, unsigned int, unsigned long long>, vector<T> >& s_rles_objs, const std::string t1, const std::string t2, M & obj_hists)
+{
+  vector<tuple<unsigned int, unsigned int, unsigned long long>> matched_wdnn_rle;
+  for(auto const & [rle, f_objs]: f_rles_objs)
+  {
+    if (s_rles_objs.find(rle) == s_rles_objs.end()) {
+      //std:cout << std::get<0>(rle) << "\t" << std::get<1>(rle) << "\t" << std::get<2>(rle) << std::endl;
+      obj_hists.fill(Form("unmatched_mass_%s", t1.c_str()), f_objs.at(0).mass);
+      continue;
+    }
+    auto s_objs = s_rles_objs.at(rle);
+    obj_hists.fill("mass", f_objs.at(0).mass, s_objs.at(0).mass);
+    obj_hists.fill("pt", f_objs.at(0).pt, s_objs.at(0).pt);
+    obj_hists.fill("pt", f_objs.at(1).pt, s_objs.at(1).pt);
+    obj_hists.fill(Form("matched_mass_%s", t1.c_str()), f_objs.at(0).mass);
+    obj_hists.fill(Form("matched_mass_%s", t2.c_str()), s_objs.at(1).mass);
+    obj_hists.fill("hits", f_objs.at(0).hits, s_objs.at(0).hits);
+    obj_hists.fill("hits", f_objs.at(1).hits, s_objs.at(1).hits);
+    matched_wdnn_rle.push_back(rle);
+  }
+  for(auto const & [rle, s_objs]: s_rles_objs)
+  {
+    if(std::find(matched_wdnn_rle.begin(), matched_wdnn_rle.end(), rle) == matched_wdnn_rle.end())
+      obj_hists.fill(Form("unmatched_mass_%s", t2.c_str()), s_objs.at(0).mass);
+  }
+}
+
+int main(int argc, char const *argv[]) {
+
+	TFile* f1                = TFile::Open(argv[1], "read");
+        TreeReader treereader_first ((TTree*) f1->Get("tree"));
+        
+	TFile* f2               = TFile::Open(argv[2], "read");
+        TreeReader treereader_second ((TTree*) f2->Get("tree"));
+
+	TFile* f = new TFile("object_study.root", "recreate"); 
+
+	cout << "creating hists for " << argv[3] << endl;
+
+	EvthistManager evthist_first_type(argv[3]);
+        
+	//// raw ///
+
+	map<std::tuple<unsigned int, unsigned int, unsigned long long>, vector<Track> > first_type_trk, second_type_trk;
+
+	cout << "calling eventloop for " << argv[3] << endl;
+
+	event_loop(treereader_first, evthist_first_type,
+		   first_type_trk
+		  );
+
+	/////// rawprime ////
+
+	cout << "creating hists for " << argv[4] << endl;
+
+	EvthistManager evthist_second_type(argv[4]);
+	cout << "calling eventloop for " << argv[4] << endl;
+
+	event_loop(treereader_second, evthist_second_type,
+                   second_type_trk
+                  );	
+	
+	f->cd();
+
+	evthist_first_type.write();
+	evthist_second_type.write();
+
+	cout << "calling matching" << endl;
+
+        {
+           match_trackobj_histManager trk_hists("tracks", argv[3], argv[4]);
+           do_matching(first_type_trk, second_type_trk,
+		    argv[3], argv[4],
+                    trk_hists
+           );
+           trk_hists.write();
+           trk_hists.compareMatching();
+        }
+
+        f->Close();	
+
+	return 0;
+}

@@ -1,0 +1,83 @@
+#pragma once
+#include "histManagerBase.h"
+#include "TrackAlgo.h"
+#include "object.h"
+#include "fit.h"
+
+class match_obj_histManager
+   : public histManagerBase
+{
+     public:
+       match_obj_histManager(const string& obj, const float& in_drcut):
+       histManagerBase(obj)
+       ,drcut(in_drcut) {};
+
+     const float get_drcut() const
+     {
+         return drcut;
+     };
+
+     void compareMatching()
+     {
+      TCanvas* canv = create_canvas();
+      canv->SetMargin(0.18, 0.20, 0.12, 0.07);
+      //canv->SetLogy(true);
+      gStyle->SetOptStat(1111); 
+      for (const auto [k,hist] : hists_2d) {
+	hist->SetStats(1);
+	hist->Scale(1./hist->Integral());
+        hist->Draw("colz");
+	hist->GetXaxis()->SetTitle("woDNN");
+	hist->GetYaxis()->SetTitle("wDNN");
+	TLine* line = new TLine(hist->GetXaxis()->GetXmin(), hist->GetYaxis()->GetXmin(), hist->GetXaxis()->GetXmax(), hist->GetYaxis()->GetXmax());
+	line->SetLineColor(kRed);
+	line->SetLineWidth(2);
+	line->Draw("SAME"); 
+	gPad->Update();
+	TPaveStats* st = (TPaveStats*)hist->FindObject("stats");
+	if (st) {
+	  st->SetX1NDC(0.16);
+          st->SetX2NDC(0.39);
+	  st->SetY1NDC(0.75);
+          st->SetY2NDC(0.90);
+	}
+	gPad->Modified();
+	gPad->Update();
+	canv->SaveAs(Form("%s.png", k.c_str()));
+	canv->Clear();
+      }
+
+      for (const auto [k,hist] : hists) {
+        hist->SetStats(1);
+	//hist->Scale(1./hist->Integral());
+        hist->GetXaxis()->SetTitle(k.c_str());
+	hist->Draw();
+        canv->SaveAs(Form("%s.png", k.c_str()));
+        canv->Clear();
+      }
+      FitTwoHistsCB(hists["matched_mass_wodnn"], hists["matched_mass_wdnn"]);
+      FitTwoHistsCB(hists["unmatched_wo_dnn_mass"], hists["unmatched_w_dnn_mass"]);
+     };
+
+     protected:
+       float drcut;
+};
+
+class match_trackobj_histManager
+      : public match_obj_histManager
+{
+        public:
+          match_trackobj_histManager(const string& obj, const float& in_drcut):
+          match_obj_histManager(obj, in_drcut)
+          {
+
+             hists_2d["pt"] = createhist("pt", "pt w/ vs w/o DNN", 100, 0, 20, 100, 0, 20);
+	     hists_2d["mass"] = createhist("mass", "mass w/ vs w/o DNN", 50, 2.6, 3.5, 50, 2.6, 3.5);
+	     hists_2d["hits"] = createhist("validhits", "validhits w/ vs w/o DNN", 50, 0.5, 50.5, 50, 0.5, 50.5);
+	     hists["matched_mass_wdnn"] = createhist("matched_mass_w_dnn", "w/ DNN", 50, 2.6, 3.5);
+             hists["matched_mass_wodnn"] = createhist("matched_wo_dnn_mass", "w/ DNN", 50, 2.6, 3.5);
+             hists["unmatched_w_dnn_mass"] = createhist("unmatched_mass_w_dnn", "w/ DNN", 50, 2.6, 3.5);
+	     hists["unmatched_wo_dnn_mass"] = createhist("unmatched_mass_wo_dnn", "w/o DNN", 50, 2.6, 3.5);
+           };
+};
+

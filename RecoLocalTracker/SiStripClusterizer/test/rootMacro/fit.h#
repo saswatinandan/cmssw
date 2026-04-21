@@ -1,0 +1,122 @@
+#include "TFile.h"
+#include "TH1D.h"
+#include "TF1.h"
+#include "TCanvas.h"
+#include "TPad.h"
+#include "TLegend.h"
+#include "TLatex.h"
+#include "TMath.h"
+
+// J/psi + exponential background function
+double jpsiExp(double *x, double *par)
+{
+    double m = x[0];
+    double nsig   = par[0];
+    double mean   = par[1];
+    double sigma  = par[2];
+    double nbkg   = par[3];
+    double lambda = par[4];
+
+    double sig = nsig * TMath::Gaus(m, mean, sigma, true);
+    double bkg = nbkg * TMath::Exp(lambda * m);
+    
+
+    return sig + bkg;
+}
+
+// Function to fit two histograms, plot them, and draw ratio
+void FitTwoHistsCB(TH1F* hist1, TH1F* hist2)
+{
+    // -------- Fit functions --------
+    TF1 *fit1 = new TF1("fit1", jpsiExp, 2.6, 3.5, 5);
+    TF1 *fit2 = new TF1("fit2", jpsiExp, 2.6, 3.5, 5);
+
+    hist1->SetStats(0);
+    hist2->SetStats(0);
+    fit1->SetParameters(hist1->GetMaximum()*0.001, 3.096, 0.03, hist1->GetMaximum()*0.90, -1.0);
+    fit2->SetParameters(hist2->GetMaximum()*0.005, 3.096, 0.03, hist2->GetMaximum()*0.90, -1.0);
+    for (TF1* fit : {fit1, fit2}) {
+        fit->SetParNames("N_{sig}", "Mean", "Sigma", "N_{bkg}", "Lambda");
+    }
+
+    // -------- Fit histograms --------
+    hist1->Fit(fit1, "R0");
+    hist2->Fit(fit2, "R0");
+
+    // -------- Extract signal yields --------
+    double nsig1 = fit1->GetParameter(0);
+    double err1  = fit1->GetParError(0);
+    double nsig2 = fit2->GetParameter(0);
+    double err2  = fit2->GetParError(0);
+    double nbkg1 = fit1->GetParameter(3);
+    double bkg_err1  = fit1->GetParError(3);
+    double nbkg2 = fit2->GetParameter(3);
+    double bkg_err2  = fit2->GetParError(3);
+
+    // -------- Canvas and pads --------
+    TCanvas *c = new TCanvas("c", "Two histograms with ratio", 800, 800);
+
+    TPad *pad1 = new TPad("pad1", "Top Pad", 0, 0.3, 1, 1.0);
+    pad1->SetBottomMargin(0.02);
+    pad1->Draw();
+    pad1->cd();
+
+    hist1->SetMarkerStyle(20);
+    hist1->SetMarkerColor(kBlack);
+    hist1->SetLineColor(kBlack);
+    hist1->SetTitle("Hist1 vs Hist2 with J/psi Fit; m_{#mu#mu} [GeV]; Events");
+    hist1->Draw("E");
+
+    hist2->SetMarkerStyle(21);
+    hist2->SetMarkerColor(kBlue);
+    hist2->SetLineColor(kBlue);
+    hist2->Draw("E SAME");
+    
+    fit1->SetLineColor(kBlack);
+    fit1->Draw("SAME");
+    fit2->SetLineColor(kBlue);
+    fit2->Draw("SAME");
+
+    // Legend
+    TLegend *leg = new TLegend(0.55,0.65,0.88,0.98);
+    leg->AddEntry(hist1, "w/ dnn", "lep");
+    leg->AddEntry(hist2, "w/o dnn", "lep");
+    leg->AddEntry(fit1, Form("Fit1: Nsig=%.0f#pm%.0f", nsig1, err1), "l");
+    leg->AddEntry(fit2, Form("Fit2: Nsig=%.0f#pm%.0f", nsig2, err2), "l");
+    leg->AddEntry(fit1, Form("Fit1: Nbkg=%.0f#pm%.0f", nbkg1, bkg_err1), "l");
+    leg->AddEntry(fit2, Form("Fit2: Nbkg=%.0f#pm%.0f", nbkg2, bkg_err2), "l");
+    leg->Draw();
+
+    // -------- Bottom pad: ratio --------
+    c->cd();
+    TPad *pad2 = new TPad("pad2", "Bottom Pad", 0, 0.05, 1, 0.3);
+    pad2->SetTopMargin(0.02);
+    pad2->SetBottomMargin(0.3);
+    pad2->Draw();
+    pad2->cd();
+
+    TH1D *hRatio = (TH1D*)hist1->Clone("hRatio");
+    hRatio->SetMinimum(0.9);
+    hRatio->SetMaximum(1.1);
+    hRatio->Divide(hist2);
+    hRatio->SetMarkerStyle(20);
+    hRatio->SetMarkerColor(kBlack);
+    hRatio->SetLineColor(kBlack);
+    hRatio->SetTitle("");
+    hRatio->GetYaxis()->SetTitle("w/ dnn / w/o dnn");
+    hRatio->GetYaxis()->SetTitleSize(0.12);
+    hRatio->GetYaxis()->SetTitleOffset(0.5);
+    hRatio->GetYaxis()->SetLabelSize(0.1);
+    hRatio->GetXaxis()->SetTitle("m_{#mu#mu} [GeV]");
+    hRatio->GetXaxis()->SetTitleSize(0.12);
+    hRatio->GetXaxis()->SetLabelSize(0.1);
+    TLine* line = new TLine(hist1->GetXaxis()->GetXmin(), 1, hist1->GetXaxis()->GetXmax(), 1);
+    hRatio->Draw("E");
+    line->SetLineColor(kBlack);
+    line->SetLineWidth(2);
+    line->Draw("same");
+
+    // -------- Save --------
+    c->SaveAs("jpsi_two_hist_ratio.png");
+    c->SaveAs("jpsi_two_hist_ratio.pdf");
+}
