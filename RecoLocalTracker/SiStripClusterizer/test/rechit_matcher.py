@@ -25,6 +25,13 @@ options.register(
              "Comma-separated p bin edges"
         )
 
+options.register(
+  'secondaryFiles',
+  '',
+  VarParsing.multiplicity.list,
+  VarParsing.varType.string,
+ 'Secondary (parent) files'
+  )
 options.parseArguments()
 
 # --- Message logger ---
@@ -33,8 +40,8 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 # --- Source ---
 process.source = cms.Source("PoolSource",
-        fileNames = cms.untracked.vstring(options.inputFiles
-                            )
+        fileNames = cms.untracked.vstring(['file:'+f for f in options.inputFiles]),
+        secondaryFileNames = cms.untracked.vstring(['file:'+f for f in options.secondaryFiles]),
             )
 
 process.TFileService = cms.Service("TFileService", fileName=cms.string(options.outputFile))
