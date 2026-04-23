@@ -1,5 +1,5 @@
 <lcgdict>
-  <class name="SiPixelCluster" ClassVersion="13">
+  <class name="SiPixelCluster" ClassVersion="14">
    <version ClassVersion="10" checksum="2468063768"/>
    <version ClassVersion="11" checksum="1473312403"/>
    <version ClassVersion="12" checksum="2042538185"/>
@@ -12,12 +12,6 @@
    </ioread>
    <ioread sourceClass="SiPixelCluster" version="[11-12]" targetClass="SiPixelCluster" source="uint16_t thePixelRow" target="theMinPixelRow">
    <![CDATA[theMinPixelRow = onfile.thePixelRow&1023;]]>
-   </ioread>
-  <ioread sourceClass="SiPixelCluster" version="[11-12]" targetClass="SiPixelCluster" source="uint16_t thePixelCol" target="thePixelColSpan">
-   <![CDATA[thePixelColSpan = onfile.thePixelCol>>10;]]>
-   </ioread>
-   <ioread sourceClass="SiPixelCluster" version="[11-12]" targetClass="SiPixelCluster" source="uint16_t thePixelRow" target="thePixelRowSpan">
-   <![CDATA[thePixelRowSpan = onfile.thePixelRow>>10;]]>
    </ioread>
   </class>
   <class name="SiPixelCluster::Pixel" ClassVersion="11">

@@ -217,23 +217,21 @@ private:
   static int overflow_(uint16_t span) { return span == uint16_t(MAXSPAN); }
 
 public:
-  int colSpan() const { return thePixelColSpan; }
+  int colSpan() const { return thePixelOffset.at(thePixelOffset.size()-1); }
 
-  int rowSpan() const { return thePixelRowSpan; }
+  int rowSpan() const { return thePixelOffset.at(thePixelOffset.size()-2); }
 
-  bool overflowCol() const { return overflow_(thePixelColSpan); }
+  bool overflowCol() const { return overflow_(thePixelOffset.at(thePixelOffset.size()-1)); }
 
-  bool overflowRow() const { return overflow_(thePixelRowSpan); }
+  bool overflowRow() const { return overflow_(thePixelOffset.size()-2); }
 
   bool overflow() const { return overflowCol() || overflowRow(); }
 
   void packCol(uint16_t ymin, uint16_t yspan) {
     theMinPixelCol = ymin;
-    thePixelColSpan = std::min(yspan, uint16_t(MAXSPAN));
   }
   void packRow(uint16_t xmin, uint16_t xspan) {
     theMinPixelRow = xmin;
-    thePixelRowSpan = std::min(xspan, uint16_t(MAXSPAN));
   }
 
   inline void settheMinPixelRow(int val) {theMinPixelRow = val;};
@@ -256,8 +254,6 @@ private:
 
   uint16_t theMinPixelRow = MAXPOS;  // Minimum pixel index in the x direction (low edge).
   uint16_t theMinPixelCol = MAXPOS;  // Minimum pixel index in the y direction (left edge).
-  uint8_t thePixelRowSpan = 0;       // Span pixel index in the x direction (low edge).
-  uint8_t thePixelColSpan = 0;       // Span pixel index in the y direction (left edge).
 
   uint16_t theOriginalClusterId = invalidClusterId;
   float err_x = -99999.9f;
